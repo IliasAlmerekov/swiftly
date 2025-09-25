@@ -1,0 +1,53 @@
+publish = "dist"
+
+[build]
+command = "npm run build"
+
+[build.environment]
+NODE_VERSION = "20"
+
+# Production environment (main branch)
+[context.production.environment]
+VITE_API_URL = "https://scooteq-helpdesk-backend.onrender.com/api"
+
+# Development environment (develop branch or deploy previews)
+[context.deploy-preview.environment]
+VITE_API_URL = "https://scooteq-helpdesk-backend-dev.onrender.com/api"
+
+[context.branch-deploy.environment]
+VITE_API_URL = "https://scooteq-helpdesk-backend-dev.onrender.com/api"
+
+[[headers]]
+for = "/*.js"
+[headers.values]
+  Content-Type = "application/javascript; charset=utf-8"
+
+[[headers]]
+for = "/assets/*.js"
+[headers.values]
+  Content-Type = "application/javascript; charset=utf-8"
+  Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/assets/*.css"
+[headers.values]
+  Content-Type = "text/css; charset=utf-8"
+  Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/assets/*"
+[headers.values]
+  Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/index.html"
+[headers.values]
+  Cache-Control = "no-cache"
+  X-Frame-Options = "DENY"
+  X-Content-Type-Options = "nosniff"
+  Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
