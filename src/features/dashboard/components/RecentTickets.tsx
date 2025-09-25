@@ -4,14 +4,11 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shared/components/ui/card";
-import { Badge } from "@/shared/components/ui/badge";
+} from '@/shared/components/ui/card';
+import { Badge } from '@/shared/components/ui/badge';
 
-import {
-  getPriorityColor,
-  getStatusColor,
-} from "@/features/tickets/utils/ticketUtils";
-import type { Ticket } from "@/types";
+import { getPriorityColor, getStatusColor } from '@/features/tickets/utils/ticketUtils';
+import type { Ticket } from '@/types';
 
 interface RecentTicketsProps {
   userTickets?: Ticket[];
@@ -22,20 +19,18 @@ export default function RecentTickets({ userTickets }: RecentTicketsProps) {
     <Card>
       <CardHeader>
         <CardTitle>Recent Tickets</CardTitle>
-        <CardDescription>
-          Latest support tickets and their current status
-        </CardDescription>
+        <CardDescription>Latest support tickets and their current status</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b">
-                <th className="text-left p-2 font-medium">Ticket ID</th>
-                <th className="text-left p-2 font-medium">Subject</th>
-                <th className="text-left p-2 font-medium">Priority</th>
-                <th className="text-left p-2 font-medium">Status</th>
-                <th className="text-left p-2 font-medium">Assignee</th>
+                <th className="p-2 text-left font-medium">Ticket ID</th>
+                <th className="p-2 text-left font-medium">Subject</th>
+                <th className="p-2 text-left font-medium">Priority</th>
+                <th className="p-2 text-left font-medium">Status</th>
+                <th className="p-2 text-left font-medium">Assignee</th>
               </tr>
             </thead>
             <tbody>
@@ -45,23 +40,17 @@ export default function RecentTickets({ userTickets }: RecentTicketsProps) {
                 </tr>
               ) : (
                 userTickets?.map((ticket, index) => (
-                  <tr key={index} className="border-b hover:bg-muted/50">
-                    <td className="p-2 font-mono text-sm">
-                      {ticket._id.slice(0, 8)}
-                    </td>
+                  <tr key={index} className="hover:bg-muted/50 border-b">
+                    <td className="p-2 font-mono text-sm">{ticket._id.slice(0, 8)}</td>
                     <td className="p-2">{ticket.title}</td>
                     <td className="p-2">
-                      <Badge className={getPriorityColor(ticket.priority)}>
-                        {ticket.priority}
-                      </Badge>
+                      <Badge className={getPriorityColor(ticket.priority)}>{ticket.priority}</Badge>
                     </td>
                     <td className="p-2">
-                      <Badge className={getStatusColor(ticket.status)}>
-                        {ticket.status}
-                      </Badge>
+                      <Badge className={getStatusColor(ticket.status)}>{ticket.status}</Badge>
                     </td>
-                    <td className="p-2 text-sm text-muted-foreground">
-                      {ticket.assignedTo?.name || "Unassigned"}
+                    <td className="text-muted-foreground p-2 text-sm">
+                      {ticket.assignedTo?.name || 'Unassigned'}
                     </td>
                   </tr>
                 ))

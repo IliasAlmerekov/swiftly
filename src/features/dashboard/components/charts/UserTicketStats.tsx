@@ -1,5 +1,5 @@
-import { TrendingUp } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
+import { TrendingUp } from 'lucide-react';
+import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts';
 
 import {
   Card,
@@ -8,17 +8,17 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/shared/components/ui/card";
+} from '@/shared/components/ui/card';
 import {
   type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/shared/components/ui/chart";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { getUserTicketStats } from "@/api/api";
+} from '@/shared/components/ui/chart';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { getUserTicketStats } from '@/api/api';
 
-export const description = "User ticket stats chart";
+export const description = 'User ticket stats chart';
 
 interface TicketStatsData {
   stats: Array<{
@@ -41,7 +41,7 @@ export function UserTicketStats() {
         const stats = await getUserTicketStats();
         setData(stats);
       } catch (error) {
-        console.error("Failed to fetch ticket stats:", error);
+        console.error('Failed to fetch ticket stats:', error);
       } finally {
         setLoading(false);
       }
@@ -57,18 +57,18 @@ export function UserTicketStats() {
             count: stat.count || 0,
           }))
         : [],
-    [data?.stats]
+    [data?.stats],
   );
 
   const chartConfig = useMemo(
     () =>
       ({
         count: {
-          label: "Count",
-          color: "var(--chart-6)",
+          label: 'Count',
+          color: 'var(--chart-6)',
         },
-      } satisfies ChartConfig),
-    []
+      }) satisfies ChartConfig,
+    [],
   );
 
   const tickFormatter = useCallback((value: string) => value.slice(0, 3), []);
@@ -79,13 +79,11 @@ export function UserTicketStats() {
     <Card>
       <CardHeader>
         <CardTitle>Your Ticket Stats</CardTitle>
-        <CardDescription>
-          {loading ? "Loading..." : data?.period}
-        </CardDescription>
+        <CardDescription>{loading ? 'Loading...' : data?.period}</CardDescription>
       </CardHeader>
       <CardContent className="flex items-center justify-center">
         {loading ? (
-          <div className="h-[180px] w-[450px] flex items-center justify-center">
+          <div className="flex h-[180px] w-[450px] items-center justify-center">
             <p>Loading stats...</p>
           </div>
         ) : chartData.length > 0 ? (
@@ -104,14 +102,14 @@ export function UserTicketStats() {
             </BarChart>
           </ChartContainer>
         ) : (
-          <div className="h-[170px] w-[500px] flex items-center justify-center">
+          <div className="flex h-[170px] w-[500px] items-center justify-center">
             <p>No ticket data available</p>
           </div>
         )}
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 leading-none font-medium">
-          This is an overview of your requests from the past six months.{" "}
+          This is an overview of your requests from the past six months.{' '}
           <TrendingUp className="h-4 w-4" />
         </div>
       </CardFooter>

@@ -1,4 +1,4 @@
-import type { Ticket } from "@/types";
+import type { Ticket } from '@/types';
 
 export function useTicketStatus(ticket: Ticket) {
   const isActive = !ticket.assignedTo;
@@ -6,7 +6,9 @@ export function useTicketStatus(ticket: Ticket) {
   return {
     isActive,
     isAssigned: !!ticket.assignedTo,
-    className: isActive ? "opacity-100 font-bold text-sm" : "opacity-80 text-muted-foreground text-sm",
+    className: isActive
+      ? 'opacity-100 font-bold text-sm'
+      : 'opacity-80 text-muted-foreground text-sm',
   };
 }
 

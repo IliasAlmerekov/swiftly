@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { uploadUserAvatar, updateUserProfile } from "@/api/api";
-import type { User } from "@/types";
+import { useState } from 'react';
+import { uploadUserAvatar, updateUserProfile } from '@/api/api';
+import type { User } from '@/types';
 
 export const useAvatarHandlers = (
   isViewingOtherUser: boolean,
   userId: string | undefined,
   onUserUpdate: (updatedUser: User) => void,
-  onError: (error: string) => void
+  onError: (error: string) => void,
 ) => {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
@@ -15,19 +15,19 @@ export const useAvatarHandlers = (
 
     // Users can only change their own avatar
     if (isViewingOtherUser && userId) {
-      onError("Cannot upload avatar for other users");
+      onError('Cannot upload avatar for other users');
       return;
     }
 
     // check file size
     if (file.size > 5 * 1024 * 1024) {
-      onError("File size must not exceed 5MB");
+      onError('File size must not exceed 5MB');
       return;
     }
 
     // Check file type
-    if (!file.type.startsWith("image/")) {
-      onError("Please select an image file");
+    if (!file.type.startsWith('image/')) {
+      onError('Please select an image file');
       return;
     }
 
@@ -37,7 +37,7 @@ export const useAvatarHandlers = (
       const updatedUser = await uploadUserAvatar(file);
       onUserUpdate(updatedUser);
     } catch (err) {
-      onError(err instanceof Error ? err.message : "Error uploading avatar");
+      onError(err instanceof Error ? err.message : 'Error uploading avatar');
     } finally {
       setUploadingAvatar(false);
     }
@@ -46,7 +46,7 @@ export const useAvatarHandlers = (
   const handleRemoveAvatar = async () => {
     // Users can only remove their own avatar
     if (isViewingOtherUser && userId) {
-      onError("Cannot remove avatar for other users");
+      onError('Cannot remove avatar for other users');
       return;
     }
 
@@ -54,7 +54,7 @@ export const useAvatarHandlers = (
       const updatedUser = await updateUserProfile({ avatar: undefined });
       onUserUpdate(updatedUser);
     } catch (err) {
-      onError(err instanceof Error ? err.message : "Error removing avatar");
+      onError(err instanceof Error ? err.message : 'Error removing avatar');
     }
   };
 

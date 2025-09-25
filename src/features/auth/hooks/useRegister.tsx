@@ -1,11 +1,11 @@
-import { registerUser } from "@/api/api";
-import React, { useState } from "react";
+import { registerUser } from '@/api/api';
+import React, { useState } from 'react';
 
 export default function useRegister() {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [name, setName] = useState<string>("");
-  const [role, setRole] = useState<"user" | "admin">("user");
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [name, setName] = useState<string>('');
+  const [role, setRole] = useState<'user' | 'admin'>('user');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
 
@@ -16,14 +16,14 @@ export default function useRegister() {
     try {
       const { token } = await registerUser(email, password, name, role);
       if (token) {
-        localStorage.setItem("token", token);
+        localStorage.setItem('token', token);
         setSuccess(true);
         setTimeout(() => {
-          window.location.href = "/login";
+          window.location.href = '/login';
         }, 2000);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed");
+      setError(err instanceof Error ? err.message : 'Registration failed');
     }
   };
 
@@ -39,7 +39,7 @@ export default function useRegister() {
     setName(e.target.value);
   };
 
-  const handleRoleChange = (value: "user" | "admin") => {
+  const handleRoleChange = (value: 'user' | 'admin') => {
     setRole(value);
   };
 

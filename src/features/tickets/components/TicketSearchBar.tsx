@@ -1,6 +1,6 @@
-import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
-import { IconSearch, IconPlus } from "@tabler/icons-react";
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
+import { IconSearch, IconPlus } from '@tabler/icons-react';
 
 interface TicketSearchBarProps {
   searchQuery?: string;
@@ -11,16 +11,16 @@ interface TicketSearchBarProps {
 }
 
 export function TicketSearchBar({
-  searchQuery = "",
+  searchQuery = '',
   onSearchChange,
   onCreateTicket,
-  placeholder = "Search tickets...",
+  placeholder = 'Search tickets...',
   showCreateButton = true,
 }: TicketSearchBarProps) {
   return (
     <div className="flex gap-4">
       <div className="relative flex-1">
-        <IconSearch className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <IconSearch className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
         <Input
           placeholder={placeholder}
           className="pl-9"

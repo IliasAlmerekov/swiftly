@@ -1,6 +1,6 @@
-import { AnalyticsChart } from "@/features/dashboard/components/charts/AnalyticsChart";
-import { TicketOfMonth } from "@/features/dashboard/components/charts/TicketsOfMonth";
-import { Suspense } from "react";
+import { AnalyticsChart } from '@/features/dashboard/components/charts/AnalyticsChart';
+import { TicketOfMonth } from '@/features/dashboard/components/charts/TicketsOfMonth';
+import { Suspense } from 'react';
 
 const Analytics = () => {
   return (

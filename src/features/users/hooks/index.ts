@@ -1,2 +1,2 @@
-export { useAvatarHandlers } from "./useAvatarHandlers";
-export { useProfileEditor } from "./useProfileEditor";
+export { useAvatarHandlers } from './useAvatarHandlers';
+export { useProfileEditor } from './useProfileEditor';

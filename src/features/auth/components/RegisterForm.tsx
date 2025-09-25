@@ -4,11 +4,11 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shared/components/ui/card";
-import { cn } from "@/shared/lib/utils";
-import React from "react";
-import { Label } from "@/shared/components/ui/label";
-import { Input } from "@/shared/components/ui/input";
+} from '@/shared/components/ui/card';
+import { cn } from '@/shared/lib/utils';
+import React from 'react';
+import { Label } from '@/shared/components/ui/label';
+import { Input } from '@/shared/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -17,14 +17,11 @@ import {
   SelectItem,
   SelectLabel,
   SelectValue,
-} from "@/shared/components/ui/select";
-import { Button } from "@/shared/components/ui/button";
-import useRegister from "../hooks/useRegister";
+} from '@/shared/components/ui/select';
+import { Button } from '@/shared/components/ui/button';
+import useRegister from '../hooks/useRegister';
 
-export default function RegisterForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+export default function RegisterForm({ className, ...props }: React.ComponentProps<'div'>) {
   const {
     email,
     password,
@@ -39,13 +36,11 @@ export default function RegisterForm({
     handleRoleChange,
   } = useRegister();
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Registration Page</CardTitle>
-          <CardDescription>
-            Please fill in the form to create an account.
-          </CardDescription>
+          <CardDescription>Please fill in the form to create an account.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
@@ -117,7 +112,7 @@ export default function RegisterForm({
                   Registration successful! Redirecting to login...
                 </p>
               )}
-              <Button type="submit" className="w-full mt-8 text-md">
+              <Button type="submit" className="text-md mt-8 w-full">
                 Registration
               </Button>
             </div>

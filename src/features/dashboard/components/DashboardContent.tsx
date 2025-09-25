@@ -1,12 +1,12 @@
-import RecentTickets from "./RecentTickets";
-import UserTicketCard from "./UserTicketCard";
-import AdminTicketCard from "./AdminTicketCard";
-import ViewSupportStatus from "./ViewSupportStatus";
-import TicketsofThisWeek from "./charts/TicketsofThisWeek";
-import type { Ticket } from "@/types";
-import { useAuth } from "@/shared/hooks/useAuth";
-import { HardwareChart } from "./charts/HardwareChart";
-import { UserTicketStats } from "./charts/UserTicketStats";
+import RecentTickets from './RecentTickets';
+import UserTicketCard from './UserTicketCard';
+import AdminTicketCard from './AdminTicketCard';
+import ViewSupportStatus from './ViewSupportStatus';
+import TicketsofThisWeek from './charts/TicketsofThisWeek';
+import type { Ticket } from '@/types';
+import { useAuth } from '@/shared/hooks/useAuth';
+import { HardwareChart } from './charts/HardwareChart';
+import { UserTicketStats } from './charts/UserTicketStats';
 
 interface DashboardContentProps {
   allTickets?: Ticket[];
@@ -43,18 +43,14 @@ export function DashboardContent({
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {role === "user" ? (
+          {role === 'user' ? (
             <UserTicketCard userTickets={userTickets} />
           ) : (
             <AdminTicketCard allTickets={allTickets} />
           )}
         </div>
       )}
-      {role !== "admin" ? (
-        <RecentTickets userTickets={userTickets} />
-      ) : (
-        <TicketsofThisWeek />
-      )}
+      {role !== 'admin' ? <RecentTickets userTickets={userTickets} /> : <TicketsofThisWeek />}
       {/* Recent Tickets Table */}
 
       {/* Quick Stats */}
@@ -64,7 +60,7 @@ export function DashboardContent({
           totalAdmins={totalAdmins}
           ticketsToday={ticketsToday}
         />
-        {role === "admin" ? <HardwareChart /> : <UserTicketStats />}
+        {role === 'admin' ? <HardwareChart /> : <UserTicketStats />}
       </div>
     </div>
   );

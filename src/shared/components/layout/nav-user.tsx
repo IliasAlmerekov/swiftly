@@ -1,13 +1,9 @@
-"use client";
+'use client';
 
-import {
-  IconDotsVertical,
-  IconLogout,
-  IconUserCircle,
-} from "@tabler/icons-react";
-import { MousePointer2 } from "lucide-react";
+import { IconDotsVertical, IconLogout, IconUserCircle } from '@tabler/icons-react';
+import { MousePointer2 } from 'lucide-react';
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,19 +12,19 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/shared/components/ui/dropdown-menu";
+} from '@/shared/components/ui/dropdown-menu';
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/shared/components/ui/sidebar";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/shared/components/ui/button";
-import { ModeToggle } from "@/shared/components/ui/mode-toogle";
-import { getUserProfile, setUserStatusOffline } from "@/api/api";
-import { useEffect, useState } from "react";
-import type { User } from "@/types";
+} from '@/shared/components/ui/sidebar';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/shared/components/ui/button';
+import { ModeToggle } from '@/shared/components/ui/mode-toogle';
+import { getUserProfile, setUserStatusOffline } from '@/api/api';
+import { useEffect, useState } from 'react';
+import type { User } from '@/types';
 
 export function NavUser({
   user,
@@ -41,16 +37,16 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar();
   const navigate = useNavigate();
-  const [avatarUrl, setAvatarUrl] = useState<User["avatar"]>();
+  const [avatarUrl, setAvatarUrl] = useState<User['avatar']>();
 
   // Fetch user profile on component mount
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
         const userData = await getUserProfile();
-        setAvatarUrl(userData?.avatar || { public_id: "", url: "default.png" });
+        setAvatarUrl(userData?.avatar || { public_id: '', url: 'default.png' });
       } catch (err) {
-        console.error("Failed to fetch user profile:", err);
+        console.error('Failed to fetch user profile:', err);
       }
     };
 
@@ -59,11 +55,11 @@ export function NavUser({
 
   function handleLogout() {
     setUserStatusOffline(); // Set user status to offline on logout
-    navigate("/login");
+    navigate('/login');
   }
 
   function handleAccount() {
-    navigate("/user-profile");
+    navigate('/user-profile');
   }
 
   return (
@@ -81,16 +77,14 @@ export function NavUser({
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
-                <span className="text-muted-foreground truncate text-xs">
-                  {user.email}
-                </span>
+                <span className="text-muted-foreground truncate text-xs">{user.email}</span>
               </div>
               <IconDotsVertical className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
+            side={isMobile ? 'bottom' : 'right'}
             align="end"
             sideOffset={4}
           >
@@ -102,9 +96,7 @@ export function NavUser({
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
-                  <span className="text-muted-foreground truncate text-xs">
-                    {user.email}
-                  </span>
+                  <span className="text-muted-foreground truncate text-xs">{user.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>

@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import type { Ticket } from "@/types";
+import { useMemo } from 'react';
+import type { Ticket } from '@/types';
 
 interface UseTicketFilterOptions {
   tickets: Ticket[];
@@ -20,8 +20,7 @@ export function useTicketFilter({
     // Filter by user's tickets if needed
     if (filterMyTickets && userId) {
       filtered = filtered.filter(
-        (ticket) =>
-          ticket.createdBy?._id === userId || ticket.assignedTo?._id === userId
+        (ticket) => ticket.createdBy?._id === userId || ticket.assignedTo?._id === userId,
       );
     }
 
@@ -34,7 +33,7 @@ export function useTicketFilter({
           ticket._id?.toLowerCase().includes(query) ||
           ticket.assignedTo?.name?.toLowerCase().includes(query) ||
           ticket.createdBy?.name?.toLowerCase().includes(query) ||
-          ticket.category?.toLowerCase().includes(query)
+          ticket.category?.toLowerCase().includes(query),
       );
     }
 

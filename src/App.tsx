@@ -1,11 +1,11 @@
-import LoginPage from "./features/auth/pages/LoginPage";
-import RegisterPage from "./features/auth/pages/RegisterPage";
-import DashboardPage from "./features/dashboard/pages/DashboardPage";
-import TicketDetailPage from "./features/tickets/pages/TicketDetailPage";
-import AppLayout from "./shared/components/layout/AppLayout";
-import { ThemeProvider } from "./provider/theme-provider";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import UserProfile from "./features/users/pages/UserProfile";
+import LoginPage from './features/auth/pages/LoginPage';
+import RegisterPage from './features/auth/pages/RegisterPage';
+import DashboardPage from './features/dashboard/pages/DashboardPage';
+import TicketDetailPage from './features/tickets/pages/TicketDetailPage';
+import AppLayout from './shared/components/layout/AppLayout';
+import { ThemeProvider } from './provider/theme-provider';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import UserProfile from './features/users/pages/UserProfile';
 
 function App() {
   return (
@@ -29,10 +29,7 @@ function App() {
           <Route
             path="/tickets/:ticketId"
             element={
-              <AppLayout
-                title="Scooteq HelpDesk - Ticket Details"
-                currentTab="my-tickets"
-              >
+              <AppLayout title="Scooteq HelpDesk - Ticket Details" currentTab="my-tickets">
                 <TicketDetailPage />
               </AppLayout>
             }

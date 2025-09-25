@@ -1,18 +1,10 @@
-import { Button } from "@/shared/components/ui/button";
-import { Card, CardContent } from "@/shared/components/ui/card";
-import { Pen, Upload } from "lucide-react";
-import { memo } from "react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/shared/components/ui/popover";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/shared/components/ui/avatar";
-import type { User } from "@/types";
+import { Button } from '@/shared/components/ui/button';
+import { Card, CardContent } from '@/shared/components/ui/card';
+import { Pen, Upload } from 'lucide-react';
+import { memo } from 'react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui/popover';
+import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
+import type { User } from '@/types';
 
 interface UserCardProps {
   user: User;
@@ -41,8 +33,8 @@ const UserCard = memo(function UserCard({
       <CardContent className="p-6">
         <div className="flex items-center justify-between pr-8">
           <div className="flex items-center gap-4">
-            <Avatar className="w-55 h-55">
-              <AvatarImage src={user.avatar?.url || ""} alt="Profile" />
+            <Avatar className="h-55 w-55">
+              <AvatarImage src={user.avatar?.url || ''} alt="Profile" />
               <AvatarFallback className="text-4xl">
                 {user.name.charAt(0).toUpperCase()}
               </AvatarFallback>
@@ -54,33 +46,25 @@ const UserCard = memo(function UserCard({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-8 w-8 p-0 hover:bg-muted absolute -top-20 -right-2 rounded-full shadow-md"
+                      className="hover:bg-muted absolute -top-20 -right-2 h-8 w-8 rounded-full p-0 shadow-md"
                       disabled={uploadingAvatar}
                     >
-                      <Pen className="w-4 h-4" />
+                      <Pen className="h-4 w-4" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent
-                    className="w-64 p-4"
-                    side="right"
-                    align="start"
-                  >
+                  <PopoverContent className="w-64 p-4" side="right" align="start">
                     <div className="space-y-3">
-                      <h4 className="font-medium text-sm">Change Avatar</h4>
+                      <h4 className="text-sm font-medium">Change Avatar</h4>
                       <div className="space-y-2">
                         <Button
                           variant="outline"
                           size="sm"
                           className="w-full justify-start bg-transparent"
-                          onClick={() =>
-                            document.getElementById("avatar-upload")?.click()
-                          }
+                          onClick={() => document.getElementById('avatar-upload')?.click()}
                           disabled={uploadingAvatar}
                         >
-                          <Upload className="w-4 h-4 mr-2" />
-                          {uploadingAvatar
-                            ? "Uploading..."
-                            : "Upload new photo"}
+                          <Upload className="mr-2 h-4 w-4" />
+                          {uploadingAvatar ? 'Uploading...' : 'Upload new photo'}
                         </Button>
                         <input
                           id="avatar-upload"
@@ -94,7 +78,7 @@ const UserCard = memo(function UserCard({
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="w-full justify-start text-destructive hover:text-destructive"
+                            className="text-destructive hover:text-destructive w-full justify-start"
                             onClick={onAvatarRemove}
                             disabled={uploadingAvatar}
                           >
@@ -108,16 +92,12 @@ const UserCard = memo(function UserCard({
               )}
             </div>
             <div className="flex flex-col gap-1">
-              <h1 className="text-3xl font-semibold text-foreground">
-                {user.name}
-              </h1>
-              <p className="text-sm text-muted-foreground">{user.email}</p>
-              {user.position && (
-                <p className="text-sm text-muted-foreground">{user.position}</p>
-              )}
+              <h1 className="text-foreground text-3xl font-semibold">{user.name}</h1>
+              <p className="text-muted-foreground text-sm">{user.email}</p>
+              {user.position && <p className="text-muted-foreground text-sm">{user.position}</p>}
               {(user.city || user.country) && (
-                <p className="text-sm text-muted-foreground">
-                  {[user.city, user.country].filter(Boolean).join(", ")}
+                <p className="text-muted-foreground text-sm">
+                  {[user.city, user.country].filter(Boolean).join(', ')}
                 </p>
               )}
             </div>

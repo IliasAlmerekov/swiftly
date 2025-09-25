@@ -1,5 +1,5 @@
-import React, { useMemo } from "react";
-import { LayoutDashboard, Ticket, Plus, BarChart3 } from "lucide-react";
+import React, { useMemo } from 'react';
+import { LayoutDashboard, Ticket, Plus, BarChart3 } from 'lucide-react';
 
 import {
   Sidebar,
@@ -10,30 +10,30 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-} from "@/shared/components/ui/sidebar";
-import { NavUser } from "./nav-user";
-import type { TabType } from "@/types";
+} from '@/shared/components/ui/sidebar';
+import { NavUser } from './nav-user';
+import type { TabType } from '@/types';
 
 // Import logo
-import scooteqLogo from "@/assets/sidebarLogo.png";
+import scooteqLogo from '@/assets/sidebarLogo.png';
 
 // Menu configuration
 const MENU_CONFIG = {
   user: [
-    { id: "dashboard" as const, label: "Dashboard", icon: LayoutDashboard },
-    { id: "my-tickets" as const, label: "My Tickets", icon: Ticket },
-    { id: "create-ticket" as const, label: "Create Ticket", icon: Plus },
+    { id: 'dashboard' as const, label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'my-tickets' as const, label: 'My Tickets', icon: Ticket },
+    { id: 'create-ticket' as const, label: 'Create Ticket', icon: Plus },
   ],
   admin: [
     {
-      id: "admin-dashboard" as const,
-      label: "Admin Dashboard",
+      id: 'admin-dashboard' as const,
+      label: 'Admin Dashboard',
       icon: LayoutDashboard,
     },
-    { id: "my-tickets" as const, label: "My Tickets", icon: Ticket },
-    { id: "all-tickets" as const, label: "All Tickets", icon: Ticket },
-    { id: "analytics" as const, label: "Analytics", icon: BarChart3 },
-    { id: "create-ticket" as const, label: "Create Ticket", icon: Plus },
+    { id: 'my-tickets' as const, label: 'My Tickets', icon: Ticket },
+    { id: 'all-tickets' as const, label: 'All Tickets', icon: Ticket },
+    { id: 'analytics' as const, label: 'Analytics', icon: BarChart3 },
+    { id: 'create-ticket' as const, label: 'Create Ticket', icon: Plus },
   ],
 };
 
@@ -51,15 +51,10 @@ interface SidebarProps {
   onSearch?: (query: string) => void;
 }
 
-const AppSidebar: React.FC<SidebarProps> = ({
-  role,
-  email,
-  currentTab,
-  onTabChange,
-}) => {
+const AppSidebar: React.FC<SidebarProps> = ({ role, email, currentTab, onTabChange }) => {
   // Determine menu based on role
-  const getMenuForRole = (role: SidebarProps["role"]): MenuItem[] => {
-    if (role === "admin") {
+  const getMenuForRole = (role: SidebarProps['role']): MenuItem[] => {
+    if (role === 'admin') {
       return MENU_CONFIG.admin;
     }
     return MENU_CONFIG.user;
@@ -73,11 +68,11 @@ const AppSidebar: React.FC<SidebarProps> = ({
     if (tabId === currentTab) return; // No action if the same tab is selected
 
     if (
-      tabId === "admin-dashboard" ||
-      tabId === "dashboard" ||
-      tabId === "analytics" ||
-      tabId === "all-tickets" ||
-      tabId === "my-tickets"
+      tabId === 'admin-dashboard' ||
+      tabId === 'dashboard' ||
+      tabId === 'analytics' ||
+      tabId === 'all-tickets' ||
+      tabId === 'my-tickets'
     ) {
       onTabChange(tabId);
       window.location.reload();
@@ -109,11 +104,7 @@ const AppSidebar: React.FC<SidebarProps> = ({
                   className="h-11"
                 >
                   <IconComponent className="h-5 w-5" />
-                  <span
-                    className={
-                      item.id === "create-ticket" ? "font-semibold" : ""
-                    }
-                  >
+                  <span className={item.id === 'create-ticket' ? 'font-semibold' : ''}>
                     {item.label}
                   </span>
                 </SidebarMenuButton>
@@ -124,10 +115,10 @@ const AppSidebar: React.FC<SidebarProps> = ({
       </SidebarContent>
 
       <SidebarFooter className="border-t p-4">
-        <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
+        <div className="bg-muted/50 flex items-center gap-3 rounded-lg p-3">
           <NavUser
             user={{
-              name: email || "Unknown User",
+              name: email || 'Unknown User',
               email: email || undefined,
             }}
           />

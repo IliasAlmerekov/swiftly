@@ -8,19 +8,18 @@ import type {
   SolutionSearchResult,
   AdminUsersResponse,
   User,
-} from "../types";
-import { ApiError } from "../types";
+} from '../types';
+import { ApiError } from '../types';
 
 // API base URL - uses environment variable or falls back to localhost for development
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 
 // Helper function to get authentication token
 const getAuthToken = (): string => {
-  const token =
-    localStorage.getItem("token") || sessionStorage.getItem("token");
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
   if (!token) {
-    throw new ApiError("Not authenticated", 401);
+    throw new ApiError('Not authenticated', 401);
   }
 
   return token;
@@ -32,7 +31,7 @@ const handleApiResponse = async <T>(response: Response): Promise<T> => {
     const errorData = await response.json().catch(() => ({}));
     throw new ApiError(
       errorData.message || `HTTP error! status: ${response.status}`,
-      response.status
+      response.status,
     );
   }
 
@@ -40,14 +39,11 @@ const handleApiResponse = async <T>(response: Response): Promise<T> => {
 };
 
 // Authentication functions
-export const loginUser = async (
-  email: string,
-  password: string
-): Promise<AuthToken> => {
+export const loginUser = async (email: string, password: string): Promise<AuthToken> => {
   try {
     const response = await fetch(`${API_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
 
@@ -56,7 +52,7 @@ export const loginUser = async (
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError("Failed to login", 500);
+    throw new ApiError('Failed to login', 500);
   }
 };
 
@@ -64,12 +60,12 @@ export const registerUser = async (
   email: string,
   password: string,
   name: string,
-  role: "user" | "admin" = "user"
+  role: 'user' | 'admin' = 'user',
 ): Promise<AuthToken> => {
   try {
     const response = await fetch(`${API_URL}/auth/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, name, role }),
     });
 
@@ -78,7 +74,7 @@ export const registerUser = async (
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError("Failed to register", 500);
+    throw new ApiError('Failed to register', 500);
   }
 };
 
@@ -87,9 +83,9 @@ export const getUserTickets = async (): Promise<Ticket[]> => {
   try {
     const token = getAuthToken();
     const response = await fetch(`${API_URL}/tickets/user`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
     });
@@ -100,7 +96,7 @@ export const getUserTickets = async (): Promise<Ticket[]> => {
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError("Failed to fetch user tickets", 500);
+    throw new ApiError('Failed to fetch user tickets', 500);
   }
 };
 
@@ -108,9 +104,9 @@ export const getSupportUsers = async () => {
   try {
     const token = getAuthToken();
     const response = await fetch(`${API_URL}/users/support`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
     });
@@ -125,7 +121,7 @@ export const getSupportUsers = async () => {
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError("Failed to fetch support users", 500);
+    throw new ApiError('Failed to fetch support users', 500);
   }
 };
 
@@ -133,9 +129,9 @@ export const getTicketStatsOfMonth = async () => {
   try {
     const token = getAuthToken();
     const response = await fetch(`${API_URL}/tickets/stats`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
     });
@@ -149,7 +145,7 @@ export const getTicketStatsOfMonth = async () => {
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError("Failed to fetch ticket stats", 500);
+    throw new ApiError('Failed to fetch ticket stats', 500);
   }
 };
 
@@ -157,9 +153,9 @@ export const getUserTicketStats = async () => {
   try {
     const token = getAuthToken();
     const response = await fetch(`${API_URL}/tickets/user/stats`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
     });
@@ -173,7 +169,7 @@ export const getUserTicketStats = async () => {
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError("Failed to fetch user ticket stats", 500);
+    throw new ApiError('Failed to fetch user ticket stats', 500);
   }
 };
 
@@ -181,10 +177,10 @@ export const setUserStatusOnline = async () => {
   try {
     const token = getAuthToken();
     const response = await fetch(`${API_URL}/users/status/online`, {
-      method: "PUT",
+      method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
 
@@ -192,7 +188,7 @@ export const setUserStatusOnline = async () => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
   } catch (error) {
-    console.error("Failed to set user status to online:", error);
+    console.error('Failed to set user status to online:', error);
   }
 };
 
@@ -200,10 +196,10 @@ export const setUserStatusOffline = async () => {
   try {
     const token = getAuthToken();
     const response = await fetch(`${API_URL}/users/status/offline`, {
-      method: "PUT",
+      method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
 
@@ -211,7 +207,7 @@ export const setUserStatusOffline = async () => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
   } catch (error) {
-    console.error("Failed to set user status to offline:", error);
+    console.error('Failed to set user status to offline:', error);
   }
 };
 
@@ -221,10 +217,10 @@ export const activityInterval = async () => {
   try {
     const token = getAuthToken();
     const response = await fetch(`${API_URL}/users/status/activity`, {
-      method: "PUT",
+      method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
 
@@ -232,7 +228,7 @@ export const activityInterval = async () => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
   } catch (error) {
-    console.error("Failed to update user activity status:", error);
+    console.error('Failed to update user activity status:', error);
   }
 };
 
@@ -240,9 +236,9 @@ export const getAllTickets = async (): Promise<Ticket[]> => {
   try {
     const token = getAuthToken();
     const response = await fetch(`${API_URL}/tickets?admin=true`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
     });
@@ -253,7 +249,7 @@ export const getAllTickets = async (): Promise<Ticket[]> => {
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError("Failed to fetch all tickets", 500);
+    throw new ApiError('Failed to fetch all tickets', 500);
   }
 };
 
@@ -261,9 +257,9 @@ export const getTicketById = async (ticketId: string): Promise<Ticket> => {
   try {
     const token = getAuthToken();
     const response = await fetch(`${API_URL}/tickets/${ticketId}`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
     });
@@ -273,20 +269,18 @@ export const getTicketById = async (ticketId: string): Promise<Ticket> => {
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError("Failed to fetch ticket details", 500);
+    throw new ApiError('Failed to fetch ticket details', 500);
   }
 };
 
-export const createTicket = async (
-  ticketData: UpdateTicketFormData
-): Promise<Ticket> => {
+export const createTicket = async (ticketData: UpdateTicketFormData): Promise<Ticket> => {
   try {
     const token = getAuthToken();
 
     const response = await fetch(`${API_URL}/tickets`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(ticketData),
@@ -298,21 +292,21 @@ export const createTicket = async (
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError("Failed to create ticket", 500);
+    throw new ApiError('Failed to create ticket', 500);
   }
 };
 
 export const updateTicket = async (
   ticketId: string,
-  updatedData: UpdateTicketFormData
+  updatedData: UpdateTicketFormData,
 ): Promise<Ticket> => {
   try {
     const token = getAuthToken();
 
     const response = await fetch(`${API_URL}/tickets/${ticketId}`, {
-      method: "PUT",
+      method: 'PUT',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(updatedData),
@@ -324,20 +318,17 @@ export const updateTicket = async (
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError("Failed to update ticket", 500);
+    throw new ApiError('Failed to update ticket', 500);
   }
 };
 
-export const addComment = async (
-  ticketId: string,
-  content: string
-): Promise<Ticket> => {
+export const addComment = async (ticketId: string, content: string): Promise<Ticket> => {
   try {
     const token = getAuthToken();
     const response = await fetch(`${API_URL}/tickets/${ticketId}/comments`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ content }),
@@ -349,7 +340,7 @@ export const addComment = async (
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError("Failed to add comment", 500);
+    throw new ApiError('Failed to add comment', 500);
   }
 };
 
@@ -358,9 +349,9 @@ export const getAdminUsers = async (): Promise<AdminUsersResponse> => {
     const token = getAuthToken();
 
     const response = await fetch(`${API_URL}/auth/admins`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
     });
@@ -371,28 +362,27 @@ export const getAdminUsers = async (): Promise<AdminUsersResponse> => {
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError("Failed to fetch admin users", 500);
+    throw new ApiError('Failed to fetch admin users', 500);
   }
 };
 
-
 // Utility functions
 export const isAuthenticated = (): boolean => {
-  return !!(localStorage.getItem("token") || sessionStorage.getItem("token"));
+  return !!(localStorage.getItem('token') || sessionStorage.getItem('token'));
 };
 
 export const clearAuthToken = (): void => {
-  localStorage.removeItem("token");
-  sessionStorage.removeItem("token");
+  localStorage.removeItem('token');
+  sessionStorage.removeItem('token');
 };
 
 export const setAuthToken = (token: string, persistent = false): void => {
   if (persistent) {
-    localStorage.setItem("token", token);
-    sessionStorage.removeItem("token");
+    localStorage.setItem('token', token);
+    sessionStorage.removeItem('token');
   } else {
-    sessionStorage.setItem("token", token);
-    localStorage.removeItem("token");
+    sessionStorage.setItem('token', token);
+    localStorage.removeItem('token');
   }
 };
 
@@ -406,9 +396,9 @@ export const getAllUsers = async (): Promise<User[]> => {
     const token = getAuthToken();
 
     const response = await fetch(`${API_URL}/users/users`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
     });
@@ -419,7 +409,7 @@ export const getAllUsers = async (): Promise<User[]> => {
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError("Failed to fetch all users", 500);
+    throw new ApiError('Failed to fetch all users', 500);
   }
 };
 
@@ -428,9 +418,9 @@ export const getUserProfile = async (): Promise<User> => {
   try {
     const token = getAuthToken();
     const response = await fetch(`${API_URL}/users/profile`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
     });
@@ -440,7 +430,7 @@ export const getUserProfile = async (): Promise<User> => {
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError("Failed to fetch user profile", 500);
+    throw new ApiError('Failed to fetch user profile', 500);
   }
 };
 
@@ -449,9 +439,9 @@ export const getUserProfileById = async (userId: string): Promise<User> => {
   try {
     const token = getAuthToken();
     const response = await fetch(`${API_URL}/users/${userId}`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
     });
@@ -461,20 +451,18 @@ export const getUserProfileById = async (userId: string): Promise<User> => {
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError("Failed to fetch user profile", 500);
+    throw new ApiError('Failed to fetch user profile', 500);
   }
 };
 
 // Update user profile
-export const updateUserProfile = async (
-  userData: Partial<User>
-): Promise<User> => {
+export const updateUserProfile = async (userData: Partial<User>): Promise<User> => {
   try {
     const token = getAuthToken();
     const response = await fetch(`${API_URL}/users/profile`, {
-      method: "PUT",
+      method: 'PUT',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(userData),
@@ -485,21 +473,21 @@ export const updateUserProfile = async (
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError("Failed to update user profile", 500);
+    throw new ApiError('Failed to update user profile', 500);
   }
 };
 
 // Update user profile by ID (admin only)
 export const updateUserProfileById = async (
   userId: string,
-  userData: Partial<User>
+  userData: Partial<User>,
 ): Promise<User> => {
   try {
     const token = getAuthToken();
     const response = await fetch(`${API_URL}/users/${userId}`, {
-      method: "PUT",
+      method: 'PUT',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(userData),
@@ -510,7 +498,7 @@ export const updateUserProfileById = async (
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError("Failed to update user profile", 500);
+    throw new ApiError('Failed to update user profile', 500);
   }
 };
 
@@ -519,10 +507,10 @@ export const uploadUserAvatar = async (file: File): Promise<User> => {
   try {
     const token = getAuthToken();
     const formData = new FormData();
-    formData.append("avatar", file);
+    formData.append('avatar', file);
 
     const response = await fetch(`${API_URL}/upload/avatar`, {
-      method: "POST",
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -539,7 +527,7 @@ export const uploadUserAvatar = async (file: File): Promise<User> => {
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError("Failed to upload avatar", 500);
+    throw new ApiError('Failed to upload avatar', 500);
   }
 };
 
@@ -550,7 +538,7 @@ export const uploadUserAvatar = async (file: File): Promise<User> => {
 const makeAIRequest = async (url: string, options: RequestInit = {}) => {
   const response = await fetch(url, {
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${getAuthToken()}`,
       ...options.headers,
     },
@@ -559,56 +547,46 @@ const makeAIRequest = async (url: string, options: RequestInit = {}) => {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new ApiError(
-      errorData.message || "AI request failed",
-      response.status
-    );
+    throw new ApiError(errorData.message || 'AI request failed', response.status);
   }
 
   return response.json();
 };
 
-export const sendChatMessage = async (
-  data: ChatRequest
-): Promise<ApiResponse<AIResponse>> => {
+export const sendChatMessage = async (data: ChatRequest): Promise<ApiResponse<AIResponse>> => {
   return makeAIRequest(`${API_URL}/ai/chat`, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify(data),
   });
 };
 
 export const searchSolutions = async (
-  query: string
+  query: string,
 ): Promise<ApiResponse<SolutionSearchResult[]>> => {
-  return makeAIRequest(
-    `${API_URL}/ai/solutions/search?query=${encodeURIComponent(query)}`,
-    { method: "GET" }
-  );
-};
-
-export const getTicketSuggestions = async (
-  ticketId: string
-): Promise<ApiResponse<AIResponse>> => {
-  return makeAIRequest(`${API_URL}/ai/tickets/${ticketId}/suggestions`, {
-    method: "GET",
+  return makeAIRequest(`${API_URL}/ai/solutions/search?query=${encodeURIComponent(query)}`, {
+    method: 'GET',
   });
 };
 
-export const generateSolution = async (
-  ticketId: string
-): Promise<ApiResponse<AIResponse>> => {
+export const getTicketSuggestions = async (ticketId: string): Promise<ApiResponse<AIResponse>> => {
+  return makeAIRequest(`${API_URL}/ai/tickets/${ticketId}/suggestions`, {
+    method: 'GET',
+  });
+};
+
+export const generateSolution = async (ticketId: string): Promise<ApiResponse<AIResponse>> => {
   return makeAIRequest(`${API_URL}/ai/tickets/${ticketId}/solution`, {
-    method: "POST",
+    method: 'POST',
   });
 };
 
 export const submitAIFeedback = async (
   sessionId: string,
   isHelpful: boolean,
-  feedback?: string
+  feedback?: string,
 ): Promise<ApiResponse<{ message: string }>> => {
   return makeAIRequest(`${API_URL}/ai/feedback`, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify({ sessionId, isHelpful, feedback }),
   });
 };
@@ -618,9 +596,9 @@ export const getAIStats = async () => {
     const token = getAuthToken();
 
     const response = await fetch(`${API_URL}/ai/stats`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
     });
@@ -631,6 +609,6 @@ export const getAIStats = async () => {
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError("Failed to fetch AI stats", 500);
+    throw new ApiError('Failed to fetch AI stats', 500);
   }
 };

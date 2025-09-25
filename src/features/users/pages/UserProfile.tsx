@@ -1,23 +1,16 @@
-import { Button } from "@/shared/components/ui/button";
-import { useState, useEffect, useCallback } from "react";
-import { getUserProfile, getUserProfileById, getAllUsers } from "@/api/api";
-import type { User } from "@/types";
-import { useParams } from "react-router-dom";
-import {
-  UserCard,
-  PersonalInformationSection,
-  LoadingState,
-  ErrorState,
-} from "../components";
-import { useAvatarHandlers, useProfileEditor } from "../hooks";
+import { Button } from '@/shared/components/ui/button';
+import { useState, useEffect, useCallback } from 'react';
+import { getUserProfile, getUserProfileById, getAllUsers } from '@/api/api';
+import type { User } from '@/types';
+import { useParams } from 'react-router-dom';
+import { UserCard, PersonalInformationSection, LoadingState, ErrorState } from '../components';
+import { useAvatarHandlers, useProfileEditor } from '../hooks';
 
 interface UserProfileProps {
   isViewingOtherUser?: boolean;
 }
 
-export default function UserProfile({
-  isViewingOtherUser = false,
-}: UserProfileProps) {
+export default function UserProfile({ isViewingOtherUser = false }: UserProfileProps) {
   const { userId } = useParams<{ userId: string }>();
   const [user, setUser] = useState<User | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -26,15 +19,14 @@ export default function UserProfile({
   const [error, setError] = useState<string | null>(null);
 
   // Custom hooks for handling avatar and profile editing
-  const { handleAvatarUpload, handleRemoveAvatar, uploadingAvatar } =
-    useAvatarHandlers(
-      isViewingOtherUser,
-      userId,
-      (updatedUser: User) => {
-        setUser(updatedUser);
-      },
-      (errorMessage: string) => setError(errorMessage)
-    );
+  const { handleAvatarUpload, handleRemoveAvatar, uploadingAvatar } = useAvatarHandlers(
+    isViewingOtherUser,
+    userId,
+    (updatedUser: User) => {
+      setUser(updatedUser);
+    },
+    (errorMessage: string) => setError(errorMessage),
+  );
 
   const {
     editMode,
@@ -52,7 +44,7 @@ export default function UserProfile({
     (updatedUser: User) => {
       setUser(updatedUser);
     },
-    (errorMessage: string) => setError(errorMessage)
+    (errorMessage: string) => setError(errorMessage),
   );
 
   // Fetch user profile on component mount
@@ -68,8 +60,8 @@ export default function UserProfile({
         // If viewing another user and we have a userId param, use it
         if (isViewingOtherUser && userId) {
           // Check if current user is admin
-          if (currentUserData.role !== "admin") {
-            setError("Access denied. Admin privileges required.");
+          if (currentUserData.role !== 'admin') {
+            setError('Access denied. Admin privileges required.');
             return;
           }
           userData = await getUserProfileById(userId);
@@ -80,9 +72,7 @@ export default function UserProfile({
 
         setUser(userData);
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Error fetching user profile"
-        );
+        setError(err instanceof Error ? err.message : 'Error fetching user profile');
       } finally {
         setLoading(false);
       }
@@ -98,9 +88,7 @@ export default function UserProfile({
         const users = await getAllUsers();
         setAllUserList(users);
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Error fetching all users"
-        );
+        setError(err instanceof Error ? err.message : 'Error fetching all users');
       }
     };
 
@@ -122,7 +110,7 @@ export default function UserProfile({
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background p-6 flex items-center justify-center">
+      <div className="bg-background flex min-h-screen items-center justify-center p-6">
         <div className="text-center">
           <p className="text-foreground">User not found</p>
         </div>
@@ -131,12 +119,10 @@ export default function UserProfile({
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="bg-background min-h-screen p-6">
       <div className="mx-auto space-y-6">
-        <h1 className="text-2xl font-semibold text-foreground">
-          {isViewingOtherUser && userId
-            ? `${user.name}'s Profile`
-            : "Your personal profile"}
+        <h1 className="text-foreground text-2xl font-semibold">
+          {isViewingOtherUser && userId ? `${user.name}'s Profile` : 'Your personal profile'}
         </h1>
 
         {error && <ErrorState message={error} onClose={handleErrorClose} />}
@@ -163,7 +149,7 @@ export default function UserProfile({
           onInputChange={handleInputChange}
         />
 
-        {editMode && currentUser?.role === "admin" && (
+        {editMode && currentUser?.role === 'admin' && (
           <div className="flex gap-4">
             <Button onClick={handleSaveProfile}>Save Changes</Button>
             <Button variant="outline" onClick={handleCancel}>

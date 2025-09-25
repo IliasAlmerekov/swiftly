@@ -4,33 +4,33 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shared/components/ui/card";
-import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
-import { Textarea } from "@/shared/components/ui/textarea";
+} from '@/shared/components/ui/card';
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { Textarea } from '@/shared/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/shared/components/ui/select";
-import type { UpdateTicketFormData } from "@/types";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { createTicket } from "@/api/api";
-import AiOverlay from "@/features/tickets/components/AiOverlay";
-import ConfirmOverlay from "@/features/tickets/components/ConfirmOverlay";
+} from '@/shared/components/ui/select';
+import type { UpdateTicketFormData } from '@/types';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { createTicket } from '@/api/api';
+import AiOverlay from '@/features/tickets/components/AiOverlay';
+import ConfirmOverlay from '@/features/tickets/components/ConfirmOverlay';
 
 export function CreateTicket({ role }: { role?: string | null }) {
   const navigate = useNavigate();
 
   // Zustand für Ticketdaten initialisieren
   const [ticketData, setTicketData] = useState<UpdateTicketFormData>({
-    title: "",
-    priority: "medium",
-    description: "",
+    title: '',
+    priority: 'medium',
+    description: '',
   });
 
   // Zustand für Ladevorgang und Fehler
@@ -45,7 +45,7 @@ export function CreateTicket({ role }: { role?: string | null }) {
 
   // Show AI Assistant when component mounts
   useEffect(() => {
-    if (role === "admin") {
+    if (role === 'admin') {
       setShowAIAssistant(false);
       setCanCreateTicket(true);
     } else {
@@ -55,9 +55,7 @@ export function CreateTicket({ role }: { role?: string | null }) {
 
   // Handler für Änderungen in Formularfeldern
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
   ): void => {
     const { name, value } = e.target;
     setTicketData({
@@ -67,9 +65,7 @@ export function CreateTicket({ role }: { role?: string | null }) {
   };
 
   // Funktion zum Absenden des Formulars
-  const handleSubmit = async (
-    e: React.FormEvent<HTMLFormElement>
-  ): Promise<void> => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault(); // Standard-Formularverhalten verhindern
 
     setIsLoading(true);
@@ -82,9 +78,9 @@ export function CreateTicket({ role }: { role?: string | null }) {
       setSuccess(true);
       setShowOverlay(true); // Show the overlay on successful ticket creation
       setTicketData({
-        title: "",
-        priority: "medium",
-        description: "",
+        title: '',
+        priority: 'medium',
+        description: '',
       });
 
       // Erfolgsmeldung nach 3 Sekunden zurücksetzen
@@ -92,8 +88,7 @@ export function CreateTicket({ role }: { role?: string | null }) {
         setSuccess(false);
       }, 3000);
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to create ticket";
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create ticket';
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -116,7 +111,7 @@ export function CreateTicket({ role }: { role?: string | null }) {
   };
 
   const handleToNavigate = (): void => {
-    navigate("/dashboard?tab=dashboard");
+    navigate('/dashboard?tab=dashboard');
   };
   return (
     <div className="space-y-6">
@@ -169,21 +164,12 @@ export function CreateTicket({ role }: { role?: string | null }) {
                   <Label htmlFor="priority">Priority *</Label>
                   <Select required name="priority" value={ticketData.priority}>
                     <SelectTrigger>
-                      <SelectValue
-                        placeholder="Select priority"
-                        onChange={handleChange}
-                      />
+                      <SelectValue placeholder="Select priority" onChange={handleChange} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="low">
-                        Low - General question
-                      </SelectItem>
-                      <SelectItem value="medium">
-                        Medium - Standard issue
-                      </SelectItem>
-                      <SelectItem value="high">
-                        High - Urgent problem
-                      </SelectItem>
+                      <SelectItem value="low">Low - General question</SelectItem>
+                      <SelectItem value="medium">Medium - Standard issue</SelectItem>
+                      <SelectItem value="high">High - Urgent problem</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -209,12 +195,8 @@ export function CreateTicket({ role }: { role?: string | null }) {
               </div>
 
               <div className="flex gap-4">
-                <Button
-                  type="submit"
-                  className="flex-1 md:flex-none"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Will create..." : "Create Ticket"}
+                <Button type="submit" className="flex-1 md:flex-none" disabled={isLoading}>
+                  {isLoading ? 'Will create...' : 'Create Ticket'}
                 </Button>
               </div>
             </form>
@@ -229,8 +211,8 @@ export function CreateTicket({ role }: { role?: string | null }) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <h4 className="font-medium mb-2">Before submitting a ticket:</h4>
-            <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+            <h4 className="mb-2 font-medium">Before submitting a ticket:</h4>
+            <ul className="text-muted-foreground ml-4 space-y-1 text-sm">
               <li>• Check our knowledge base for common solutions</li>
               <li>• Restart your computer or application</li>
               <li>• Try using a different browser or device</li>
@@ -239,8 +221,8 @@ export function CreateTicket({ role }: { role?: string | null }) {
           </div>
 
           <div>
-            <h4 className="font-medium mb-2">For faster resolution:</h4>
-            <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+            <h4 className="mb-2 font-medium">For faster resolution:</h4>
+            <ul className="text-muted-foreground ml-4 space-y-1 text-sm">
               <li>• Provide as much detail as possible</li>
               <li>• Include screenshots if applicable</li>
               <li>• Mention your operating system and browser</li>

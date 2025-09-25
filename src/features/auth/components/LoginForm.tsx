@@ -1,10 +1,10 @@
-import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
-import LogoWhite from "../../../assets/logos.png";
-import { cn } from "@/shared/lib/utils";
-import { Card, CardContent } from "@/shared/components/ui/card";
-import { useLogin } from "../hooks/useLogin";
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import LogoWhite from '../../../assets/logos.png';
+import { cn } from '@/shared/lib/utils';
+import { Card, CardContent } from '@/shared/components/ui/card';
+import { useLogin } from '../hooks/useLogin';
 
 interface LoginFormProps {
   onLoginSuccess: () => void;
@@ -14,7 +14,7 @@ export default function LoginForm({
   className,
   onLoginSuccess,
   ...props
-}: React.ComponentProps<"div"> & LoginFormProps) {
+}: React.ComponentProps<'div'> & LoginFormProps) {
   const {
     email,
     setEmail,
@@ -28,7 +28,7 @@ export default function LoginForm({
   } = useLogin({ onLoginSuccess });
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
           <form id="login-form" className="p-8 md:p-12" onSubmit={handleSubmit}>
@@ -59,10 +59,7 @@ export default function LoginForm({
                   <Label htmlFor="password" className="text-md">
                     Password
                   </Label>
-                  <a
-                    href="#"
-                    className="ml-auto text-sm underline-offset-2 hover:underline"
-                  >
+                  <a href="#" className="ml-auto text-sm underline-offset-2 hover:underline">
                     Forgot password?
                   </a>
                 </div>
@@ -91,18 +88,16 @@ export default function LoginForm({
             <Button
               type="submit"
               form="login-form"
-              className="w-full mt-8 text-md"
+              className="text-md mt-8 w-full"
               disabled={loading}
             >
-              {loading ? "Loading..." : "Login"}
+              {loading ? 'Loading...' : 'Login'}
             </Button>
             {error && (
-              <p className="text-red-500 flex items-center justify-center pt-2.5">
-                {error}
-              </p>
+              <p className="flex items-center justify-center pt-2.5 text-red-500">{error}</p>
             )}
-            <div className="text-center text-sm py-2">
-              Don&apos;t have an account?{" "}
+            <div className="py-2 text-center text-sm">
+              Don&apos;t have an account?{' '}
               <a href="/register" className="underline underline-offset-4">
                 Sign up
               </a>

@@ -1,34 +1,34 @@
-import { Pie, PieChart } from "recharts";
-import type { Ticket } from "@/types";
+import { Pie, PieChart } from 'recharts';
+import type { Ticket } from '@/types';
 
 import {
   type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/shared/components/ui/chart";
-import { useEffect, useState } from "react";
+} from '@/shared/components/ui/chart';
+import { useEffect, useState } from 'react';
 
 const CHART_CONFIGS = {
   total: {
-    label: "Total Tickets",
-    color: "var(--chart-2)",
-    fill: "var(--chart-2)",
+    label: 'Total Tickets',
+    color: 'var(--chart-2)',
+    fill: 'var(--chart-2)',
   },
   open: {
-    label: "Open Tickets",
-    color: "var(--chart-1)",
-    fill: "var(--chart-1)",
+    label: 'Open Tickets',
+    color: 'var(--chart-1)',
+    fill: 'var(--chart-1)',
   },
-  "in-progress": {
-    label: "In Progress Tickets",
-    color: "var(--chart-6)",
-    fill: "var(--chart-6)",
+  'in-progress': {
+    label: 'In Progress Tickets',
+    color: 'var(--chart-6)',
+    fill: 'var(--chart-6)',
   },
   resolved: {
-    label: "Resolved Tickets",
-    color: "var(--chart-5)",
-    fill: "var(--chart-5)",
+    label: 'Resolved Tickets',
+    color: 'var(--chart-5)',
+    fill: 'var(--chart-5)',
   },
 } as const;
 
@@ -40,11 +40,7 @@ interface TicketStatusChartProps {
   showLabel?: boolean;
 }
 
-export function TicketStatusChart({
-  allTickets,
-  type,
-  showLabel = false,
-}: TicketStatusChartProps) {
+export function TicketStatusChart({ allTickets, type, showLabel = false }: TicketStatusChartProps) {
   const [totalTickets, setTotalTickets] = useState<number>(0);
   const [filteredTickets, setFilteredTickets] = useState<number>(0);
 
@@ -54,12 +50,10 @@ export function TicketStatusChart({
     const total = allTickets.length;
     setTotalTickets(total);
 
-    if (type === "total") {
+    if (type === 'total') {
       setFilteredTickets(total);
     } else {
-      const filtered = allTickets.filter(
-        (ticket) => ticket.status === type
-      ).length;
+      const filtered = allTickets.filter((ticket) => ticket.status === type).length;
       setFilteredTickets(filtered);
     }
   }, [allTickets, type]);
@@ -67,7 +61,7 @@ export function TicketStatusChart({
   const config = CHART_CONFIGS[type];
 
   const chartData =
-    type === "total"
+    type === 'total'
       ? [
           {
             status: config.label,
@@ -76,29 +70,29 @@ export function TicketStatusChart({
           },
         ]
       : totalTickets > 0
-      ? [
-          {
-            status: config.label,
-            count: filteredTickets,
-            fill: config.fill,
-          },
-          {
-            status: "Total Tickets",
-            count: totalTickets - filteredTickets,
-            fill: "var(--chart-2)",
-          },
-        ]
-      : [
-          {
-            status: "No Data",
-            count: 1,
-            fill: "var(--muted)",
-          },
-        ];
+        ? [
+            {
+              status: config.label,
+              count: filteredTickets,
+              fill: config.fill,
+            },
+            {
+              status: 'Total Tickets',
+              count: totalTickets - filteredTickets,
+              fill: 'var(--chart-2)',
+            },
+          ]
+        : [
+            {
+              status: 'No Data',
+              count: 1,
+              fill: 'var(--muted)',
+            },
+          ];
 
   const chartConfig = {
     count: {
-      label: type === "total" ? "Total Tickets" : "Tickets",
+      label: type === 'total' ? 'Total Tickets' : 'Tickets',
     },
     [type]: {
       label: config.label,
@@ -117,10 +111,10 @@ export function TicketStatusChart({
           data={chartData}
           dataKey="count"
           nameKey="status"
-          innerRadius={type === "total" ? 0 : 30}
+          innerRadius={type === 'total' ? 0 : 30}
           outerRadius={80}
-          stroke={type === "total" ? "none" : "var(--background)"}
-          strokeWidth={type === "total" ? 0 : 2}
+          stroke={type === 'total' ? 'none' : 'var(--background)'}
+          strokeWidth={type === 'total' ? 0 : 2}
           label={showLabel ? ({ value }) => `${value}` : undefined}
         />
       </PieChart>

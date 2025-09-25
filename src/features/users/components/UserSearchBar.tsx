@@ -1,6 +1,6 @@
-import { useRef, useEffect } from "react";
-import { Input } from "@/shared/components/ui/input";
-import { IconSearch } from "@tabler/icons-react";
+import { useRef, useEffect } from 'react';
+import { Input } from '@/shared/components/ui/input';
+import { IconSearch } from '@tabler/icons-react';
 
 interface UserSearchBarProps {
   searchQuery?: string;
@@ -9,9 +9,9 @@ interface UserSearchBarProps {
 }
 
 export function UserSearchBar({
-  searchQuery = "",
+  searchQuery = '',
   onSearchChange,
-  placeholder = "Search users...",
+  placeholder = 'Search users...',
 }: UserSearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -37,7 +37,7 @@ export function UserSearchBar({
   return (
     <div className="flex gap-4">
       <div className="relative flex-1">
-        <IconSearch className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <IconSearch className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
         <Input
           ref={inputRef}
           placeholder={placeholder}

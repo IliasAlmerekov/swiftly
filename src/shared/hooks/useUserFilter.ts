@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import type { User } from "@/types";
+import { useMemo } from 'react';
+import type { User } from '@/types';
 
 interface UseUserFilterOptions {
   users: User[];
@@ -19,7 +19,7 @@ export function useUserFilter({ users, searchQuery }: UseUserFilterOptions) {
         user.email?.toLowerCase().includes(query) ||
         user.position?.toLowerCase().includes(query) ||
         user.department?.toLowerCase().includes(query) ||
-        user.company?.toLowerCase().includes(query)
+        user.company?.toLowerCase().includes(query),
     );
   }, [users, searchQuery]);
 

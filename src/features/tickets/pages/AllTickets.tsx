@@ -1,10 +1,10 @@
-import type { Ticket } from "@/types";
-import { TicketTable } from "@/features/tickets/components/TicketTable";
-import { TicketSearchBar } from "@/features/tickets/components/TicketSearchBar";
-import { TicketStats } from "@/features/tickets/components/TicketStats";
-import { useTicketFilter } from "@/shared/hooks/useTicketFilter";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import type { Ticket } from '@/types';
+import { TicketTable } from '@/features/tickets/components/TicketTable';
+import { TicketSearchBar } from '@/features/tickets/components/TicketSearchBar';
+import { TicketStats } from '@/features/tickets/components/TicketStats';
+import { useTicketFilter } from '@/shared/hooks/useTicketFilter';
+import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 interface AllTicketsProps {
   allTickets?: Ticket[];
@@ -12,11 +12,7 @@ interface AllTicketsProps {
   role?: string | null;
 }
 
-export function AllTickets({
-  searchQuery = "",
-  allTickets = [],
-  role,
-}: AllTicketsProps) {
+export function AllTickets({ searchQuery = '', allTickets = [], role }: AllTicketsProps) {
   const navigate = useNavigate();
   const [currentSearchQuery, setCurrentSearchQuery] = useState(searchQuery);
 
@@ -30,7 +26,7 @@ export function AllTickets({
   };
 
   const handleCreateTicket = () => {
-    navigate("/dashboard?tab=create-ticket");
+    navigate('/dashboard?tab=create-ticket');
   };
 
   const handleUserClick = (userId: string): void => {
@@ -52,7 +48,7 @@ export function AllTickets({
         tickets={filteredTickets}
         title="All Tickets"
         description={`${filteredTickets.length} ticket(s) found${
-          currentSearchQuery ? ` for "${currentSearchQuery}"` : ""
+          currentSearchQuery ? ` for "${currentSearchQuery}"` : ''
         }`}
         onTicketClick={handleTicketClick}
         onUserClick={handleUserClick}

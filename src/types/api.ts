@@ -11,7 +11,7 @@ export interface RequestOptions extends RequestInit {
 }
 
 // Token storage types
-export type TokenStorage = "localStorage" | "sessionStorage";
+export type TokenStorage = 'localStorage' | 'sessionStorage';
 
 export interface AuthOptions {
   persistent?: boolean;

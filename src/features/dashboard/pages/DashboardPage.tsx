@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import type { TabType, Ticket } from "@/types";
-import { ApiError } from "@/types";
-import { useAuth } from "@/shared/hooks/useAuth";
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import type { TabType, Ticket } from '@/types';
+import { ApiError } from '@/types';
+import { useAuth } from '@/shared/hooks/useAuth';
 import {
   getAllTickets,
   getUserTickets,
   getSupportUsers,
   setUserStatusOnline,
   activityInterval,
-} from "@/api/api";
-import { useGreeting } from "../hooks/useGreeting";
-import { DashboardTabContent } from "@/features/dashboard/components/DashboardTabContent";
+} from '@/api/api';
+import { useGreeting } from '../hooks/useGreeting';
+import { DashboardTabContent } from '@/features/dashboard/components/DashboardTabContent';
 
 const DashboardPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -22,12 +22,11 @@ const DashboardPage: React.FC = () => {
   const [userTickets, setUserTickets] = useState<Ticket[]>([]);
   const [allTickets, setAllTickets] = useState<Ticket[]>([]);
   const [ticketsToday, setTicketsToday] = useState<number>(0);
-  const [searchQuery] = useState<string>("");
+  const [searchQuery] = useState<string>('');
   const [loadingTickets, setLoadingTickets] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const currentTab: TabType =
-    (searchParams.get("tab") as TabType) || "dashboard";
+  const currentTab: TabType = (searchParams.get('tab') as TabType) || 'dashboard';
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -36,16 +35,16 @@ const DashboardPage: React.FC = () => {
       try {
         const tickets = await getUserTickets();
         setUserTickets(tickets);
-        const allTickets = role === "admin" ? await getAllTickets() : [];
+        const allTickets = role === 'admin' ? await getAllTickets() : [];
         setAllTickets(allTickets);
       } catch (error) {
-        setError("Failed to load tickets");
-        console.error("Error fetching tickets:", error);
+        setError('Failed to load tickets');
+        console.error('Error fetching tickets:', error);
 
         if (error instanceof ApiError && error.status === 401) {
-          localStorage.removeItem("token");
-          sessionStorage.removeItem("token");
-          window.location.href = "/login";
+          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
+          window.location.href = '/login';
         }
       } finally {
         setLoadingTickets(false);
@@ -80,7 +79,7 @@ const DashboardPage: React.FC = () => {
         setSupportUsers(response.onlineCount || 0);
         setTotalAdmins(response.totalCount || 0);
       } catch (error) {
-        console.error("Failed to fetch support users:", error);
+        console.error('Failed to fetch support users:', error);
       }
     };
 
@@ -88,9 +87,12 @@ const DashboardPage: React.FC = () => {
     fetchSupportUsers();
     setUserStatusOnline();
 
-    const activeInterval = setInterval(() => {
-      activityInterval();
-    }, 2 * 60 * 1000);
+    const activeInterval = setInterval(
+      () => {
+        activityInterval();
+      },
+      2 * 60 * 1000,
+    );
 
     const supportUsersInterval = setInterval(() => {
       fetchSupportUsers();

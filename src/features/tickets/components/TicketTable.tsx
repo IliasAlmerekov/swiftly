@@ -4,15 +4,12 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shared/components/ui/card";
-import { Badge } from "@/shared/components/ui/badge";
-import type { Ticket } from "@/types";
-import {
-  getPriorityColor,
-  getStatusColor,
-} from "@/features/tickets/utils/ticketUtils";
-import { Avatar, AvatarImage } from "@radix-ui/react-avatar";
-import useTicketStatus from "@/shared/hooks/useTicketStatus";
+} from '@/shared/components/ui/card';
+import { Badge } from '@/shared/components/ui/badge';
+import type { Ticket } from '@/types';
+import { getPriorityColor, getStatusColor } from '@/features/tickets/utils/ticketUtils';
+import { Avatar, AvatarImage } from '@radix-ui/react-avatar';
+import useTicketStatus from '@/shared/hooks/useTicketStatus';
 
 interface TicketRowProps {
   ticket: Ticket;
@@ -21,31 +18,23 @@ interface TicketRowProps {
   role?: string | null;
 }
 
-function TicketRow({
-  ticket,
-  onTicketClick,
-  onUserClick,
-  role,
-}: TicketRowProps) {
+function TicketRow({ ticket, onTicketClick, onUserClick, role }: TicketRowProps) {
   const { className } = useTicketStatus(ticket);
 
   return (
-    <tr className={`border-b hover:bg-muted/50 ${className}`}>
+    <tr className={`hover:bg-muted/50 border-b ${className}`}>
       <td className="p-3 font-mono text-sm">{ticket._id.slice(0, 8)}</td>
-      <td className="p-3 max-w-xs">
+      <td className="max-w-xs p-3">
         <a href="" onClick={() => onTicketClick?.(ticket._id)}>
           {ticket.title}
         </a>
       </td>
-      <td className="p-3 max-w-xs">
+      <td className="max-w-xs p-3">
         <div className="truncate" title={ticket.owner.name}>
-          <Avatar className="inline-block w-8 h-8 mr-2 align-middle rounded-full overflow-hidden">
-            <AvatarImage
-              src={ticket.owner.avatar?.url}
-              alt={ticket.owner.name}
-            />
+          <Avatar className="mr-2 inline-block h-8 w-8 overflow-hidden rounded-full align-middle">
+            <AvatarImage src={ticket.owner.avatar?.url} alt={ticket.owner.name} />
           </Avatar>
-          {role === "admin" ? (
+          {role === 'admin' ? (
             <span className="font-medium">
               <a href="" onClick={() => onUserClick?.(ticket.owner?._id)}>
                 {ticket.owner.name}
@@ -57,25 +46,21 @@ function TicketRow({
         </div>
       </td>
       <td className="p-3">
-        <Badge className={getPriorityColor(ticket.priority)}>
-          {ticket.priority}
-        </Badge>
+        <Badge className={getPriorityColor(ticket.priority)}>{ticket.priority}</Badge>
       </td>
       <td className="p-3">
         <Badge className={getStatusColor(ticket.status)}>{ticket.status}</Badge>
       </td>
-      <td className="p-3 flex items-center">
-        <Avatar className="inline-block w-8 h-8 mr-2 align-middle rounded-full overflow-hidden">
+      <td className="flex items-center p-3">
+        <Avatar className="mr-2 inline-block h-8 w-8 overflow-hidden rounded-full align-middle">
           <AvatarImage
             src={ticket.assignedTo?.avatar?.url}
-            alt={ticket.assignedTo?.name || "Unassigned"}
+            alt={ticket.assignedTo?.name || 'Unassigned'}
           />
         </Avatar>
-        {ticket.assignedTo?.name ?? "Unassigned"}
+        {ticket.assignedTo?.name ?? 'Unassigned'}
       </td>
-      <td className="p-3 text-sm text-muted-foreground">
-        {ticket.createdAt.slice(0, 10)}
-      </td>
+      <td className="text-muted-foreground p-3 text-sm">{ticket.createdAt.slice(0, 10)}</td>
     </tr>
   );
 }
@@ -91,20 +76,20 @@ interface TicketTableProps {
 
 export function TicketTable({
   tickets,
-  title = "All Tickets",
+  title = 'All Tickets',
   description,
   onTicketClick,
   onUserClick,
   role,
 }: TicketTableProps) {
   const tableHeaders = [
-    { title: "Ticket ID", key: "id" },
-    { title: "Title", key: "title" },
-    { title: "Owner", key: "owner" },
-    { title: "Priority", key: "priority" },
-    { title: "Status", key: "status" },
-    { title: "Assignee", key: "assignee" },
-    { title: "Created", key: "created" },
+    { title: 'Ticket ID', key: 'id' },
+    { title: 'Title', key: 'title' },
+    { title: 'Owner', key: 'owner' },
+    { title: 'Priority', key: 'priority' },
+    { title: 'Status', key: 'status' },
+    { title: 'Assignee', key: 'assignee' },
+    { title: 'Created', key: 'created' },
   ];
 
   const sortedTickets = () => {
@@ -127,7 +112,7 @@ export function TicketTable({
                 {tableHeaders.map((header) => (
                   <th
                     key={header.key}
-                    className="text-left p-3 font-bold text-md text-white uppercase"
+                    className="text-md p-3 text-left font-bold text-white uppercase"
                   >
                     {header.title}
                   </th>
@@ -150,7 +135,7 @@ export function TicketTable({
         </div>
 
         {tickets.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground">
+          <div className="text-muted-foreground py-8 text-center">
             No tickets found matching your search.
           </div>
         )}

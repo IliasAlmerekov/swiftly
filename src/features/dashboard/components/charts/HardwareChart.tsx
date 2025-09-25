@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Label, PolarRadiusAxis, RadialBar, RadialBarChart } from "recharts";
+import { Label, PolarRadiusAxis, RadialBar, RadialBarChart } from 'recharts';
 
 import {
   Card,
@@ -8,26 +8,26 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shared/components/ui/card";
+} from '@/shared/components/ui/card';
 import {
   type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/shared/components/ui/chart";
+} from '@/shared/components/ui/chart';
 
-export const description = "A radial chart with stacked sections";
+export const description = 'A radial chart with stacked sections';
 
-const chartData = [{ month: "january", macbook: 80, windows: 23 }];
+const chartData = [{ month: 'january', macbook: 80, windows: 23 }];
 
 const chartConfig = {
   macbook: {
-    label: "MacBook",
-    color: "var(--chart-6)",
+    label: 'MacBook',
+    color: 'var(--chart-6)',
   },
   windows: {
-    label: "Windows",
-    color: "var(--chart-8)",
+    label: 'Windows',
+    color: 'var(--chart-8)',
   },
 } satisfies ChartConfig;
 
@@ -41,24 +41,13 @@ export function HardwareChart() {
         <CardDescription>2025</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-1 items-center pb-0">
-        <ChartContainer
-          config={chartConfig}
-          className="mx-auto aspect-square w-full max-w-[250px]"
-        >
-          <RadialBarChart
-            data={chartData}
-            endAngle={180}
-            innerRadius={80}
-            outerRadius={130}
-          >
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
+        <ChartContainer config={chartConfig} className="mx-auto aspect-square w-full max-w-[250px]">
+          <RadialBarChart data={chartData} endAngle={180} innerRadius={80} outerRadius={130}>
+            <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
             <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
               <Label
                 content={({ viewBox }) => {
-                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                  if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
                     return (
                       <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle">
                         <tspan

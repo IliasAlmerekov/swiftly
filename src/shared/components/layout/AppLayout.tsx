@@ -1,12 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import {
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/shared/components/ui/sidebar";
-import AppSidebar from "@/shared/components/layout/Sidebar";
-import { useAuth } from "@/shared/hooks/useAuth";
-import type { TabType } from "@/types";
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { SidebarProvider, SidebarTrigger } from '@/shared/components/ui/sidebar';
+import AppSidebar from '@/shared/components/layout/Sidebar';
+import { useAuth } from '@/shared/hooks/useAuth';
+import type { TabType } from '@/types';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -14,16 +11,11 @@ interface AppLayoutProps {
   currentTab?: TabType;
 }
 
-const AppLayout: React.FC<AppLayoutProps> = ({
-  children,
-  title = "HelpDesk",
-  currentTab,
-}) => {
+const AppLayout: React.FC<AppLayoutProps> = ({ children, title = 'HelpDesk', currentTab }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { role, email } = useAuth();
-  const [currentSidebarTab, setCurrentSidebarTab] =
-    useState<TabType>("dashboard");
+  const [currentSidebarTab, setCurrentSidebarTab] = useState<TabType>('dashboard');
 
   // Determine current tab based on URL if not explicitly provided
   useEffect(() => {
@@ -33,18 +25,18 @@ const AppLayout: React.FC<AppLayoutProps> = ({
       // Auto-detect tab from current URL
       const path = location.pathname;
       const params = new URLSearchParams(location.search);
-      const tabParam = params.get("tab");
+      const tabParam = params.get('tab');
 
-      if (path.includes("/tickets/")) {
-        setCurrentSidebarTab("my-tickets");
-      } else if (path === "/dashboard") {
+      if (path.includes('/tickets/')) {
+        setCurrentSidebarTab('my-tickets');
+      } else if (path === '/dashboard') {
         if (tabParam) {
           setCurrentSidebarTab(tabParam as TabType);
         } else {
-          setCurrentSidebarTab("dashboard");
+          setCurrentSidebarTab('dashboard');
         }
       } else {
-        setCurrentSidebarTab("dashboard");
+        setCurrentSidebarTab('dashboard');
       }
     }
   }, [currentTab, location.pathname, location.search]);
@@ -56,27 +48,27 @@ const AppLayout: React.FC<AppLayoutProps> = ({
 
     // Navigate based on tab selection
     switch (tabId) {
-      case "dashboard":
-      case "admin-dashboard":
-        navigate("/dashboard?tab=dashboard");
+      case 'dashboard':
+      case 'admin-dashboard':
+        navigate('/dashboard?tab=dashboard');
         break;
-      case "my-tickets":
-        navigate("/dashboard?tab=my-tickets");
+      case 'my-tickets':
+        navigate('/dashboard?tab=my-tickets');
         break;
-      case "all-tickets":
-        navigate("/dashboard?tab=all-tickets");
+      case 'all-tickets':
+        navigate('/dashboard?tab=all-tickets');
         break;
-      case "create-ticket":
-        navigate("/dashboard?tab=create-ticket");
+      case 'create-ticket':
+        navigate('/dashboard?tab=create-ticket');
         break;
-      case "analytics":
-        navigate("/dashboard?tab=analytics");
+      case 'analytics':
+        navigate('/dashboard?tab=analytics');
         break;
-      case "user-profile":
-        navigate("/user-profile");
+      case 'user-profile':
+        navigate('/user-profile');
         break;
       default:
-        navigate("/dashboard");
+        navigate('/dashboard');
         break;
     }
   };
@@ -90,7 +82,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
           currentTab={currentSidebarTab}
           onTabChange={handleTabChange}
         />
-        <main className="@container/main flex-1 flex flex-col overflow-hidden">
+        <main className="@container/main flex flex-1 flex-col overflow-hidden">
           <header className="flex h-14 items-center gap-4 border-b px-4 lg:h-[60px] lg:px-6">
             <SidebarTrigger />
             <div className="flex-1">

@@ -1,15 +1,15 @@
-import { useState, useDeferredValue, memo } from "react";
+import { useState, useDeferredValue, memo } from 'react';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/shared/components/ui/select";
-import { Avatar, AvatarImage } from "@/shared/components/ui/avatar";
-import { UserSearchBar } from "./UserSearchBar";
-import type { User } from "@/types";
-import { useUserFilter } from "@/shared/hooks/useUserFilter";
+} from '@/shared/components/ui/select';
+import { Avatar, AvatarImage } from '@/shared/components/ui/avatar';
+import { UserSearchBar } from './UserSearchBar';
+import type { User } from '@/types';
+import { useUserFilter } from '@/shared/hooks/useUserFilter';
 
 interface ManagerSelectProps {
   selectedManagerId: string;
@@ -24,7 +24,7 @@ const ManagerSelect = memo(function ManagerSelect({
   disabled = false,
   onValueChange,
 }: ManagerSelectProps) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const deferredSearchQuery = useDeferredValue(searchQuery);
 
   const filteredUsers = useUserFilter({
@@ -33,16 +33,12 @@ const ManagerSelect = memo(function ManagerSelect({
   });
 
   return (
-    <Select
-      value={selectedManagerId}
-      disabled={disabled}
-      onValueChange={onValueChange}
-    >
-      <SelectTrigger className="w-[180px] mt-2">
+    <Select value={selectedManagerId} disabled={disabled} onValueChange={onValueChange}>
+      <SelectTrigger className="mt-2 w-[180px]">
         <SelectValue placeholder="Select a manager" />
       </SelectTrigger>
       <SelectContent className="max-h-80">
-        <div className="p-2 border-b">
+        <div className="border-b p-2">
           <UserSearchBar
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
@@ -52,26 +48,17 @@ const ManagerSelect = memo(function ManagerSelect({
         <div className="max-h-60 overflow-auto">
           {filteredUsers.length > 0 ? (
             filteredUsers.map((user) => (
-              <SelectItem
-                key={user._id}
-                value={user._id}
-                className="flex items-center gap-2 p-2"
-              >
+              <SelectItem key={user._id} value={user._id} className="flex items-center gap-2 p-2">
                 <div className="flex items-center gap-2">
-                  <Avatar className="w-6 h-6">
-                    <AvatarImage
-                      src={user.avatar?.url || ""}
-                      alt={user.name || "Manager"}
-                    />
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage src={user.avatar?.url || ''} alt={user.name || 'Manager'} />
                   </Avatar>
                   <span className="truncate">{user.name}</span>
                 </div>
               </SelectItem>
             ))
           ) : (
-            <div className="p-2 text-sm text-muted-foreground text-center">
-              No managers found
-            </div>
+            <div className="text-muted-foreground p-2 text-center text-sm">No managers found</div>
           )}
         </div>
       </SelectContent>

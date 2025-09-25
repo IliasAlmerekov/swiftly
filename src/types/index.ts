@@ -10,7 +10,7 @@ export class ApiError extends Error {
 
   constructor(message: string, status: number = 500) {
     super(message);
-    this.name = "ApiError";
+    this.name = 'ApiError';
     this.status = status;
   }
 }
@@ -20,7 +20,7 @@ export interface User {
   _id: string;
   email: string;
   name: string;
-  role: "user" | "admin";
+  role: 'user' | 'admin';
   createdAt: string;
   updatedAt: string;
   onlineCount?: number;
@@ -72,7 +72,7 @@ export interface RegisterFormData {
   email: string;
   password: string;
   name: string;
-  role?: "user" | "admin";
+  role?: 'user' | 'admin';
 }
 
 // Ticket types
@@ -88,8 +88,8 @@ export interface Ticket {
   owner: User;
   title: string;
   description: string;
-  priority: "low" | "medium" | "high";
-  status: "open" | "in-progress" | "resolved" | "closed";
+  priority: 'low' | 'medium' | 'high';
+  status: 'open' | 'in-progress' | 'resolved' | 'closed';
   category: string;
   createdBy: User;
   assignedTo?: User;
@@ -101,15 +101,15 @@ export interface Ticket {
 export interface CreateTicketFormData {
   title: string;
   description: string;
-  priority: "low" | "medium" | "high" | "urgent";
+  priority: 'low' | 'medium' | 'high' | 'urgent';
   category: string;
 }
 
 export interface UpdateTicketFormData {
   title?: string;
   description?: string;
-  priority?: "low" | "medium" | "high";
-  status?: "open" | "in-progress" | "resolved" | "closed";
+  priority?: 'low' | 'medium' | 'high';
+  status?: 'open' | 'in-progress' | 'resolved' | 'closed';
   assignedTo?: string;
 }
 
@@ -119,7 +119,7 @@ export interface AddCommentFormData {
 
 // AI types
 export interface ChatRequest {
-  role: "user" | "assistant";
+  role: 'user' | 'assistant';
   message?: string;
   content?: string;
   ticketId?: string;
@@ -144,13 +144,13 @@ export interface SolutionSearchResult {
 
 // Navigation Types
 export type TabType =
-  | "dashboard"
-  | "my-tickets"
-  | "all-tickets"
-  | "analytics"
-  | "create-ticket"
-  | "admin-dashboard"
-  | "user-profile";
+  | 'dashboard'
+  | 'my-tickets'
+  | 'all-tickets'
+  | 'analytics'
+  | 'create-ticket'
+  | 'admin-dashboard'
+  | 'user-profile';
 
 // Re-export API types
-export * from "./api";
+export * from './api';
