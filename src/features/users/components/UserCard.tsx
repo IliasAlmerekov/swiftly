@@ -1,4 +1,4 @@
-import { Button } from '@/shared/components/ui/button';
+﻿import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent } from '@/shared/components/ui/card';
 import { Pen, Upload } from 'lucide-react';
 import { memo } from 'react';
@@ -30,29 +30,29 @@ const UserCard = memo(function UserCard({
 
   return (
     <Card>
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between pr-8">
-          <div className="flex items-center gap-4">
-            <Avatar className="h-55 w-55">
-              <AvatarImage src={user.avatar?.url || ''} alt="Profile" />
-              <AvatarFallback className="text-4xl">
-                {user.name.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+      <CardContent className="p-4 sm:p-6">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
             <div className="relative">
+              <Avatar className="h-24 w-24 sm:h-32 sm:w-32">
+                <AvatarImage src={user.avatar?.url || ''} alt="Profile" />
+                <AvatarFallback className="text-2xl sm:text-4xl">
+                  {user.name.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
               {!isViewingOtherUser && (
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      size="sm"
-                      className="hover:bg-muted absolute -top-20 -right-2 h-8 w-8 rounded-full p-0 shadow-md"
+                      size="icon"
+                      className="hover:bg-muted absolute right-0 -bottom-2 h-9 w-9 rounded-full border shadow-sm sm:-top-2 sm:-right-2 sm:bottom-auto"
                       disabled={uploadingAvatar}
                     >
                       <Pen className="h-4 w-4" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-64 p-4" side="right" align="start">
+                  <PopoverContent className="w-64 p-4" align="center" sideOffset={8}>
                     <div className="space-y-3">
                       <h4 className="text-sm font-medium">Change Avatar</h4>
                       <div className="space-y-2">
@@ -91,8 +91,8 @@ const UserCard = memo(function UserCard({
                 </Popover>
               )}
             </div>
-            <div className="flex flex-col gap-1">
-              <h1 className="text-foreground text-3xl font-semibold">{user.name}</h1>
+            <div className="text-center sm:text-left">
+              <h1 className="text-foreground text-2xl font-semibold sm:text-3xl">{user.name}</h1>
               <p className="text-muted-foreground text-sm">{user.email}</p>
               {user.position && <p className="text-muted-foreground text-sm">{user.position}</p>}
               {(user.city || user.country) && (

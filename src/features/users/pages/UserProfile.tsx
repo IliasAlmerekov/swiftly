@@ -1,4 +1,4 @@
-import { Button } from '@/shared/components/ui/button';
+﻿import { Button } from '@/shared/components/ui/button';
 import { useState, useEffect, useCallback } from 'react';
 import { getUserProfile, getUserProfileById, getAllUsers } from '@/api/api';
 import type { User } from '@/types';
@@ -119,8 +119,8 @@ export default function UserProfile({ isViewingOtherUser = false }: UserProfileP
   }
 
   return (
-    <div className="bg-background min-h-screen p-6">
-      <div className="mx-auto space-y-6">
+    <div className="bg-background min-h-screen px-4 py-6 sm:p-6">
+      <div className="mx-auto max-w-5xl space-y-6">
         <h1 className="text-foreground text-2xl font-semibold">
           {isViewingOtherUser && userId ? `${user.name}'s Profile` : 'Your personal profile'}
         </h1>
@@ -150,7 +150,7 @@ export default function UserProfile({ isViewingOtherUser = false }: UserProfileP
         />
 
         {editMode && currentUser?.role === 'admin' && (
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
             <Button onClick={handleSaveProfile}>Save Changes</Button>
             <Button variant="outline" onClick={handleCancel}>
               Cancel
