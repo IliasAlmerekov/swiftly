@@ -1,0 +1,65 @@
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+import type { Ticket } from "@/types";
+import { IconTicket, IconCircleCheck, IconClock } from "@tabler/icons-react";
+import {
+  TotalTicketsChart,
+  OpenTicketsChart,
+  InProgressChart,
+  ResolvedChart,
+} from "./charts/TicketStatusChart";
+
+interface AdminTicketCardProps {
+  title: string;
+  icon: typeof IconTicket;
+  component: React.ComponentType<{ allTickets?: Ticket[] }>;
+}
+
+interface AllTicketProps {
+  allTickets?: Ticket[];
+}
+
+export default function AdminTicketCard({ allTickets }: AllTicketProps) {
+  // Admin charts configuration
+  const adminChartsData: AdminTicketCardProps[] = [
+    {
+      title: "Total Tickets",
+      icon: IconTicket,
+      component: TotalTicketsChart,
+    },
+    {
+      title: "Open Tickets",
+      icon: IconClock,
+      component: OpenTicketsChart,
+    },
+    {
+      title: "In Progress Tickets",
+      icon: IconClock,
+      component: InProgressChart,
+    },
+    {
+      title: "Resolved Tickets",
+      icon: IconCircleCheck,
+      component: ResolvedChart,
+    },
+  ];
+  return (
+    <>
+      {adminChartsData.map((chart, index) => (
+        <Card key={index}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{chart.title}</CardTitle>
+            <chart.icon className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <chart.component allTickets={allTickets} />
+          </CardContent>
+        </Card>
+      ))}
+    </>
+  );
+}
