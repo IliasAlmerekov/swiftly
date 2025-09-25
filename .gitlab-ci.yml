@@ -9,7 +9,9 @@ stages:
 
 workflow:
   rules:
-    - if: $CI_COMMIT_TAG && $CI_COMMIT_REF_NAME =~ /^v.*/
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH # run on any branch push
+    - if: $CI_COMMIT_TAG && $CI_COMMIT_REF_NAME =~ /^v.*/ # keep tag pipelines (for deploy)
 
 variables:
   HUSKY: '0'
