@@ -23,22 +23,9 @@ export default defineConfig({
     chunkSizeWarningLimit: 700,
     cssCodeSplit: true,
     rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (!id.includes('node_modules')) return undefined;
-
-          if (id.includes('react-router')) return 'router';
-          if (id.includes('react-dom') || id.includes('react')) return 'react';
-          if (id.includes('recharts')) return 'charts';
-          if (id.includes('@dnd-kit')) return 'dnd';
-          if (id.includes('@tanstack')) return 'tanstack';
-          if (id.includes('@radix-ui')) return 'radix';
-          if (id.includes('cloudinary')) return 'cloudinary';
-
-          // fallback: group other vendor code
-          return 'vendor';
-        },
-      },
+      // Rely on Vite's default chunking to prevent
+      // potential init-order issues with React hooks
+      // accessed during module evaluation in split chunks.
     },
   },
 });
