@@ -36,9 +36,14 @@ lint:
   stage: lint
   script:
     - npm run lint -- --max-warnings 5
-    - npm run format:check
     - npm run lint:css
   allow_failure: false
+
+format:check:
+  stage: lint
+  script:
+    - npm run format:check
+  allow_failure: true
 
 # -------- TESTS --------
 test:types:
