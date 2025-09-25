@@ -113,7 +113,7 @@ deploy:production:
     - netlify deploy --dir=dist --site=$NETLIFY_SITE_ID_PRODUCTION --auth=$NETLIFY_AUTH_TOKEN --prod --message "Prod deploy $CI_COMMIT_SHORT_SHA"
   environment:
     name: production
-    url: https://scooteq-helpdesk.netlify.app/
+    url: https://helpdesk-scooteq.netlify.app/
   when: manual
   only:
     - /^v[0-9]+\.[0-9]+\.[0-9]+$/
