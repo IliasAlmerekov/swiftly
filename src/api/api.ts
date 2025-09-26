@@ -28,11 +28,25 @@ const getAuthToken = (): string => {
 // Helper function to handle API responses
 const handleApiResponse = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new ApiError(
-      errorData.message || `HTTP error! status: ${response.status}`,
-      response.status,
-    );
+    let message = `HTTP error! status: ${response.status}`;
+
+    try {
+      const errorData = await response.json();
+      if (errorData && typeof errorData === 'object' && 'message' in errorData) {
+        message = String(errorData.message) || message;
+      }
+    } catch {
+      try {
+        const text = await response.text();
+        if (text) {
+          message = text;
+        }
+      } catch {
+        // ignore parsing errors
+      }
+    }
+
+    throw new ApiError(message, response.status);
   }
 
   return response.json();
@@ -507,7 +521,7 @@ export const uploadUserAvatar = async (file: File): Promise<User> => {
   try {
     const token = getAuthToken();
     const formData = new FormData();
-    formData.append('avatar', file);
+    formData.append('avatar', file, file.name);
 
     const response = await fetch(`${API_URL}/upload/avatar`, {
       method: 'POST',
@@ -522,6 +536,11 @@ export const uploadUserAvatar = async (file: File): Promise<User> => {
       message: string;
       user: User;
     }>(response);
+
+    if (!data?.user) {
+      throw new ApiError('Invalid server response while uploading avatar', 500);
+    }
+
     return data.user;
   } catch (error) {
     if (error instanceof ApiError) {

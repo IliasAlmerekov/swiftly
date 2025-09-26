@@ -8,7 +8,8 @@ import {
 import { Badge } from '@/shared/components/ui/badge';
 import type { Ticket } from '@/types';
 import { getPriorityColor, getStatusColor } from '@/features/tickets/utils/ticketUtils';
-import { Avatar, AvatarImage } from '@radix-ui/react-avatar';
+import type { MouseEvent } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 import useTicketStatus from '@/shared/hooks/useTicketStatus';
 
 interface TicketRowProps {
@@ -20,6 +21,20 @@ interface TicketRowProps {
 
 function TicketRow({ ticket, onTicketClick, onUserClick, role }: TicketRowProps) {
   const { className } = useTicketStatus(ticket);
+  const ownerName = ticket.owner?.name ?? 'Unknown User';
+  const ownerId = ticket.owner?._id;
+  const ownerAvatarUrl = ticket.owner?.avatar?.url;
+  const ownerInitial = ownerName.charAt(0).toUpperCase() || '?';
+
+  const handleOwnerClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+
+    if (!ownerId) {
+      return;
+    }
+
+    onUserClick?.(ownerId);
+  };
 
   return (
     <tr className={`hover:bg-muted/50 border-b ${className}`}>
@@ -30,18 +45,19 @@ function TicketRow({ ticket, onTicketClick, onUserClick, role }: TicketRowProps)
         </a>
       </td>
       <td className="max-w-xs p-3">
-        <div className="truncate" title={ticket.owner.name}>
+        <div className="truncate" title={ownerName}>
           <Avatar className="mr-2 inline-block h-8 w-8 overflow-hidden rounded-full align-middle">
-            <AvatarImage src={ticket.owner.avatar?.url} alt={ticket.owner.name} />
+            <AvatarImage src={ownerAvatarUrl} alt={ownerName} />
+            <AvatarFallback>{ownerInitial}</AvatarFallback>
           </Avatar>
-          {role === 'admin' ? (
+          {role === 'admin' && ownerId ? (
             <span className="font-medium">
-              <a href="" onClick={() => onUserClick?.(ticket.owner?._id)}>
-                {ticket.owner.name}
+              <a href="" onClick={handleOwnerClick}>
+                {ownerName}
               </a>
             </span>
           ) : (
-            <span>{ticket.owner.name}</span>
+            <span>{ownerName}</span>
           )}
         </div>
       </td>
