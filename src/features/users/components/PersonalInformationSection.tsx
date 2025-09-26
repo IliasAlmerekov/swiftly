@@ -6,6 +6,7 @@ import { Avatar, AvatarImage } from '@/shared/components/ui/avatar';
 import ManagerSelect from './ManagerSelect';
 import type { User } from '@/types';
 import { memo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface PersonalInformationSectionProps {
   user: User;
@@ -30,12 +31,27 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
   onSave,
   onInputChange,
 }: PersonalInformationSectionProps) {
+  const navigate = useNavigate();
   const handleManagerChange = useCallback(
     (value: string) => {
       onInputChange('manager', value);
     },
     [onInputChange],
   );
+
+  const handleUserClick = (userId: string): void => {
+    navigate(`/users/${userId}`);
+  };
+
+  const handleOwnerClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+
+    if (!selectedManagerId) {
+      return;
+    }
+
+    handleUserClick(selectedManagerId);
+  };
 
   return (
     <Card>
@@ -137,14 +153,18 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
                 onValueChange={handleManagerChange}
               />
             ) : (
-              <div className="flex items-center gap-2 p-2">
-                <Avatar>
-                  <AvatarImage
-                    src={user.manager?.avatar?.url || ''}
-                    alt={user.manager?.name || 'Manager'}
-                  />
-                </Avatar>
-                <p className="mt-1 text-[var(--ring)]">{user.manager?.name || 'N/A'}</p>
+              <div className="flex items-center gap-2 pt-2">
+                {user.manager?.avatar?.url && (
+                  <Avatar>
+                    <AvatarImage
+                      src={user.manager?.avatar?.url || ''}
+                      alt={user.manager?.name || 'Manager'}
+                    />
+                  </Avatar>
+                )}
+                <Button variant="secondary" className="cursor-pointer" onClick={handleOwnerClick}>
+                  <p className="mt-1 text-white">{user.manager?.name || 'N/A'}</p>
+                </Button>
               </div>
             )}
           </div>
