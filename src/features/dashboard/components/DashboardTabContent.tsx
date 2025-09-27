@@ -4,16 +4,12 @@ import { AllTickets } from '@/features/tickets/pages/AllTickets';
 import { CreateTicket } from '@/features/tickets/pages/CreateTicket';
 import { MyTickets } from '@/features/tickets/pages/MyTickets';
 import Analytics from '@/features/dashboard/pages/Analytics';
-import type { TabType, Ticket } from '@/types';
+import type { TabType } from '@/types';
 
 interface DashboardTabContentProps {
   currentTab: TabType;
   greeting: string;
   userName: string | null;
-  userTickets: Ticket[];
-  allTickets: Ticket[];
-  loading: boolean;
-  error: string | null;
   searchQuery: string;
   role: string | null;
 }
@@ -22,10 +18,6 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({
   currentTab,
   greeting,
   userName,
-  userTickets,
-  allTickets,
-  loading,
-  error,
   searchQuery,
   role,
 }) => {
@@ -42,12 +34,7 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({
             </p>
           </div>
           <div className="px-4 py-6 lg:px-6">
-            <DashboardContent
-              allTickets={allTickets}
-              userTickets={userTickets}
-              loading={loading}
-              error={error}
-            />
+            <DashboardContent role={role} />
           </div>
         </div>
       );
@@ -62,12 +49,7 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({
             <p className="text-muted-foreground">Administrative overview and controls</p>
           </div>
           <div className="px-4 py-6 lg:px-6">
-            <DashboardContent
-              userTickets={userTickets}
-              allTickets={allTickets}
-              loading={loading}
-              error={error}
-            />
+            <DashboardContent role={role} />
           </div>
         </div>
       );
@@ -79,7 +61,7 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({
             <p className="text-muted-foreground">Manage and track your support tickets</p>
           </div>
           <div className="p-4 lg:p-6">
-            <MyTickets tickets={userTickets} searchQuery={searchQuery} role={role} />
+            <MyTickets searchQuery={searchQuery} role={role} />
           </div>
         </div>
       );
@@ -91,7 +73,7 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({
             <p className="text-muted-foreground">View and manage all support tickets</p>
           </div>
           <div className="px-4 py-6 lg:px-6">
-            <AllTickets searchQuery={searchQuery} allTickets={allTickets} role={role} />
+            <AllTickets searchQuery={searchQuery} role={role} />
           </div>
         </div>
       );

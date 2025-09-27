@@ -1,3 +1,6 @@
+import { useEffect } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { activityInterval, getSupportUsers, getUserTickets, setUserStatusOnline } from '@/api/api';
 import {
   Card,
   CardContent,
@@ -5,62 +8,54 @@ import {
   CardHeader,
   CardTitle,
 } from '@/shared/components/ui/card';
-import { activityInterval, setUserStatusOnline } from '@/api/api';
-import { getSupportUsers, getUserTickets } from '@/api/api';
 import { IconClock, IconTicket, IconUser } from '@tabler/icons-react';
-import { useEffect, useState } from 'react';
 
 export default function ViewSupportStatus() {
-  const [supportAdminsNow, setSupportAdminsNow] = useState<number>(0);
-  const [totalAdmins, setTotalAdmins] = useState<number>(0);
-  const [createdTicketsToday, setCreatedTicketsToday] = useState<number>(0);
+  const { data: supportUsers } = useQuery({
+    queryKey: ['support-users'],
+    queryFn: getSupportUsers,
+    select: (adminList) => ({
+      online: adminList?.onlineCount ?? 0,
+      total: adminList?.totalCount ?? 0,
+    }),
+    refetchInterval: 60_000,
+    staleTime: 60_000,
+  });
+
+  const { data: ticketsTodayCount = 0 } = useQuery({
+    queryKey: ['tickets-today'],
+    queryFn: getUserTickets,
+    select: (tickets) => {
+      if (!Array.isArray(tickets)) {
+        return 0;
+      }
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      return tickets.filter((ticket) => {
+        const created = new Date(ticket.createdAt);
+        created.setHours(0, 0, 0, 0);
+        return created.getTime() === today.getTime();
+      }).length;
+    },
+    refetchInterval: 5 * 60_000,
+  });
+
+  const heartbeat = useMutation({ mutationFn: activityInterval });
+  const markOnline = useMutation({ mutationFn: setUserStatusOnline });
 
   useEffect(() => {
-    const fetchUserTicketsToday = async () => {
-      try {
-        const tickets = await getUserTickets();
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const todayTickets = tickets.filter((ticket) => {
-          const ticketDate = new Date(ticket.createdAt);
-          ticketDate.setHours(0, 0, 0, 0);
-          return ticketDate.getTime() === today.getTime();
-        });
-        setCreatedTicketsToday(todayTickets.length);
-      } catch (error) {
-        console.error("Failed to fetch user's tickets today:", error);
-      }
-    };
+    markOnline.mutate();
 
-    const fetchSupportAdmins = async () => {
-      try {
-        const response = await getSupportUsers();
-        setSupportAdminsNow(response.onlineCount || 0);
-        setTotalAdmins(response.totalCount || 0);
-      } catch (error) {
-        console.error('Failed to fetch support users:', error);
-      }
-    };
-
-    fetchUserTicketsToday();
-    fetchSupportAdmins();
-    setUserStatusOnline();
-
-    const activeInterval = setInterval(
-      () => {
-        activityInterval();
-      },
-      2 * 60 * 1000,
-    );
-
-    const supportAdminsInterval = setInterval(() => {
-      fetchSupportAdmins();
-    }, 30 * 1000);
+    const id = window.setInterval(() => {
+      heartbeat.mutate();
+    }, 2 * 60_000);
 
     return () => {
-      clearInterval(activeInterval);
-      clearInterval(supportAdminsInterval);
+      window.clearInterval(id);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -76,7 +71,7 @@ export default function ViewSupportStatus() {
             <span className="text-sm">Online Support</span>
           </div>
           <span className="text-sm font-medium">
-            {supportAdminsNow} / {totalAdmins} Available
+            {supportUsers?.online ?? 0} / {supportUsers?.total ?? 0} Available
           </span>
         </div>
         <div className="flex items-center justify-between">
@@ -84,7 +79,7 @@ export default function ViewSupportStatus() {
             <IconUser className="h-4 w-4 text-blue-500" />
             <span className="text-sm">Total Admins</span>
           </div>
-          <span className="text-sm font-medium">{totalAdmins}</span>
+          <span className="text-sm font-medium">{supportUsers?.total ?? 0}</span>
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -98,7 +93,7 @@ export default function ViewSupportStatus() {
             <IconTicket className="h-4 w-4 text-blue-500" />
             <span className="text-sm">Tickets Today</span>
           </div>
-          <span className="text-sm font-medium">{createdTicketsToday}</span>
+          <span className="text-sm font-medium">{ticketsTodayCount}</span>
         </div>
       </CardContent>
     </Card>
