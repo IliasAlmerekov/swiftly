@@ -1,3 +1,6 @@
+﻿import { useMemo } from 'react';
+import { getAllTickets } from '@/api/api';
+import { useQuery } from '@tanstack/react-query';
 import { Pie, PieChart } from 'recharts';
 import type { Ticket } from '@/types';
 
@@ -7,98 +10,139 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/shared/components/ui/chart';
-import { useEffect, useState } from 'react';
 
-const CHART_CONFIGS = {
-  total: {
-    label: 'Total Tickets',
-    color: 'var(--chart-2)',
-    fill: 'var(--chart-2)',
-  },
-  open: {
-    label: 'Open Tickets',
-    color: 'var(--chart-1)',
-    fill: 'var(--chart-1)',
-  },
-  'in-progress': {
-    label: 'In Progress Tickets',
-    color: 'var(--chart-6)',
-    fill: 'var(--chart-6)',
-  },
-  resolved: {
-    label: 'Resolved Tickets',
-    color: 'var(--chart-5)',
-    fill: 'var(--chart-5)',
-  },
-} as const;
-
-export type ChartType = keyof typeof CHART_CONFIGS;
+type TicketStatusVariant = 'total' | 'open' | 'inProgress' | 'resolved';
 
 interface TicketStatusChartProps {
-  allTickets?: Ticket[];
-  type: ChartType;
+  variant: TicketStatusVariant;
   showLabel?: boolean;
 }
 
-export function TicketStatusChart({ allTickets, type, showLabel = false }: TicketStatusChartProps) {
-  const [totalTickets, setTotalTickets] = useState<number>(0);
-  const [filteredTickets, setFilteredTickets] = useState<number>(0);
+export function TicketStatusChart({ variant, showLabel }: TicketStatusChartProps) {
+  const { data: ticketsSummary } = useQuery({
+    queryKey: ['all-tickets'],
+    queryFn: getAllTickets,
+    select: (tickets: Ticket[]) => ({
+      totalTickets: tickets.length ?? 0,
+      openTickets: tickets.filter((ticket) => ticket.status === 'open').length ?? 0,
+      inProgressTickets: tickets.filter((ticket) => ticket.status === 'in-progress').length ?? 0,
+      resolvedTickets: tickets.filter((ticket) => ticket.status === 'resolved').length ?? 0,
+    }),
+  });
 
-  useEffect(() => {
-    if (!allTickets) return;
+  const totalTickets = ticketsSummary?.totalTickets ?? 0;
+  const openTickets = ticketsSummary?.openTickets ?? 0;
+  const inProgressTickets = ticketsSummary?.inProgressTickets ?? 0;
+  const resolvedTickets = ticketsSummary?.resolvedTickets ?? 0;
 
-    const total = allTickets.length;
-    setTotalTickets(total);
-
-    if (type === 'total') {
-      setFilteredTickets(total);
-    } else {
-      const filtered = allTickets.filter((ticket) => ticket.status === type).length;
-      setFilteredTickets(filtered);
-    }
-  }, [allTickets, type]);
-
-  const config = CHART_CONFIGS[type];
-
-  const chartData =
-    type === 'total'
-      ? [
-          {
-            status: config.label,
-            count: totalTickets,
-            fill: config.fill,
-          },
-        ]
-      : totalTickets > 0
-        ? [
+  const { chartData, chartConfig } = useMemo<{
+    chartData: Array<{ status: string; label: string; count: number; fill: string }>;
+    chartConfig: ChartConfig;
+  }>(() => {
+    switch (variant) {
+      case 'open':
+        return {
+          chartData: [
             {
-              status: config.label,
-              count: filteredTickets,
-              fill: config.fill,
+              status: 'openTickets',
+              label: 'Open Tickets',
+              count: openTickets,
+              fill: 'var(--chart-1)',
             },
             {
-              status: 'Total Tickets',
-              count: totalTickets - filteredTickets,
+              status: 'otherTickets',
+              label: 'Total Tickets',
+              count: Math.max(totalTickets - openTickets, 0),
               fill: 'var(--chart-2)',
             },
-          ]
-        : [
-            {
-              status: 'No Data',
-              count: 1,
-              fill: 'var(--muted)',
+          ],
+          chartConfig: {
+            openTickets: {
+              label: 'Open Tickets',
+              color: 'var(--chart-1)',
             },
-          ];
+            otherTickets: {
+              label: 'Total Tickets',
+              color: 'var(--chart-2)',
+            },
+          } as ChartConfig,
+        };
+      case 'inProgress':
+        return {
+          chartData: [
+            {
+              status: 'inProgressTickets',
+              label: 'In Progress Tickets',
+              count: inProgressTickets,
+              fill: 'var(--chart-6)',
+            },
+            {
+              status: 'otherTickets',
+              label: 'Total Tickets',
+              count: Math.max(totalTickets - inProgressTickets, 0),
+              fill: 'var(--chart-2)',
+            },
+          ],
+          chartConfig: {
+            inProgressTickets: {
+              label: 'In Progress Tickets',
+              color: 'var(--chart-6)',
+            },
+            otherTickets: {
+              label: 'Total Tickets',
+              color: 'var(--chart-2)',
+            },
+          } as ChartConfig,
+        };
+      case 'resolved':
+        return {
+          chartData: [
+            {
+              status: 'resolvedTickets',
+              label: 'Resolved Tickets',
+              count: resolvedTickets,
+              fill: 'var(--chart-4)',
+            },
+            {
+              status: 'otherTickets',
+              label: 'Total Tickets',
+              count: Math.max(totalTickets - resolvedTickets, 0),
+              fill: 'var(--chart-2)',
+            },
+          ],
+          chartConfig: {
+            resolvedTickets: {
+              label: 'Resolved Tickets',
+              color: 'var(--chart-4)',
+            },
+            otherTickets: {
+              label: 'Total Tickets',
+              color: 'var(--chart-2)',
+            },
+          } as ChartConfig,
+        };
+      case 'total':
+      default:
+        return {
+          chartData: [
+            {
+              status: 'totalTickets',
+              label: 'Total Tickets',
+              count: totalTickets,
+              fill: 'var(--chart-2)',
+            },
+          ],
+          chartConfig: {
+            totalTickets: {
+              label: 'Total Tickets',
+              color: 'var(--chart-2)',
+            },
+          } as ChartConfig,
+        };
+    }
+  }, [inProgressTickets, openTickets, resolvedTickets, totalTickets, variant]);
 
-  const chartConfig = {
-    count: {
-      label: type === 'total' ? 'Total Tickets' : 'Tickets',
-    },
-    [type]: {
-      label: config.label,
-      color: config.color,
-    },
-  } satisfies ChartConfig;
+  const hasData = chartData.some((item) => item.count > 0);
 
   return (
     <ChartContainer
@@ -106,15 +150,15 @@ export function TicketStatusChart({ allTickets, type, showLabel = false }: Ticke
       className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square max-h-[250px] pb-0"
     >
       <PieChart>
-        <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+        <ChartTooltip content={<ChartTooltipContent hideLabel nameKey="status" />} />
         <Pie
           data={chartData}
           dataKey="count"
-          nameKey="status"
-          innerRadius={type === 'total' ? 0 : 30}
+          nameKey="label"
+          innerRadius={hasData && chartData.length > 1 ? 30 : 0}
           outerRadius={80}
-          stroke={type === 'total' ? 'none' : 'var(--background)'}
-          strokeWidth={type === 'total' ? 0 : 2}
+          stroke={hasData ? 'var(--background)' : 'none'}
+          strokeWidth={hasData ? 2 : 0}
           label={showLabel ? ({ value }) => `${value}` : undefined}
         />
       </PieChart>
@@ -122,18 +166,18 @@ export function TicketStatusChart({ allTickets, type, showLabel = false }: Ticke
   );
 }
 
-export function TotalTicketsChart({ allTickets }: { allTickets?: Ticket[] }) {
-  return <TicketStatusChart allTickets={allTickets} type="total" showLabel />;
+export function TotalTicketsChart() {
+  return <TicketStatusChart variant="total" showLabel />;
 }
 
-export function OpenTicketsChart({ allTickets }: { allTickets?: Ticket[] }) {
-  return <TicketStatusChart allTickets={allTickets} type="open" />;
+export function OpenTicketsChart() {
+  return <TicketStatusChart variant="open" showLabel />;
 }
 
-export function InProgressChart({ allTickets }: { allTickets?: Ticket[] }) {
-  return <TicketStatusChart allTickets={allTickets} type="in-progress" />;
+export function InProgressChart() {
+  return <TicketStatusChart variant="inProgress" showLabel />;
 }
 
-export function ResolvedChart({ allTickets }: { allTickets?: Ticket[] }) {
-  return <TicketStatusChart allTickets={allTickets} type="resolved" />;
+export function ResolvedChart() {
+  return <TicketStatusChart variant="resolved" showLabel />;
 }

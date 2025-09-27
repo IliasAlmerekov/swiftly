@@ -1,3 +1,6 @@
+import { useEffect } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { activityInterval, getSupportUsers, getUserTickets, setUserStatusOnline } from '@/api/api';
 import {
   Card,
   CardContent,
@@ -7,18 +10,54 @@ import {
 } from '@/shared/components/ui/card';
 import { IconClock, IconTicket, IconUser } from '@tabler/icons-react';
 
-interface ViewSupportStatusProps {
-  supportUsers?: number;
-  totalAdmins?: number;
-  ticketsToday?: number;
-  role?: string | null;
-}
+export default function ViewSupportStatus() {
+  const { data: supportUsers } = useQuery({
+    queryKey: ['support-users'],
+    queryFn: getSupportUsers,
+    select: (adminList) => ({
+      online: adminList?.onlineCount ?? 0,
+      total: adminList?.totalCount ?? 0,
+    }),
+    refetchInterval: 60_000,
+    staleTime: 60_000,
+  });
 
-export default function ViewSupportStatus({
-  supportUsers,
-  totalAdmins,
-  ticketsToday,
-}: ViewSupportStatusProps) {
+  const { data: ticketsTodayCount = 0 } = useQuery({
+    queryKey: ['tickets-today'],
+    queryFn: getUserTickets,
+    select: (tickets) => {
+      if (!Array.isArray(tickets)) {
+        return 0;
+      }
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      return tickets.filter((ticket) => {
+        const created = new Date(ticket.createdAt);
+        created.setHours(0, 0, 0, 0);
+        return created.getTime() === today.getTime();
+      }).length;
+    },
+    refetchInterval: 5 * 60_000,
+  });
+
+  const heartbeat = useMutation({ mutationFn: activityInterval });
+  const markOnline = useMutation({ mutationFn: setUserStatusOnline });
+
+  useEffect(() => {
+    markOnline.mutate();
+
+    const id = window.setInterval(() => {
+      heartbeat.mutate();
+    }, 2 * 60_000);
+
+    return () => {
+      window.clearInterval(id);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <Card>
       <CardHeader>
@@ -32,7 +71,7 @@ export default function ViewSupportStatus({
             <span className="text-sm">Online Support</span>
           </div>
           <span className="text-sm font-medium">
-            {supportUsers} / {totalAdmins} Available
+            {supportUsers?.online ?? 0} / {supportUsers?.total ?? 0} Available
           </span>
         </div>
         <div className="flex items-center justify-between">
@@ -40,7 +79,7 @@ export default function ViewSupportStatus({
             <IconUser className="h-4 w-4 text-blue-500" />
             <span className="text-sm">Total Admins</span>
           </div>
-          <span className="text-sm font-medium">{totalAdmins}</span>
+          <span className="text-sm font-medium">{supportUsers?.total ?? 0}</span>
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -54,7 +93,7 @@ export default function ViewSupportStatus({
             <IconTicket className="h-4 w-4 text-blue-500" />
             <span className="text-sm">Tickets Today</span>
           </div>
-          <span className="text-sm font-medium">{ticketsToday}</span>
+          <span className="text-sm font-medium">{ticketsTodayCount}</span>
         </div>
       </CardContent>
     </Card>

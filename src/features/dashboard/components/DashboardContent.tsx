@@ -9,25 +9,13 @@ import { HardwareChart } from './charts/HardwareChart';
 import { UserTicketStats } from './charts/UserTicketStats';
 
 interface DashboardContentProps {
-  allTickets?: Ticket[];
   userTickets?: Ticket[];
-  supportUsers?: number;
-  totalAdmins?: number;
-  ticketsToday?: number;
   loading?: boolean;
   error?: string | null;
   role?: string | null;
 }
 
-export function DashboardContent({
-  userTickets,
-  allTickets,
-  supportUsers,
-  totalAdmins,
-  ticketsToday,
-  loading,
-  error,
-}: DashboardContentProps) {
+export function DashboardContent({ userTickets, loading, error }: DashboardContentProps) {
   const { role } = useAuth();
 
   return (
@@ -43,11 +31,7 @@ export function DashboardContent({
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {role === 'user' ? (
-            <UserTicketCard userTickets={userTickets} />
-          ) : (
-            <AdminTicketCard allTickets={allTickets} />
-          )}
+          {role === 'user' ? <UserTicketCard /> : <AdminTicketCard />}
         </div>
       )}
       {role !== 'admin' ? <RecentTickets userTickets={userTickets} /> : <TicketsofThisWeek />}
@@ -55,11 +39,7 @@ export function DashboardContent({
 
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-2">
-        <ViewSupportStatus
-          supportUsers={supportUsers}
-          totalAdmins={totalAdmins}
-          ticketsToday={ticketsToday}
-        />
+        <ViewSupportStatus />
         {role === 'admin' ? <HardwareChart /> : <UserTicketStats />}
       </div>
     </div>

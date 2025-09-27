@@ -14,11 +14,7 @@ interface AdminTicketCardProps {
   component: React.ComponentType<{ allTickets?: Ticket[] }>;
 }
 
-interface AllTicketProps {
-  allTickets?: Ticket[];
-}
-
-export default function AdminTicketCard({ allTickets }: AllTicketProps) {
+export default function AdminTicketCard() {
   // Admin charts configuration
   const adminChartsData: AdminTicketCardProps[] = [
     {
@@ -51,7 +47,7 @@ export default function AdminTicketCard({ allTickets }: AllTicketProps) {
             <chart.icon className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <chart.component allTickets={allTickets} />
+            <chart.component />
           </CardContent>
         </Card>
       ))}
