@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2025-09-27
+
+- Started rewriting the project to use React Query for data fetching and caching
+- Refactored the ViewSupportStatus.tsx component: now uses React Query, moved state management from parent to child components, and fixed excessive rerendering.
+- Performed extensive refactoring across the codebase to optimize performance and maintainability.
+
 ## [1.0.4] - 2025-09-26
 
 ## Fixed
