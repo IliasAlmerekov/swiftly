@@ -12,9 +12,6 @@ interface DashboardTabContentProps {
   userName: string | null;
   userTickets: Ticket[];
   allTickets: Ticket[];
-  supportUsers: number;
-  totalAdmins: number;
-  ticketsToday: number;
   loading: boolean;
   error: string | null;
   searchQuery: string;
@@ -27,9 +24,6 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({
   userName,
   userTickets,
   allTickets,
-  supportUsers,
-  totalAdmins,
-  ticketsToday,
   loading,
   error,
   searchQuery,
@@ -51,9 +45,6 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({
             <DashboardContent
               allTickets={allTickets}
               userTickets={userTickets}
-              supportUsers={supportUsers}
-              totalAdmins={totalAdmins}
-              ticketsToday={ticketsToday}
               loading={loading}
               error={error}
             />
@@ -74,9 +65,6 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({
             <DashboardContent
               userTickets={userTickets}
               allTickets={allTickets}
-              supportUsers={supportUsers}
-              totalAdmins={totalAdmins}
-              ticketsToday={ticketsToday}
               loading={loading}
               error={error}
             />

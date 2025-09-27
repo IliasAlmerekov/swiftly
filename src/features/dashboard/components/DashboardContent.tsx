@@ -11,9 +11,6 @@ import { UserTicketStats } from './charts/UserTicketStats';
 interface DashboardContentProps {
   allTickets?: Ticket[];
   userTickets?: Ticket[];
-  supportUsers?: number;
-  totalAdmins?: number;
-  ticketsToday?: number;
   loading?: boolean;
   error?: string | null;
   role?: string | null;
@@ -22,9 +19,6 @@ interface DashboardContentProps {
 export function DashboardContent({
   userTickets,
   allTickets,
-  supportUsers,
-  totalAdmins,
-  ticketsToday,
   loading,
   error,
 }: DashboardContentProps) {
@@ -55,11 +49,7 @@ export function DashboardContent({
 
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-2">
-        <ViewSupportStatus
-          supportUsers={supportUsers}
-          totalAdmins={totalAdmins}
-          ticketsToday={ticketsToday}
-        />
+        <ViewSupportStatus />
         {role === 'admin' ? <HardwareChart /> : <UserTicketStats />}
       </div>
     </div>
