@@ -260,12 +260,12 @@ const AiOverlay: React.FC<AIAssistantOverlayProps> = ({
                 <img src={sendIcon} alt="Send" className="h-5 w-5" />
               </button>
             </div>
-
-            {canCreateTicket && (
+            {canCreateTicket || (
               <div className="text-center">
                 <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">
-                  Es tut mir wirklich leid, dass ich hier nicht weiterhelfen konnte. Dafür sind aber
-                  meine menschlichen Kollegen da
+                  Bitte erstellen Sie ein Ticket, falls der AI-Assistent Ihnen nicht weiterhelfen
+                  konnte. So können wir uns auf komplexe Probleme konzentrieren. Vielen Dank für Ihr
+                  Verständnis! Ihr ITO-Team
                 </p>
                 <button
                   onClick={handleCreateTicket}

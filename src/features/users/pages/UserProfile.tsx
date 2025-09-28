@@ -60,10 +60,6 @@ export default function UserProfile({ isViewingOtherUser = false }: UserProfileP
         // If viewing another user and we have a userId param, use it
         if (isViewingOtherUser && userId) {
           // Check if current user is admin
-          if (currentUserData.role !== 'admin') {
-            setError('Access denied. Admin privileges required.');
-            return;
-          }
           userData = await getUserProfileById(userId);
         } else {
           // Otherwise, get current user's profile

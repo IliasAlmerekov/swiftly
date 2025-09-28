@@ -1,20 +1,25 @@
-import type { Ticket } from '@/types';
 import { TicketTable } from '@/features/tickets/components/TicketTable';
 import { TicketSearchBar } from '@/features/tickets/components/TicketSearchBar';
 import { TicketStats } from '@/features/tickets/components/TicketStats';
 import { useTicketFilter } from '@/shared/hooks/useTicketFilter';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { useAuth } from '@/shared/hooks/useAuth';
+import { useQuery } from '@tanstack/react-query';
+import { getAllTickets } from '@/api/api';
 
-interface AllTicketsProps {
-  allTickets?: Ticket[];
-  searchQuery?: string;
-  role?: string | null;
-}
-
-export function AllTickets({ searchQuery = '', allTickets = [], role }: AllTicketsProps) {
+export function AllTickets() {
   const navigate = useNavigate();
+  const [searchQuery] = useState<string>('');
   const [currentSearchQuery, setCurrentSearchQuery] = useState(searchQuery);
+  const { role } = useAuth();
+
+  // fetch all tickets
+
+  const { data: allTickets = [] } = useQuery({
+    queryKey: ['all-tickets'],
+    queryFn: getAllTickets,
+  });
 
   const filteredTickets = useTicketFilter({
     tickets: allTickets,

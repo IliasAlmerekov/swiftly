@@ -1,20 +1,27 @@
-import type { Ticket } from '@/types';
 import { useNavigate } from 'react-router-dom';
 import { TicketTable } from '@/features/tickets/components/TicketTable';
 import { TicketSearchBar } from '@/features/tickets/components/TicketSearchBar';
 import { useTicketFilter } from '@/shared/hooks/useTicketFilter';
 import { useState } from 'react';
+import { useAuth } from '@/shared/hooks/useAuth';
+import { useQuery } from '@tanstack/react-query';
+import { getUserTickets } from '@/api/api';
 
 interface MyTicketsProps {
-  searchQuery?: string;
-  tickets?: Ticket[];
-  role?: string | null;
   userId?: string;
 }
 
-export function MyTickets({ searchQuery = '', tickets = [], role, userId }: MyTicketsProps) {
+export function MyTickets({ userId }: MyTicketsProps) {
+  const [searchQuery] = useState('');
   const navigate = useNavigate();
   const [currentSearchQuery, setCurrentSearchQuery] = useState(searchQuery);
+  const { role } = useAuth();
+
+  // fetch user's tickets
+  const { data: tickets = [], isLoading } = useQuery({
+    queryKey: ['user-tickets', userId],
+    queryFn: getUserTickets,
+  });
 
   const filteredTickets = useTicketFilter({
     tickets,
@@ -30,6 +37,8 @@ export function MyTickets({ searchQuery = '', tickets = [], role, userId }: MyTi
   const handleCreateTicket = () => {
     navigate('/dashboard?tab=create-ticket');
   };
+
+  if (isLoading) return <div>Loading...</div>;
 
   return (
     <div className="space-y-6">
