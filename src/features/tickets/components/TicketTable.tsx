@@ -11,6 +11,7 @@ import { getPriorityColor, getStatusColor } from '@/features/tickets/utils/ticke
 import type { MouseEvent } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 import useTicketStatus from '@/shared/hooks/useTicketStatus';
+import { useAuth } from '@/shared/hooks/useAuth';
 
 interface TicketRowProps {
   ticket: Ticket;
@@ -26,7 +27,7 @@ function TicketRow({ ticket, onTicketClick, onUserClick, role }: TicketRowProps)
   const ownerAvatarUrl = ticket.owner?.avatar?.url;
   const ownerInitial = ownerName.charAt(0).toUpperCase() || '?';
 
-  const handleOwnerClick = (event: MouseEvent<HTMLAnchorElement>) => {
+  const handleOwnerClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
 
     if (!ownerId) {
@@ -40,9 +41,12 @@ function TicketRow({ ticket, onTicketClick, onUserClick, role }: TicketRowProps)
     <tr className={`hover:bg-muted/50 border-b ${className}`}>
       <td className="p-3 font-mono text-sm">{ticket._id.slice(0, 8)}</td>
       <td className="max-w-xs p-3">
-        <a href="" onClick={() => onTicketClick?.(ticket._id)}>
+        <button
+          onClick={() => onTicketClick?.(ticket._id)}
+          className="cursor-pointer text-left font-medium hover:underline"
+        >
           {ticket.title}
-        </a>
+        </button>
       </td>
       <td className="max-w-xs p-3">
         <div className="truncate" title={ownerName}>
@@ -52,9 +56,9 @@ function TicketRow({ ticket, onTicketClick, onUserClick, role }: TicketRowProps)
           </Avatar>
           {role === 'admin' && ownerId ? (
             <span className="font-medium">
-              <a href="" onClick={handleOwnerClick}>
+              <button onClick={handleOwnerClick} className="cursor-pointer hover:underline">
                 {ownerName}
-              </a>
+              </button>
             </span>
           ) : (
             <span>{ownerName}</span>
@@ -87,7 +91,12 @@ interface TicketTableProps {
   description?: string;
   onTicketClick?: (ticketId: string) => void;
   onUserClick?: (_id: string) => void;
-  role?: string | null;
+  emptyState?: {
+    title: string;
+    description?: string;
+    actionLabel?: string;
+    onAction?: () => void;
+  };
 }
 
 export function TicketTable({
@@ -96,8 +105,8 @@ export function TicketTable({
   description,
   onTicketClick,
   onUserClick,
-  role,
 }: TicketTableProps) {
+  const { role } = useAuth();
   const tableHeaders = [
     { title: 'Ticket ID', key: 'id' },
     { title: 'Title', key: 'title' },

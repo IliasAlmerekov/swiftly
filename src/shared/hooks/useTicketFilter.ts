@@ -33,7 +33,8 @@ export function useTicketFilter({
           ticket._id?.toLowerCase().includes(query) ||
           ticket.assignedTo?.name?.toLowerCase().includes(query) ||
           ticket.createdBy?.name?.toLowerCase().includes(query) ||
-          ticket.category?.toLowerCase().includes(query),
+          ticket.category?.toLowerCase().includes(query) ||
+          ticket.owner?.name?.toLowerCase().includes(query),
       );
     }
 

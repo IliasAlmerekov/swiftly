@@ -22,9 +22,11 @@ import { useNavigate } from 'react-router-dom';
 import { createTicket } from '@/api/api';
 import AiOverlay from '@/features/tickets/components/AiOverlay';
 import ConfirmOverlay from '@/features/tickets/components/ConfirmOverlay';
+import { useAuth } from '@/shared/hooks/useAuth';
 
-export function CreateTicket({ role }: { role?: string | null }) {
+export function CreateTicket() {
   const navigate = useNavigate();
+  const { role } = useAuth();
 
   // Zustand für Ticketdaten initialisieren
   const [ticketData, setTicketData] = useState<UpdateTicketFormData>({

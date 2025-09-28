@@ -51,6 +51,7 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
     }
 
     handleUserClick(selectedManagerId);
+    window.location.reload();
   };
 
   return (

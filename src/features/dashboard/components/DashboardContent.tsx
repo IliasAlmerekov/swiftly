@@ -12,7 +12,6 @@ interface DashboardContentProps {
   userTickets?: Ticket[];
   loading?: boolean;
   error?: string | null;
-  role?: string | null;
 }
 
 export function DashboardContent({ userTickets, loading, error }: DashboardContentProps) {

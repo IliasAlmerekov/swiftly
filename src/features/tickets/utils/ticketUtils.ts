@@ -1,11 +1,11 @@
 export const getPriorityColor = (priority: string) => {
   switch (priority.toLowerCase()) {
     case 'high':
-      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+      return 'bg-[var(--destructive)] text-white dark:bg-[var(--destructive)] dark:text-white';
     case 'medium':
-      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
+      return 'bg-[var(--chart-5)] text-white dark:bg-[var(--chart-5)] dark:text-white';
     case 'low':
-      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+      return 'bg-[var(--chart-2)] text-white dark:bg-[var(--chart-2)] dark:text-white';
     default:
       return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
   }
@@ -14,12 +14,11 @@ export const getPriorityColor = (priority: string) => {
 export const getStatusColor = (status: string) => {
   switch (status.toLowerCase()) {
     case 'open':
-      return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-    case 'in progress':
+      return 'bg-[var(--chart-1)] text-white dark:bg-[var(--chart-1)] dark:text-white';
     case 'in-progress':
-      return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300';
+      return 'bg-[var(--chart-6)] text-white dark:bg-[var(--chart-6)] dark:text-white';
     case 'resolved':
-      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+      return 'bg-[var(--chart-5)] text-white dark:bg-[var(--chart-10)] dark:text-white';
     default:
       return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
   }

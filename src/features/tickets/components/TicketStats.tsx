@@ -1,43 +1,48 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import type { Ticket } from '@/types';
+import { useMemo } from 'react';
 
 interface TicketStatsProps {
   tickets: Ticket[];
 }
 
+type Counters = Record<Ticket['status'], number>;
+
 export function TicketStats({ tickets }: TicketStatsProps) {
-  const openCount = tickets.filter((t) => t.status === 'open').length;
-  const inProgressCount = tickets.filter((t) => t.status === 'in-progress').length;
-  const resolvedCount = tickets.filter((t) => t.status === 'resolved').length;
+  const counts = useMemo(() => {
+    const initial: Counters = { open: 0, 'in-progress': 0, resolved: 0, closed: 0 };
+    for (const ticket of tickets ?? []) {
+      if (ticket.status in initial) initial[ticket.status as Ticket['status']] += 1;
+    }
+    return initial;
+  }, [tickets]);
 
   return (
-    <div className="grid gap-4 md:grid-cols-3">
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">Open Tickets</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{openCount}</div>
-        </CardContent>
-      </Card>
+    <section
+      aria-label="Ticket statistics"
+      aria-live="polite"
+      className="grid gap-4 md:grid-cols-3"
+    >
+      <StatCard title="Open Tickets" value={counts.open} />
+      <StatCard title="In Progress" value={counts['in-progress']} />
+      <StatCard title="Resolved" value={counts.resolved} />
+    </section>
+  );
+}
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">In Progress</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{inProgressCount}</div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">Resolved</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{resolvedCount}</div>
-        </CardContent>
-      </Card>
-    </div>
+function StatCard({ title, value }: { title: string; value: number }) {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle>
+          <h3 className="text-sm font-medium">{title}</h3>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold" aria-live="polite" aria-atomic="true">
+          {value}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
