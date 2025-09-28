@@ -11,6 +11,7 @@ import { getPriorityColor, getStatusColor } from '@/features/tickets/utils/ticke
 import type { MouseEvent } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 import useTicketStatus from '@/shared/hooks/useTicketStatus';
+import { useAuth } from '@/shared/hooks/useAuth';
 
 interface TicketRowProps {
   ticket: Ticket;
@@ -90,7 +91,12 @@ interface TicketTableProps {
   description?: string;
   onTicketClick?: (ticketId: string) => void;
   onUserClick?: (_id: string) => void;
-  role?: string | null;
+  emptyState?: {
+    title: string;
+    description?: string;
+    actionLabel?: string;
+    onAction?: () => void;
+  };
 }
 
 export function TicketTable({
@@ -99,8 +105,8 @@ export function TicketTable({
   description,
   onTicketClick,
   onUserClick,
-  role,
 }: TicketTableProps) {
+  const { role } = useAuth();
   const tableHeaders = [
     { title: 'Ticket ID', key: 'id' },
     { title: 'Title', key: 'title' },
