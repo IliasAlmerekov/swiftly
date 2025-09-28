@@ -1,7 +1,6 @@
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
-import LogoWhite from '../../../assets/logos.png';
 import { cn } from '@/shared/lib/utils';
 import { Card, CardContent } from '@/shared/components/ui/card';
 import { useLogin } from '../hooks/useLogin';
@@ -28,14 +27,14 @@ export default function LoginForm({
   } = useLogin({ onLoginSuccess });
 
   return (
-    <div className={cn('flex flex-col gap-6', className)} {...props}>
-      <Card className="overflow-hidden p-0">
-        <CardContent className="grid p-0 md:grid-cols-2">
-          <form id="login-form" className="p-8 md:p-12" onSubmit={handleSubmit}>
+    <div className={cn('flex min-h-screen items-center justify-center', className)} {...props}>
+      <Card className="w-full max-w-md p-0 shadow-lg">
+        <CardContent className="p-10">
+          <form id="login-form" className="space-y-8" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold">Welcome back</h1>
-                <p className="text-muted-foreground text-balance">
+                <h1 className="text-3xl font-bold">Welcome back</h1>
+                <p className="text-muted-foreground text-lg text-balance">
                   Login to your account to continue
                 </p>
               </div>
@@ -50,7 +49,7 @@ export default function LoginForm({
                   required
                   autoComplete="username"
                   value={email}
-                  className="h-10"
+                  className="h-12 text-lg"
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
@@ -70,7 +69,7 @@ export default function LoginForm({
                   required
                   autoComplete="current-password"
                   value={password}
-                  className="h-10"
+                  className="h-12 text-lg"
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
@@ -88,7 +87,7 @@ export default function LoginForm({
             <Button
               type="submit"
               form="login-form"
-              className="text-md mt-8 w-full"
+              className="text-md mt-8 h-12 w-full text-lg"
               disabled={loading}
             >
               {loading ? 'Loading...' : 'Login'}
@@ -103,14 +102,6 @@ export default function LoginForm({
               </a>
             </div>
           </form>
-
-          <div className="bg-muted relative hidden md:block">
-            <img
-              src={LogoWhite}
-              alt="Logo"
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-          </div>
         </CardContent>
       </Card>
     </div>
