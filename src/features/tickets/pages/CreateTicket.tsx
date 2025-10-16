@@ -88,7 +88,7 @@ export function CreateTicket() {
       // Erfolgsmeldung nach 3 Sekunden zurücksetzen
       setTimeout(() => {
         setSuccess(false);
-      }, 3000);
+      }, 2000);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create ticket';
       setError(errorMessage);
@@ -99,12 +99,6 @@ export function CreateTicket() {
 
   const handleOverlayClose = (): void => {
     setShowOverlay(false);
-  };
-
-  // AI Assistant Handlers
-  const handleAIAssistantClose = (): void => {
-    setShowAIAssistant(false);
-    setCanCreateTicket(true);
   };
 
   const handleAllowCreateTicket = (): void => {
@@ -119,7 +113,6 @@ export function CreateTicket() {
     <div className="space-y-6">
       <AiOverlay
         isOpen={showAIAssistant}
-        onClose={handleAIAssistantClose}
         onAllowCreateTicket={handleAllowCreateTicket}
         onNavigate={handleToNavigate}
       />

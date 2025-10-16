@@ -46,14 +46,12 @@ const formatAIMessage = (content: string) => {
 
 interface AIAssistantOverlayProps {
   isOpen: boolean;
-  onClose: () => void;
   onAllowCreateTicket: () => void;
   onNavigate: () => void;
 }
 
 const AiOverlay: React.FC<AIAssistantOverlayProps> = ({
   isOpen,
-  onClose,
   onAllowCreateTicket,
   onNavigate,
 }) => {
@@ -61,7 +59,6 @@ const AiOverlay: React.FC<AIAssistantOverlayProps> = ({
   const [currentMessage, setCurrentMessage] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [sessionId] = useState<string>(() => `session_${Date.now()}_${Math.random()}`);
-  const [canCreateTicket, setCanCreateTicket] = useState<boolean>(false);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -109,7 +106,6 @@ const AiOverlay: React.FC<AIAssistantOverlayProps> = ({
       const apiRequest = { ...chatRequest, sessionId };
 
       const response = await sendChatMessage(apiRequest as ChatRequest);
-      console.log('AI Response received:', response);
 
       const aiMessage: ChatRequest = {
         role: 'assistant',
@@ -138,7 +134,15 @@ const AiOverlay: React.FC<AIAssistantOverlayProps> = ({
         ticketPhrases.test(aiText) ||
         escalationHints.test(aiText)
       ) {
-        setCanCreateTicket(true);
+        const errorAiMessage: ChatRequest = {
+          role: 'assistant',
+          message:
+            'Entschuldigung, ich kann Ihnen nicht direkt helfen. Bitte erstellen Sie ein Ticket.',
+          content:
+            'Entschuldigung, ich kann Ihnen nicht direkt helfen. Bitte erstellen Sie ein Ticket.',
+          timestamp: new Date().toISOString(),
+        };
+        setMessage((prev) => [...prev, errorAiMessage]);
       }
     } catch (error) {
       console.error('API Error:', error);
@@ -151,17 +155,10 @@ const AiOverlay: React.FC<AIAssistantOverlayProps> = ({
         timestamp: new Date().toISOString(),
       };
       setMessage((prev) => [...prev, errorMessage]);
-      setCanCreateTicket(true);
     } finally {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (message.length >= 5) {
-      setCanCreateTicket(true);
-    }
-  }, [message.length]);
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -172,7 +169,6 @@ const AiOverlay: React.FC<AIAssistantOverlayProps> = ({
 
   const handleCreateTicket = () => {
     onAllowCreateTicket();
-    onClose();
   };
 
   if (!isOpen) return null;
@@ -260,21 +256,19 @@ const AiOverlay: React.FC<AIAssistantOverlayProps> = ({
                 <img src={sendIcon} alt="Send" className="h-5 w-5" />
               </button>
             </div>
-            {canCreateTicket || (
-              <div className="text-center">
-                <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">
-                  Bitte erstellen Sie ein Ticket, falls der AI-Assistent Ihnen nicht weiterhelfen
-                  konnte. So können wir uns auf komplexe Probleme konzentrieren. Vielen Dank für Ihr
-                  Verständnis! Ihr ITO-Team
-                </p>
-                <button
-                  onClick={handleCreateTicket}
-                  className="w-full rounded-lg bg-green-600 px-4 py-3 font-medium text-white transition-colors hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-gray-900"
-                >
-                  Create Ticket
-                </button>
-              </div>
-            )}
+            <div className="text-center">
+              <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">
+                Bitte erstellen Sie ein Ticket, falls der AI-Assistent Ihnen nicht weiterhelfen
+                konnte. So können wir uns auf komplexe Probleme konzentrieren. Vielen Dank für Ihr
+                Verständnis! Ihr ITO-Team
+              </p>
+              <button
+                onClick={handleCreateTicket}
+                className="w-full rounded-lg bg-green-600 px-4 py-3 font-medium text-white transition-colors hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-gray-900"
+              >
+                Create Ticket
+              </button>
+            </div>
           </div>
         </div>
       </div>
