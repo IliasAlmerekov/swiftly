@@ -1,4 +1,4 @@
-import { sendChatMessage } from '@/api/api';
+import { sendChatMessage } from '@/api/ai';
 import type { ChatRequest, AIResponse } from '@/types';
 import React, { useEffect, useState } from 'react';
 import { Bot } from 'lucide-react';
@@ -121,18 +121,22 @@ const AiOverlay: React.FC<AIAssistantOverlayProps> = ({
         shouldCreateTicket?: boolean;
       };
       const aiType = responseData.type;
-      const aiText = (responseData.response || '').toLowerCase();
+      const aiText = (response.data.message || responseData.response || '').toLowerCase();
       const explicitFlag = responseData.shouldCreateTicket === true;
       const escalationType = aiType === 'escalation_required';
       const ticketPhrases =
         /(ticket erstellen|create ticket|support[- ]?ticket|technicker|administrator|it[- ]?support|admin)/i;
+      const ticketRequestPhrases =
+        /((bitte|please).{0,40}ticket|ticket.{0,40}(erstellen|create)|erstellen\s+(?:sie\s+)?(?:ein\s+)?ticket|helpdesk[- ]?formular|formular ausf(ü|u)llen|1st level support|first level support|support übernimmt|helpdesk-formular|helpdeskformular)/i;
       const escalationHints =
         /(manuelle prüfung|berechtigung|sensible|sensitive|kundendaten|personenbezogene|personal data|privat|private|rechtliche|legal|datenschutz|data protection|client data)/i;
+      const aiAlreadyRequestsTicket = ticketRequestPhrases.test(aiText);
       if (
-        explicitFlag ||
-        escalationType ||
-        ticketPhrases.test(aiText) ||
-        escalationHints.test(aiText)
+        (explicitFlag ||
+          escalationType ||
+          ticketPhrases.test(aiText) ||
+          escalationHints.test(aiText)) &&
+        !aiAlreadyRequestsTicket
       ) {
         const errorAiMessage: ChatRequest = {
           role: 'assistant',

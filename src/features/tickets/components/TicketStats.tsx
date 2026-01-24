@@ -21,11 +21,12 @@ export function TicketStats({ tickets }: TicketStatsProps) {
     <section
       aria-label="Ticket statistics"
       aria-live="polite"
-      className="grid gap-4 md:grid-cols-3"
+      className="grid gap-4 md:grid-cols-4"
     >
       <StatCard title="Open Tickets" value={counts.open} />
       <StatCard title="In Progress" value={counts['in-progress']} />
       <StatCard title="Resolved" value={counts.resolved} />
+      <StatCard title="Closed" value={counts.closed} />
     </section>
   );
 }

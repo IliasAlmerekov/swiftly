@@ -5,13 +5,16 @@ import { useTicketFilter } from '@/shared/hooks/useTicketFilter';
 import { useNavigate } from 'react-router-dom';
 import { useCallback, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getAllTickets } from '@/api/api';
+import { getAllTickets } from '@/api/tickets';
 import type { Ticket } from '@/types';
 import { Skeleton } from '@/shared/components/ui/skeleton';
+import { useAuth } from '@/shared/hooks/useAuth';
 
 export function AllTickets() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const { role } = useAuth();
+  const isStaff = role === 'admin' || role === 'support1';
 
   // fetch all tickets
 
@@ -26,6 +29,7 @@ export function AllTickets() {
     staleTime: 30_000, // 30 seconds
     gcTime: 5 * 60_000, // 5 minutes
     retry: 1, // Retry once on failure
+    enabled: isStaff,
   });
 
   const filteredTickets = useTicketFilter({
@@ -50,9 +54,20 @@ export function AllTickets() {
     return `${filteredTickets.length} ticket(s) found${suffix}`;
   }, [filteredTickets.length, searchQuery]);
 
+  if (!isStaff) {
+    return (
+      <div className="space-y-6">
+        <div role="alert" className="border-destructive rounded-xl border p-4">
+          <p className="font-medium">Access restricted</p>
+          <p className="text-sm opacity-80">You do not have permission to view all tickets.</p>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
-      <div className='aria-busy="true" aria-live="polite" space-y-6'>
+      <div className="space-y-6" aria-busy="true" aria-live="polite">
         <TicketSearchBar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -100,7 +115,7 @@ export function AllTickets() {
         onTicketClick={handleTicketClick}
         onUserClick={handleUserClick}
         emptyState={{
-          title: searchQuery ? 'No tresults' : 'No tickets yet',
+          title: searchQuery ? 'No results' : 'No tickets yet',
           description: searchQuery ? 'Try a different query.' : 'Create your first ticket.',
           actionLabel: 'Create Ticket',
           onAction: handleCreateTicket,

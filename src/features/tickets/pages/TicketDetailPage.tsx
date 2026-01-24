@@ -1,4 +1,6 @@
-import { addComment, getAdminUsers, getTicketById, updateTicket } from '@/api/api';
+import { getAdminUsers } from '@/api/auth';
+import { addComment, getTicketById, updateTicket } from '@/api/tickets';
+import { useAuthContext } from '@/shared/context/AuthContext';
 import { Button } from '@/shared/components/ui/button';
 import { Textarea } from '@/shared/components/ui/textarea';
 import { Input } from '@/shared/components/ui/input';
@@ -14,7 +16,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui
 import { Badge } from '@/shared/components/ui/badge';
 import { Separator } from '@/shared/components/ui/separator';
 import type { Ticket, UpdateTicketFormData, User } from '@/types';
-import { jwtDecode } from 'jwt-decode';
 import { TicketIcon, ChevronDown } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -27,31 +28,36 @@ interface EditingTicketState {
   title: string;
   description: string;
   priority: Ticket['priority'];
+  category: string;
 }
 
 const INITIAL_EDITED_TICKET: EditingTicketState = {
   title: '',
   description: '',
   priority: 'low',
+  category: '',
 };
-
-interface DecodedToken {
-  id: string;
-  email: string;
-  role: string;
-  name: string;
-}
 
 const TicketDetailPage: React.FC = () => {
   const { ticketId } = useParams<{ ticketId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuthContext();
 
   // State
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [comment, setComment] = useState<string>('');
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const currentUser: User | null = user
+    ? {
+        _id: user.id,
+        email: user.email,
+        role: user.role,
+        name: user.name,
+        createdAt: '',
+        updatedAt: '',
+      }
+    : null;
   const [adminUsers, setAdminUsers] = useState<User[]>([]);
 
   // UI State
@@ -59,35 +65,6 @@ const TicketDetailPage: React.FC = () => {
   const [assignDropDownOpen, setAssignDropDownOpen] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editedTicket, setEditedTicket] = useState<EditingTicketState>(INITIAL_EDITED_TICKET);
-
-  // Helper functions for user authentication
-  const getUserFromToken = (): User | null => {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-
-    if (token) {
-      try {
-        const decoded = jwtDecode<DecodedToken>(token);
-        return {
-          _id: decoded.id,
-          email: decoded.email,
-          role: decoded.role as 'user' | 'admin',
-          name: decoded.name,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-      } catch (err) {
-        console.error('Invalid token', err);
-        return null;
-      }
-    }
-    return null;
-  };
-
-  // Load user data from token
-  useEffect(() => {
-    const userData = getUserFromToken();
-    setCurrentUser(userData);
-  }, []);
 
   // Load ticket data
   useEffect(() => {
@@ -104,7 +81,8 @@ const TicketDetailPage: React.FC = () => {
         setEditedTicket({
           title: ticketData.title,
           description: ticketData.description,
-          priority: ticketData.priority,
+          priority: ticketData.priority ?? 'low',
+          category: ticketData.category ?? '',
         });
       } catch (err) {
         setError('Failed to load ticket');
@@ -120,7 +98,7 @@ const TicketDetailPage: React.FC = () => {
   // Load admin users for assignment
   useEffect(() => {
     const loadAdminUsers = async () => {
-      if (currentUser?.role === 'admin') {
+      if (currentUser?.role === 'admin' || currentUser?.role === 'support1') {
         try {
           const response = await getAdminUsers();
           setAdminUsers(response.users);
@@ -131,10 +109,10 @@ const TicketDetailPage: React.FC = () => {
     };
 
     loadAdminUsers();
-  }, [currentUser]);
+  }, [currentUser?.role]);
 
-  const isAdmin = (): boolean => {
-    return currentUser?.role === 'admin';
+  const isStaff = (): boolean => {
+    return currentUser?.role === 'admin' || currentUser?.role === 'support1';
   };
 
   const updateTicketAndRefresh = async (
@@ -181,7 +159,15 @@ const TicketDetailPage: React.FC = () => {
 
   const handleEditSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const success = await updateTicketAndRefresh(editedTicket, 'Failed to update ticket');
+    const updatePayload: Partial<UpdateTicketFormData> = {
+      title: editedTicket.title,
+      description: editedTicket.description,
+    };
+    if (isStaff()) {
+      updatePayload.priority = editedTicket.priority;
+      updatePayload.category = editedTicket.category?.trim() || undefined;
+    }
+    const success = await updateTicketAndRefresh(updatePayload, 'Failed to update ticket');
     if (success) {
       setIsEditing(false);
     }
@@ -206,6 +192,8 @@ const TicketDetailPage: React.FC = () => {
   const goBack = (): void => {
     navigate(-1);
   };
+
+  const priorityLabel = ticket?.priority ?? 'untriaged';
 
   if (loading) {
     return (
@@ -240,7 +228,7 @@ const TicketDetailPage: React.FC = () => {
             <h1 className="text-2xl font-bold">Ticket {ticket._id.substring(0, 8)}</h1>
           </div>
           <Button variant="outline" onClick={goBack}>
-            ← Back
+            &larr; Back
           </Button>
         </div>
 
@@ -249,7 +237,7 @@ const TicketDetailPage: React.FC = () => {
             <h2 className="text-muted-foreground text-2xl font-bold">Title:</h2>
             <CardTitle className="flex items-center justify-between">
               <span className="text-xl text-[var(--chart-4)]">{ticket?.title}</span>
-              {(isAdmin() || currentUser?._id === ticket.owner?._id) && (
+              {(isStaff() || currentUser?._id === ticket.owner?._id) && (
                 <Button variant="outline" onClick={handleEditToggle}>
                   {isEditing ? 'Cancel' : 'Edit Ticket'}
                 </Button>
@@ -261,14 +249,16 @@ const TicketDetailPage: React.FC = () => {
               <div className="flex items-center space-x-4">
                 <Badge
                   variant={
-                    ticket.priority === 'low'
+                    priorityLabel === 'low'
                       ? 'secondary'
-                      : ticket.priority === 'medium'
+                      : priorityLabel === 'medium'
                         ? 'default'
-                        : 'destructive'
+                        : priorityLabel === 'high'
+                          ? 'destructive'
+                          : 'outline'
                   }
                 >
-                  {ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1)} Priority
+                  {priorityLabel.charAt(0).toUpperCase() + priorityLabel.slice(1)} Priority
                 </Badge>
                 <div className="relative">
                   <Badge
@@ -281,12 +271,13 @@ const TicketDetailPage: React.FC = () => {
                             ? 'outline'
                             : 'destructive'
                     }
-                    className="cursor-pointer"
-                    onClick={() => setStatusDropDown(!statusDropDown)}
+                    className={isStaff() ? 'cursor-pointer' : 'cursor-default'}
+                    onClick={isStaff() ? () => setStatusDropDown(!statusDropDown) : undefined}
                   >
-                    {ticket.status} <ChevronDown className="ml-1 h-3 w-3" />
+                    {ticket.status}
+                    {isStaff() && <ChevronDown className="ml-1 h-3 w-3" />}
                   </Badge>
-                  {statusDropDown && isAdmin() && (
+                  {statusDropDown && isStaff() && (
                     <div className="bg-popover absolute top-full z-10 mt-1 min-w-32 rounded-md border shadow-lg">
                       {STATUS_OPTIONS.map((status) => (
                         <div
@@ -313,27 +304,41 @@ const TicketDetailPage: React.FC = () => {
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="priority">Priority</Label>
-                  <Select
-                    value={editedTicket.priority}
-                    onValueChange={(value) =>
-                      setEditedTicket((prev) => ({
-                        ...prev,
-                        priority: value as Ticket['priority'],
-                      }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="low">Low</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                {isStaff() && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="priority">Priority</Label>
+                      <Select
+                        value={editedTicket.priority ?? 'low'}
+                        onValueChange={(value) =>
+                          setEditedTicket((prev) => ({
+                            ...prev,
+                            priority: value as Ticket['priority'],
+                          }))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="low">Low</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="high">High</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="category">Category</Label>
+                      <Input
+                        id="category"
+                        name="category"
+                        value={editedTicket.category}
+                        onChange={handleEditChange}
+                        placeholder="e.g. Hardware, Access, Software"
+                      />
+                    </div>
+                  </>
+                )}
               </form>
             )}
           </CardContent>
@@ -364,7 +369,7 @@ const TicketDetailPage: React.FC = () => {
                 {ticket.assignedTo ? (
                   <div className="mt-1 flex items-center justify-between">
                     <p className="text-sm">{ticket.assignedTo.name}</p>
-                    {isAdmin() && (
+                    {isStaff() && (
                       <div className="relative">
                         <Button
                           variant="outline"
@@ -403,7 +408,7 @@ const TicketDetailPage: React.FC = () => {
                       </div>
                     )}
                   </div>
-                ) : isAdmin() ? (
+                ) : isStaff() ? (
                   <div className="relative mt-1">
                     <Button
                       variant="outline"
@@ -446,6 +451,10 @@ const TicketDetailPage: React.FC = () => {
                   <p className="text-sm">Unassigned</p>
                 )}
               </div>
+              <div>
+                <Label className="text-muted-foreground text-sm font-medium">Category</Label>
+                <p className="pt-3 text-sm">{ticket.category || 'Not set'}</p>
+              </div>
             </CardContent>
           </Card>
 
@@ -480,8 +489,8 @@ const TicketDetailPage: React.FC = () => {
           <CardContent className="space-y-4">
             <div className="space-y-4">
               {ticket.comments && ticket.comments.length > 0 ? (
-                ticket.comments.map((comment, index) => (
-                  <Card key={index} className="bg-muted/50">
+                ticket.comments.map((comment) => (
+                  <Card key={comment._id} className="bg-muted/50">
                     <CardContent className="pt-4">
                       <div className="mb-2 flex items-center justify-between">
                         <span className="text-sm font-medium">

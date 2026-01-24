@@ -9,31 +9,26 @@ import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Textarea } from '@/shared/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/components/ui/select';
-import type { UpdateTicketFormData } from '@/types';
-import { useEffect, useState } from 'react';
+import type { CreateTicketFormData } from '@/types';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createTicket } from '@/api/api';
+import { createTicket, uploadTicketAttachment } from '@/api/tickets';
 import AiOverlay from '@/features/tickets/components/AiOverlay';
 import ConfirmOverlay from '@/features/tickets/components/ConfirmOverlay';
 import { useAuth } from '@/shared/hooks/useAuth';
+import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 
 export function CreateTicket() {
   const navigate = useNavigate();
   const { role } = useAuth();
 
   // Zustand für Ticketdaten initialisieren
-  const [ticketData, setTicketData] = useState<UpdateTicketFormData>({
+  const [ticketData, setTicketData] = useState<CreateTicketFormData>({
     title: '',
-    priority: 'medium',
     description: '',
   });
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const attachmentRef = useRef<HTMLInputElement | null>(null);
 
   // Zustand für Ladevorgang und Fehler
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -47,7 +42,7 @@ export function CreateTicket() {
 
   // Show AI Assistant when component mounts
   useEffect(() => {
-    if (role === 'admin') {
+    if (role === 'admin' || role === 'support1') {
       setShowAIAssistant(false);
       setCanCreateTicket(true);
     } else {
@@ -66,6 +61,11 @@ export function CreateTicket() {
     });
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const file = e.target.files?.[0] || null;
+    setAttachment(file);
+  };
+
   // Funktion zum Absenden des Formulars
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault(); // Standard-Formularverhalten verhindern
@@ -74,24 +74,35 @@ export function CreateTicket() {
     setError(null);
 
     try {
-      await createTicket(ticketData);
+      const createdTicket = await createTicket(ticketData);
+      if (attachment) {
+        try {
+          await uploadTicketAttachment(createdTicket._id, attachment);
+        } catch (uploadError) {
+          setError(
+            getApiErrorMessage(uploadError, 'Attachment upload failed. Ticket created without it.'),
+          );
+        }
+      }
 
       // Erfolg setzen und Formular zurücksetzen
       setSuccess(true);
       setShowOverlay(true); // Show the overlay on successful ticket creation
       setTicketData({
         title: '',
-        priority: 'medium',
         description: '',
       });
+      setAttachment(null);
+      if (attachmentRef.current) {
+        attachmentRef.current.value = '';
+      }
 
       // Erfolgsmeldung nach 3 Sekunden zurücksetzen
       setTimeout(() => {
         setSuccess(false);
       }, 2000);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create ticket';
-      setError(errorMessage);
+      setError(getApiErrorMessage(err, 'Failed to create ticket'));
     } finally {
       setIsLoading(false);
     }
@@ -154,22 +165,6 @@ export function CreateTicket() {
                 </div>
               </div>
 
-              <div className="grid gap-6 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="priority">Priority *</Label>
-                  <Select required name="priority" value={ticketData.priority}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select priority" onChange={handleChange} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="low">Low - General question</SelectItem>
-                      <SelectItem value="medium">Medium - Standard issue</SelectItem>
-                      <SelectItem value="high">High - Urgent problem</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
               <div className="space-y-2">
                 <Label htmlFor="description">Description *</Label>
                 <Textarea
@@ -186,7 +181,13 @@ export function CreateTicket() {
 
               <div className="space-y-2">
                 <Label htmlFor="file">Attach a file (optional)</Label>
-                <Input id="file" type="file" name="file" />
+                <Input
+                  id="file"
+                  type="file"
+                  name="file"
+                  ref={attachmentRef}
+                  onChange={handleFileChange}
+                />
               </div>
 
               <div className="flex gap-4">
@@ -208,20 +209,20 @@ export function CreateTicket() {
           <div>
             <h4 className="mb-2 font-medium">Before submitting a ticket:</h4>
             <ul className="text-muted-foreground ml-4 space-y-1 text-sm">
-              <li>• Check our knowledge base for common solutions</li>
-              <li>• Restart your computer or application</li>
-              <li>• Try using a different browser or device</li>
-              <li>• Check your internet connection</li>
+              <li>Check our knowledge base for common solutions</li>
+              <li>Restart your computer or application</li>
+              <li>Try using a different browser or device</li>
+              <li>Check your internet connection</li>
             </ul>
           </div>
 
           <div>
             <h4 className="mb-2 font-medium">For faster resolution:</h4>
             <ul className="text-muted-foreground ml-4 space-y-1 text-sm">
-              <li>• Provide as much detail as possible</li>
-              <li>• Include screenshots if applicable</li>
-              <li>• Mention your operating system and browser</li>
-              <li>• Include any error messages exactly as they appear</li>
+              <li>Provide as much detail as possible</li>
+              <li>Include screenshots if applicable</li>
+              <li>Mention your operating system and browser</li>
+              <li>Include any error messages exactly as they appear</li>
             </ul>
           </div>
         </CardContent>

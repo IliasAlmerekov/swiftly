@@ -5,7 +5,7 @@ import { useTicketFilter } from '@/shared/hooks/useTicketFilter';
 import { useState } from 'react';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
-import { getUserTickets } from '@/api/api';
+import { getUserTickets } from '@/api/tickets';
 
 interface MyTicketsProps {
   userId?: string;

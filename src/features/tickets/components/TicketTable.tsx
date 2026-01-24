@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
-import type { Ticket } from '@/types';
+import type { Ticket, UserRole } from '@/types';
 import { getPriorityColor, getStatusColor } from '@/features/tickets/utils/ticketUtils';
 import type { MouseEvent } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
@@ -17,7 +17,7 @@ interface TicketRowProps {
   ticket: Ticket;
   onTicketClick?: (ticketId: string) => void;
   onUserClick?: (userId: string) => void;
-  role?: string | null;
+  role?: UserRole | null;
 }
 
 function TicketRow({ ticket, onTicketClick, onUserClick, role }: TicketRowProps) {
@@ -26,6 +26,7 @@ function TicketRow({ ticket, onTicketClick, onUserClick, role }: TicketRowProps)
   const ownerId = ticket.owner?._id;
   const ownerAvatarUrl = ticket.owner?.avatar?.url;
   const ownerInitial = ownerName.charAt(0).toUpperCase() || '?';
+  const priorityLabel = ticket.priority ?? 'untriaged';
 
   const handleOwnerClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -54,7 +55,7 @@ function TicketRow({ ticket, onTicketClick, onUserClick, role }: TicketRowProps)
             <AvatarImage src={ownerAvatarUrl} alt={ownerName} />
             <AvatarFallback>{ownerInitial}</AvatarFallback>
           </Avatar>
-          {role === 'admin' && ownerId ? (
+          {(role === 'admin' || role === 'support1') && ownerId ? (
             <span className="font-medium">
               <button onClick={handleOwnerClick} className="cursor-pointer hover:underline">
                 {ownerName}
@@ -66,7 +67,7 @@ function TicketRow({ ticket, onTicketClick, onUserClick, role }: TicketRowProps)
         </div>
       </td>
       <td className="p-3">
-        <Badge className={getPriorityColor(ticket.priority)}>{ticket.priority}</Badge>
+        <Badge className={getPriorityColor(priorityLabel)}>{priorityLabel}</Badge>
       </td>
       <td className="p-3">
         <Badge className={getStatusColor(ticket.status)}>{ticket.status}</Badge>
@@ -118,7 +119,7 @@ export function TicketTable({
   ];
 
   const sortedTickets = () => {
-    return tickets.sort((a, b) => {
+    return [...tickets].sort((a, b) => {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
   };
@@ -145,16 +146,15 @@ export function TicketTable({
               </tr>
             </thead>
             <tbody>
-              {sortedTickets() &&
-                tickets.map((ticket, index) => (
-                  <TicketRow
-                    key={index}
-                    ticket={ticket}
-                    onTicketClick={onTicketClick}
-                    onUserClick={onUserClick}
-                    role={role}
-                  />
-                ))}
+              {sortedTickets().map((ticket) => (
+                <TicketRow
+                  key={ticket._id}
+                  ticket={ticket}
+                  onTicketClick={onTicketClick}
+                  onUserClick={onUserClick}
+                  role={role}
+                />
+              ))}
             </tbody>
           </table>
         </div>
