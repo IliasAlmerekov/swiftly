@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { uploadUserAvatar, updateUserProfile } from '@/api/api';
+import { updateUserProfile, uploadUserAvatar } from '@/api/users';
 import type { User } from '@/types';
+import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 
 export const useAvatarHandlers = (
   isViewingOtherUser: boolean,
@@ -37,7 +38,7 @@ export const useAvatarHandlers = (
       const updatedUser = await uploadUserAvatar(file);
       onUserUpdate(updatedUser);
     } catch (err) {
-      onError(err instanceof Error ? err.message : 'Error uploading avatar');
+      onError(getApiErrorMessage(err, 'Error uploading avatar'));
     } finally {
       setUploadingAvatar(false);
     }
@@ -54,7 +55,7 @@ export const useAvatarHandlers = (
       const updatedUser = await updateUserProfile({ avatar: undefined });
       onUserUpdate(updatedUser);
     } catch (err) {
-      onError(err instanceof Error ? err.message : 'Error removing avatar');
+      onError(getApiErrorMessage(err, 'Error removing avatar'));
     }
   };
 

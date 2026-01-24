@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
-import { updateUserProfile, updateUserProfileById } from '@/api/api';
+import { updateUserProfile, updateUserProfileById } from '@/api/users';
 import type { User } from '@/types';
+import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 
 export const useProfileEditor = (
   user: User | null,
@@ -88,7 +89,7 @@ export const useProfileEditor = (
       setEditMode(false);
     } catch (err) {
       console.error('Profile update error:', err);
-      onError(err instanceof Error ? err.message : 'Error saving profile');
+      onError(getApiErrorMessage(err, 'Error saving profile'));
     }
   }, [
     currentUser?.role,
