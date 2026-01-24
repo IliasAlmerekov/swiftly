@@ -50,7 +50,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, title = 'HelpDesk', cur
     switch (tabId) {
       case 'dashboard':
       case 'admin-dashboard':
-        navigate('/dashboard?tab=dashboard');
+        navigate(`/dashboard?tab=${tabId}`);
         break;
       case 'my-tickets':
         navigate('/dashboard?tab=my-tickets');

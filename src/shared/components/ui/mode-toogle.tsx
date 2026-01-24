@@ -25,7 +25,6 @@ export function ModeToggle() {
         <DropdownMenuItem
           onClick={() => {
             setTheme('light');
-            window.location.reload();
           }}
         >
           Light
@@ -33,7 +32,6 @@ export function ModeToggle() {
         <DropdownMenuItem
           onClick={() => {
             setTheme('dark');
-            window.location.reload();
           }}
         >
           Dark
@@ -41,7 +39,6 @@ export function ModeToggle() {
         <DropdownMenuItem
           onClick={() => {
             setTheme('system');
-            window.location.reload();
           }}
         >
           System
