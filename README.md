@@ -1,10 +1,10 @@
-# Support-Ticket-System der ScooTeq GmbH
+# Support-Ticket-System der Solutions IT
 
 Ein internes Ticket-System für die Bearbeitung von internen Anfragen der Mitarbeiter.
 
 ## Überblick
 
-Das Support-Ticket-System wurde ausschließlich für die interne Verwendung bei der ScooTeq GmbH entwickelt und ermöglicht die effiziente Erfassung, Verwaltung und Bearbeitung von Support-Anfragen der Mitarbeiter. Das System bietet eine übersichtliche Benutzeroberfläche für das IT-Support-Team, um die internen Anfragen schnell zu bearbeiten und den Status von Tickets zu verfolgen.
+Das Support-Ticket-System wurde ausschließlich für die interne Verwendung bei Solutions IT entwickelt und ermöglicht die effiziente Erfassung, Verwaltung und Bearbeitung von Support-Anfragen der Mitarbeiter. Das System bietet eine übersichtliche Benutzeroberfläche für das IT-Support-Team, um die internen Anfragen schnell zu bearbeiten und den Status von Tickets zu verfolgen.
 
 ## Funktionen
 
@@ -56,4 +56,4 @@ cd backend && npm run dev
 
 ## Entwickelt für
 
-ScooTeq GmbH - Internes IT-Support-Team zur Bearbeitung von Mitarbeiteranfragen
+Solutions IT - Internes IT-Support-Team zur Bearbeitung von Mitarbeiteranfragen
