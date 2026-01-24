@@ -44,7 +44,9 @@ export default function RecentTickets({ userTickets }: RecentTicketsProps) {
                     <td className="p-2 font-mono text-sm">{ticket._id.slice(0, 8)}</td>
                     <td className="p-2">{ticket.title}</td>
                     <td className="p-2">
-                      <Badge className={getPriorityColor(ticket.priority)}>{ticket.priority}</Badge>
+                      <Badge className={getPriorityColor(ticket.priority ?? 'untriaged')}>
+                        {ticket.priority ?? 'untriaged'}
+                      </Badge>
                     </td>
                     <td className="p-2">
                       <Badge className={getStatusColor(ticket.status)}>{ticket.status}</Badge>

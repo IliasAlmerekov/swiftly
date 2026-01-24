@@ -16,7 +16,7 @@ import {
   ChartTooltipContent,
 } from '@/shared/components/ui/chart';
 import { useEffect, useMemo, useState } from 'react';
-import { getAIStats } from '@/api/api';
+import { getAIStats } from '@/api/ai';
 
 export const description = 'Ai analytics chart';
 
@@ -35,9 +35,8 @@ export function AnalyticsChart() {
       try {
         const stats = await getAIStats();
         setData(stats as AIStatsData);
-        console.log(stats);
-      } catch (error) {
-        console.error('Failed to fetch AI stats:', error);
+      } catch {
+        // Error handled silently - data will remain null
       }
     };
     fetchData();

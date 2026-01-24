@@ -15,7 +15,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/shared/components/ui/chart';
-import { getTicketStatsOfMonth } from '@/api/api';
+import { getTicketStatsOfMonth } from '@/api/tickets';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 export const description = 'Ticket of month chart';
@@ -39,8 +39,8 @@ export function TicketOfMonth() {
       try {
         const stats = await getTicketStatsOfMonth();
         setData(stats);
-      } catch (error) {
-        console.error('Failed to fetch ticket stats:', error);
+      } catch {
+        // Error handled silently - data will remain null
       }
     };
     fetchStats();

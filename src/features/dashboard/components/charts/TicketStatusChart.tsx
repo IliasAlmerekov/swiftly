@@ -1,5 +1,5 @@
 ﻿import { useMemo } from 'react';
-import { getAllTickets } from '@/api/api';
+import { getAllTickets } from '@/api/tickets';
 import { useQuery } from '@tanstack/react-query';
 import { Pie, PieChart } from 'recharts';
 import type { Ticket } from '@/types';
@@ -26,7 +26,9 @@ export function TicketStatusChart({ variant, showLabel }: TicketStatusChartProps
       totalTickets: tickets.length ?? 0,
       openTickets: tickets.filter((ticket) => ticket.status === 'open').length ?? 0,
       inProgressTickets: tickets.filter((ticket) => ticket.status === 'in-progress').length ?? 0,
-      resolvedTickets: tickets.filter((ticket) => ticket.status === 'resolved').length ?? 0,
+      resolvedTickets:
+        tickets.filter((ticket) => ticket.status === 'resolved' || ticket.status === 'closed')
+          .length ?? 0,
     }),
   });
 
