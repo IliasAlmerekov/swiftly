@@ -1,5 +1,7 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
-import { loginUser } from '@/api/api';
+import { loginUser } from '@/api/auth';
+import { getApiErrorMessage } from '@/shared/lib/apiErrors';
+import { useAuthContext } from '@/shared/context/AuthContext';
 
 interface UseLoginProps {
   onLoginSuccess: () => void;
@@ -10,6 +12,7 @@ interface LoginResponse {
 }
 
 export function useLogin({ onLoginSuccess }: UseLoginProps) {
+  const { login } = useAuthContext();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
@@ -24,17 +27,12 @@ export function useLogin({ onLoginSuccess }: UseLoginProps) {
     try {
       const { token } = (await loginUser(email, password)) as LoginResponse;
 
-      if (keepLoggedIn) {
-        localStorage.setItem('token', token);
-        sessionStorage.removeItem('token');
-      } else {
-        sessionStorage.setItem('token', token);
-        localStorage.removeItem('token');
-      }
+      // Используем централизованный метод login из AuthContext
+      login(token, keepLoggedIn);
 
       onLoginSuccess();
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : 'Invalid email or password');
+      setError(getApiErrorMessage(error, 'Invalid email or password'));
     } finally {
       setLoading(false);
     }

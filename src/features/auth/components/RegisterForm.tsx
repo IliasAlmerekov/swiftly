@@ -52,7 +52,7 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
                 <Input
                   id="email"
                   type="email"
-                  placeholder="name.surname@scooteq.com"
+                  placeholder="name.surname@solutions-it.com"
                   required
                   autoComplete="email"
                   value={email}
@@ -101,6 +101,7 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
                     <SelectGroup>
                       <SelectLabel>Roles</SelectLabel>
                       <SelectItem value="user">User</SelectItem>
+                      <SelectItem value="support1">Support</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
                     </SelectGroup>
                   </SelectContent>

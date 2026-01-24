@@ -1,69 +1,28 @@
-import { useEffect, useState } from 'react';
-import { jwtDecode } from 'jwt-decode';
-
-type Role = 'user' | 'admin';
-
-interface JwtPayload {
-  id?: string;
-  name?: string;
-  email?: string;
-  role?: Role;
-  exp?: number;
-}
+import { useAuthContext } from '@/shared/context/AuthContext';
+import type { UserRole } from '@/types';
 
 interface AuthState {
-  role: Role | null;
+  userId: string | null;
+  role: UserRole | null;
   email: string | null;
   userName: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
 }
 
+/**
+ * Hooks to access authentication state.
+ * @returns AuthState object containing user info and auth status
+ */
 export const useAuth = (): AuthState => {
-  const [authState, setAuthState] = useState<AuthState>({
-    role: null,
-    email: null,
-    userName: null,
-    isLoading: true,
-    isAuthenticated: false,
-  });
+  const { user, isAuthenticated, isLoading } = useAuthContext();
 
-  useEffect(() => {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-
-    if (!token) {
-      // Redirect to login if no token
-      window.location.href = '/login';
-      return;
-    }
-
-    try {
-      const decoded = jwtDecode<JwtPayload>(token);
-
-      // Check token expiration
-      if (decoded.exp && decoded.exp * 1000 < Date.now()) {
-        // Token expired - clear storage and redirect to login
-        localStorage.removeItem('token');
-        sessionStorage.removeItem('token');
-        window.location.href = '/login';
-        return;
-      }
-
-      setAuthState({
-        role: decoded.role || 'user',
-        email: decoded.email || null,
-        userName: decoded.name || null,
-        isLoading: false,
-        isAuthenticated: true,
-      });
-    } catch (error) {
-      console.error('Failed to decode token:', error);
-      // Invalid token - clear storage and redirect to login
-      localStorage.removeItem('token');
-      sessionStorage.removeItem('token');
-      window.location.href = '/login';
-    }
-  }, []);
-
-  return authState;
+  return {
+    userId: user?.id || null,
+    role: user?.role || null,
+    email: user?.email || null,
+    userName: user?.name || null,
+    isLoading,
+    isAuthenticated,
+  };
 };
