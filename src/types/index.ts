@@ -7,20 +7,24 @@ export interface ApiResponse<T = unknown> {
 
 export class ApiError extends Error {
   public status: number;
+  public details?: unknown;
 
-  constructor(message: string, status: number = 500) {
+  constructor(message: string, status: number = 500, details?: unknown) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
+    this.details = details;
   }
 }
+
+export type UserRole = 'user' | 'support1' | 'admin';
 
 // User types
 export interface User {
   _id: string;
   email: string;
   name: string;
-  role: 'user' | 'admin';
+  role: UserRole;
   createdAt: string;
   updatedAt: string;
   onlineCount?: number;
@@ -72,7 +76,7 @@ export interface RegisterFormData {
   email: string;
   password: string;
   name: string;
-  role?: 'user' | 'admin';
+  role?: UserRole;
 }
 
 // Ticket types
@@ -83,17 +87,27 @@ export interface Comment {
   createdAt: string;
 }
 
+export interface TicketAttachment {
+  _id?: string;
+  url: string;
+  name?: string;
+  filename?: string;
+  size?: number;
+  uploadedAt?: string;
+}
+
 export interface Ticket {
   _id: string;
   owner: User;
   title: string;
   description: string;
-  priority: 'low' | 'medium' | 'high';
+  priority?: 'low' | 'medium' | 'high';
   status: 'open' | 'in-progress' | 'resolved' | 'closed';
-  category: string;
+  category?: string;
   createdBy: User;
   assignedTo?: User;
   comments: Comment[];
+  attachments?: TicketAttachment[];
   createdAt: string;
   updatedAt: string;
 }
@@ -101,8 +115,8 @@ export interface Ticket {
 export interface CreateTicketFormData {
   title: string;
   description: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  category: string;
+  priority?: 'low' | 'medium' | 'high';
+  category?: string;
 }
 
 export interface UpdateTicketFormData {
@@ -110,6 +124,7 @@ export interface UpdateTicketFormData {
   description?: string;
   priority?: 'low' | 'medium' | 'high';
   status?: 'open' | 'in-progress' | 'resolved' | 'closed';
+  category?: string;
   assignedTo?: string;
 }
 

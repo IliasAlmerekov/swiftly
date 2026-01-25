@@ -16,23 +16,12 @@ import {
   ChartTooltipContent,
 } from '@/shared/components/ui/chart';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { getUserTicketStats } from '@/api/api';
+import { getUserTicketStats, type UserTicketStats } from '@/api/tickets';
 
 export const description = 'User ticket stats chart';
 
-interface TicketStatsData {
-  stats: Array<{
-    count: number;
-    year: number;
-    monthNumber: number;
-    month: string;
-  }>;
-  period: string;
-  userId: number;
-}
-
 export function UserTicketStats() {
-  const [data, setData] = useState<TicketStatsData | null>(null);
+  const [data, setData] = useState<UserTicketStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,8 +29,8 @@ export function UserTicketStats() {
       try {
         const stats = await getUserTicketStats();
         setData(stats);
-      } catch (error) {
-        console.error('Failed to fetch ticket stats:', error);
+      } catch {
+        // Error handled silently - data will remain null
       } finally {
         setLoading(false);
       }

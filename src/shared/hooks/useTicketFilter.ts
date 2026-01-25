@@ -20,7 +20,10 @@ export function useTicketFilter({
     // Filter by user's tickets if needed
     if (filterMyTickets && userId) {
       filtered = filtered.filter(
-        (ticket) => ticket.createdBy?._id === userId || ticket.assignedTo?._id === userId,
+        (ticket) =>
+          ticket.createdBy?._id === userId ||
+          ticket.owner?._id === userId ||
+          ticket.assignedTo?._id === userId,
       );
     }
 

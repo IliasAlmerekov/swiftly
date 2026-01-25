@@ -45,7 +45,7 @@ export default function LoginForm({
                 <Input
                   id="email"
                   type="email"
-                  placeholder="name.surname@scooteq.com"
+                  placeholder="name.surname@solutions-it.com"
                   required
                   autoComplete="username"
                   value={email}

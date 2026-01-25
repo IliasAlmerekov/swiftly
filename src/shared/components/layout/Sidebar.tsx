@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { LayoutDashboard, Ticket, Plus, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Ticket, HelpCircle, BarChart3 } from 'lucide-react';
 
 import {
   Sidebar,
@@ -12,7 +12,7 @@ import {
   SidebarRail,
 } from '@/shared/components/ui/sidebar';
 import { NavUser } from './nav-user';
-import type { TabType } from '@/types';
+import type { TabType, UserRole } from '@/types';
 
 // Import logo
 import scooteqLogo from '@/assets/sidebarLogo.png';
@@ -22,7 +22,14 @@ const MENU_CONFIG = {
   user: [
     { id: 'dashboard' as const, label: 'Dashboard', icon: LayoutDashboard },
     { id: 'my-tickets' as const, label: 'My Tickets', icon: Ticket },
-    { id: 'create-ticket' as const, label: 'Create Ticket', icon: Plus },
+    { id: 'create-ticket' as const, label: 'Support', icon: HelpCircle },
+  ],
+  support1: [
+    { id: 'dashboard' as const, label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'my-tickets' as const, label: 'My Tickets', icon: Ticket },
+    { id: 'all-tickets' as const, label: 'All Tickets', icon: Ticket },
+    { id: 'analytics' as const, label: 'Analytics', icon: BarChart3 },
+    { id: 'create-ticket' as const, label: 'Support', icon: HelpCircle },
   ],
   admin: [
     {
@@ -33,7 +40,7 @@ const MENU_CONFIG = {
     { id: 'my-tickets' as const, label: 'My Tickets', icon: Ticket },
     { id: 'all-tickets' as const, label: 'All Tickets', icon: Ticket },
     { id: 'analytics' as const, label: 'Analytics', icon: BarChart3 },
-    { id: 'create-ticket' as const, label: 'Create Ticket', icon: Plus },
+    { id: 'create-ticket' as const, label: 'Support', icon: HelpCircle },
   ],
 };
 
@@ -44,7 +51,7 @@ interface MenuItem {
 }
 
 interface SidebarProps {
-  role: string | null;
+  role: UserRole | null;
   email: string | null;
   currentTab: TabType;
   onTabChange: (tabId: TabType) => void;
@@ -57,6 +64,9 @@ const AppSidebar: React.FC<SidebarProps> = ({ role, email, currentTab, onTabChan
     if (role === 'admin') {
       return MENU_CONFIG.admin;
     }
+    if (role === 'support1') {
+      return MENU_CONFIG.support1;
+    }
     return MENU_CONFIG.user;
   };
 
@@ -66,17 +76,6 @@ const AppSidebar: React.FC<SidebarProps> = ({ role, email, currentTab, onTabChan
 
   const handleTabChange = (tabId: TabType) => {
     if (tabId === currentTab) return; // No action if the same tab is selected
-
-    if (
-      tabId === 'admin-dashboard' ||
-      tabId === 'dashboard' ||
-      tabId === 'analytics' ||
-      tabId === 'all-tickets' ||
-      tabId === 'my-tickets'
-    ) {
-      onTabChange(tabId);
-      window.location.reload();
-    }
     onTabChange(tabId);
   };
 
@@ -84,9 +83,9 @@ const AppSidebar: React.FC<SidebarProps> = ({ role, email, currentTab, onTabChan
     <Sidebar className="border-r">
       <SidebarHeader className="border-b px-4 py-4">
         <div className="flex items-center gap-3">
-          <img src={scooteqLogo} alt="ScooTeq" className="h-8 w-8 rounded-sm" />
+          <img src={scooteqLogo} alt="Solutions IT" className="h-8 w-8 rounded-sm" />
           <div className="flex">
-            <h1 className="text-lg font-semibold">ScooTeq Helpdesk</h1>
+            <h1 className="text-lg font-semibold">Solutions IT</h1>
           </div>
         </div>
       </SidebarHeader>

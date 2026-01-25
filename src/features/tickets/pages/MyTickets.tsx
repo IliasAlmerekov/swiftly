@@ -5,7 +5,7 @@ import { useTicketFilter } from '@/shared/hooks/useTicketFilter';
 import { useState } from 'react';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
-import { getUserTickets } from '@/api/api';
+import { getUserTickets } from '@/api/tickets';
 
 interface MyTicketsProps {
   userId?: string;
@@ -31,7 +31,7 @@ export function MyTickets({ userId }: MyTicketsProps) {
   });
 
   const handleTicketClick = (ticketId: string): void => {
-    navigate(`/tickets/${ticketId}`, { state: { role } });
+    navigate(`/tickets/${ticketId}?tab=my-tickets`, { state: { role } });
   };
 
   const handleCreateTicket = () => {

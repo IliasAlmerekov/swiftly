@@ -22,7 +22,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/shared/components/ui/button';
 import { ModeToggle } from '@/shared/components/ui/mode-toogle';
-import { getUserProfile, setUserStatusOffline } from '@/api/api';
+import { getUserProfile, setUserStatusOffline } from '@/api/users';
+import { useAuthContext } from '@/shared/context/AuthContext';
 import { useEffect, useState } from 'react';
 import type { User } from '@/types';
 
@@ -37,6 +38,7 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar();
   const navigate = useNavigate();
+  const { logout } = useAuthContext();
   const [avatarUrl, setAvatarUrl] = useState<User['avatar']>();
 
   // Fetch user profile on component mount
@@ -53,9 +55,15 @@ export function NavUser({
     fetchUserProfile();
   }, []);
 
-  function handleLogout() {
-    setUserStatusOffline(); // Set user status to offline on logout
-    navigate('/login');
+  async function handleLogout() {
+    try {
+      await setUserStatusOffline();
+    } catch {
+      // ignore status errors during logout
+    } finally {
+      logout();
+      navigate('/login', { replace: true });
+    }
   }
 
   function handleAccount() {

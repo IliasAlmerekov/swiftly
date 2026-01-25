@@ -14,7 +14,20 @@ interface DashboardTabContentProps {
 
 export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({ currentTab }) => {
   const greeting = useGreeting().greeting;
-  const { userName } = useAuth();
+  const { userName, role } = useAuth();
+  const isStaff = role === 'admin' || role === 'support1';
+  const staffOnlyTabs: TabType[] = ['admin-dashboard', 'all-tickets', 'analytics'];
+
+  if (staffOnlyTabs.includes(currentTab) && !isStaff) {
+    return (
+      <div className="@container/main flex-1 overflow-auto">
+        <div className="border-b px-4 py-6 lg:px-6">
+          <h1 className="text-2xl font-semibold">Access Restricted</h1>
+          <p className="text-muted-foreground">You do not have permission to view this section.</p>
+        </div>
+      </div>
+    );
+  }
 
   switch (currentTab) {
     case 'dashboard':

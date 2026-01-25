@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getUserTickets } from '@/api/api';
+import { getUserTickets } from '@/api/tickets';
 import type { Ticket } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { IconTicket, IconUsers, IconCircleCheck, IconClock } from '@tabler/icons-react';
@@ -20,7 +20,9 @@ export default function UserTicketCard() {
       totalTickets: tickets.length ?? 0,
       openTickets: tickets.filter((ticket) => ticket.status === 'open').length ?? 0,
       inProgressTickets: tickets.filter((ticket) => ticket.status === 'in-progress').length ?? 0,
-      resolvedTickets: tickets.filter((ticket) => ticket.status === 'resolved').length ?? 0,
+      resolvedTickets:
+        tickets.filter((ticket) => ticket.status === 'resolved' || ticket.status === 'closed')
+          .length ?? 0,
     }),
   });
 
@@ -49,7 +51,7 @@ export default function UserTicketCard() {
       title: 'Resolved Tickets',
       value: userTickets?.resolvedTickets ?? 0,
       icon: IconCircleCheck,
-      description: 'Resolved tickets',
+      description: 'Resolved or closed',
     },
   ];
 

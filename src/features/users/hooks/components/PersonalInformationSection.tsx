@@ -51,8 +51,9 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
     }
 
     handleUserClick(selectedManagerId);
-    window.location.reload();
   };
+
+  const isStaff = currentUser?.role === 'admin' || currentUser?.role === 'support1';
 
   return (
     <Card>
@@ -163,9 +164,13 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
                     />
                   </Avatar>
                 )}
-                <Button variant="secondary" className="cursor-pointer" onClick={handleOwnerClick}>
-                  <p className="mt-1 text-white">{user.manager?.name || 'N/A'}</p>
-                </Button>
+                {isStaff ? (
+                  <Button variant="secondary" className="cursor-pointer" onClick={handleOwnerClick}>
+                    <p className="mt-1 text-white">{user.manager?.name || 'N/A'}</p>
+                  </Button>
+                ) : (
+                  <p className="mt-1 text-[var(--ring)]">{user.manager?.name || 'N/A'}</p>
+                )}
               </div>
             )}
           </div>

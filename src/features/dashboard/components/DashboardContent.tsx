@@ -16,6 +16,7 @@ interface DashboardContentProps {
 
 export function DashboardContent({ userTickets, loading, error }: DashboardContentProps) {
   const { role } = useAuth();
+  const isStaff = role === 'admin' || role === 'support1';
 
   return (
     <div className="space-y-6">
@@ -30,16 +31,16 @@ export function DashboardContent({ userTickets, loading, error }: DashboardConte
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {role === 'user' ? <UserTicketCard /> : <AdminTicketCard />}
+          {isStaff ? <AdminTicketCard /> : <UserTicketCard />}
         </div>
       )}
-      {role !== 'admin' ? <RecentTickets userTickets={userTickets} /> : <TicketsofThisWeek />}
+      {isStaff ? <TicketsofThisWeek /> : <RecentTickets userTickets={userTickets} />}
       {/* Recent Tickets Table */}
 
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-2">
         <ViewSupportStatus />
-        {role === 'admin' ? <HardwareChart /> : <UserTicketStats />}
+        {isStaff ? <HardwareChart /> : <UserTicketStats />}
       </div>
     </div>
   );

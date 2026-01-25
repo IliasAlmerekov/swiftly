@@ -24,7 +24,7 @@ export function TicketSearchBar({
         <Input
           placeholder={placeholder}
           className="pl-9"
-          defaultValue={searchQuery}
+          value={searchQuery}
           onChange={(e) => onSearchChange?.(e.target.value)}
         />
       </div>

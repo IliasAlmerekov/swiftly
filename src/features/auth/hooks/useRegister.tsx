@@ -1,11 +1,17 @@
-import { registerUser } from '@/api/api';
+import { registerUser } from '@/api/auth';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import type { UserRole } from '@/types';
+import { getApiErrorMessage } from '@/shared/lib/apiErrors';
+import { useAuthContext } from '@/shared/context/AuthContext';
 
 export default function useRegister() {
+  const navigate = useNavigate();
+  const { login } = useAuthContext();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [name, setName] = useState<string>('');
-  const [role, setRole] = useState<'user' | 'admin'>('user');
+  const [role, setRole] = useState<UserRole>('user');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
 
@@ -16,14 +22,15 @@ export default function useRegister() {
     try {
       const { token } = await registerUser(email, password, name, role);
       if (token) {
-        localStorage.setItem('token', token);
+        // Используем централизованный метод login из AuthContext
+        login(token, true);
         setSuccess(true);
         setTimeout(() => {
-          window.location.href = '/login';
+          navigate('/login');
         }, 2000);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed');
+      setError(getApiErrorMessage(err, 'Registration failed'));
     }
   };
 
@@ -39,7 +46,7 @@ export default function useRegister() {
     setName(e.target.value);
   };
 
-  const handleRoleChange = (value: 'user' | 'admin') => {
+  const handleRoleChange = (value: UserRole) => {
     setRole(value);
   };
 

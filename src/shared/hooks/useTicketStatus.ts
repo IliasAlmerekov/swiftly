@@ -2,7 +2,7 @@ import type { Ticket } from '@/types';
 
 export function useTicketStatus(ticket: Ticket) {
   const isActive = !ticket.assignedTo;
-  const status = ticket.status === 'resolved';
+  const status = ticket.status === 'resolved' || ticket.status === 'closed';
 
   return {
     isActive,

@@ -1,10 +1,16 @@
 ﻿import { Button } from '@/shared/components/ui/button';
 import { useState, useEffect, useCallback } from 'react';
-import { getUserProfile, getUserProfileById, getAllUsers } from '@/api/api';
+import { getAllUsers, getUserProfile, getUserProfileById } from '@/api/users';
 import type { User } from '@/types';
 import { useParams } from 'react-router-dom';
-import { UserCard, PersonalInformationSection, LoadingState, ErrorState } from '../components';
+import {
+  UserCard,
+  PersonalInformationSection,
+  LoadingState,
+  ErrorState,
+} from '../hooks/components';
 import { useAvatarHandlers, useProfileEditor } from '../hooks';
+import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 
 interface UserProfileProps {
   isViewingOtherUser?: boolean;
@@ -57,10 +63,20 @@ export default function UserProfile({ isViewingOtherUser = false }: UserProfileP
 
         let userData: User;
 
-        // If viewing another user and we have a userId param, use it
+        const isStaff = currentUserData.role === 'admin' || currentUserData.role === 'support1';
+
+        // If viewing another user and we have a userId param, check permissions
         if (isViewingOtherUser && userId) {
-          // Check if current user is admin
-          userData = await getUserProfileById(userId);
+          if (userId === currentUserData._id) {
+            userData = currentUserData;
+          } else {
+            if (!isStaff) {
+              setError('Access restricted: you cannot view other user profiles.');
+              setLoading(false);
+              return;
+            }
+            userData = await getUserProfileById(userId);
+          }
         } else {
           // Otherwise, get current user's profile
           userData = currentUserData;
@@ -68,7 +84,7 @@ export default function UserProfile({ isViewingOtherUser = false }: UserProfileP
 
         setUser(userData);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error fetching user profile');
+        setError(getApiErrorMessage(err, 'Error fetching user profile'));
       } finally {
         setLoading(false);
       }
@@ -81,15 +97,18 @@ export default function UserProfile({ isViewingOtherUser = false }: UserProfileP
   useEffect(() => {
     const fetchAllUsers = async () => {
       try {
+        if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'support1')) {
+          return;
+        }
         const users = await getAllUsers();
         setAllUserList(users);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error fetching all users');
+        setError(getApiErrorMessage(err, 'Error fetching all users'));
       }
     };
 
     fetchAllUsers();
-  }, []);
+  }, [currentUser]);
 
   // Create stable handlers with useCallback
   const handleEdit = useCallback(() => setEditMode(true), [setEditMode]);
@@ -108,7 +127,11 @@ export default function UserProfile({ isViewingOtherUser = false }: UserProfileP
     return (
       <div className="bg-background flex min-h-screen items-center justify-center p-6">
         <div className="text-center">
-          <p className="text-foreground">User not found</p>
+          {error ? (
+            <ErrorState message={error} onClose={handleErrorClose} />
+          ) : (
+            <p className="text-foreground">User not found</p>
+          )}
         </div>
       </div>
     );

@@ -28,7 +28,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, title = 'HelpDesk', cur
       const tabParam = params.get('tab');
 
       if (path.includes('/tickets/')) {
-        setCurrentSidebarTab('my-tickets');
+        if (tabParam === 'all-tickets' || tabParam === 'my-tickets') {
+          setCurrentSidebarTab(tabParam as TabType);
+        } else {
+          setCurrentSidebarTab('my-tickets');
+        }
       } else if (path === '/dashboard') {
         if (tabParam) {
           setCurrentSidebarTab(tabParam as TabType);
@@ -50,7 +54,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, title = 'HelpDesk', cur
     switch (tabId) {
       case 'dashboard':
       case 'admin-dashboard':
-        navigate('/dashboard?tab=dashboard');
+        navigate(`/dashboard?tab=${tabId}`);
         break;
       case 'my-tickets':
         navigate('/dashboard?tab=my-tickets');
