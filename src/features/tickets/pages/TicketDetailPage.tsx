@@ -232,7 +232,10 @@ const TicketDetailPage: React.FC = () => {
   const getInitials = (value?: string) => {
     if (!value) return 'U';
     const parts = value.trim().split(' ');
-    const letters = parts.map((part) => part[0]).slice(0, 2).join('');
+    const letters = parts
+      .map((part) => part[0])
+      .slice(0, 2)
+      .join('');
     return letters.toUpperCase();
   };
 
@@ -415,11 +418,16 @@ const TicketDetailPage: React.FC = () => {
                           <Label className="text-muted-foreground text-xs">Requester</Label>
                           <div className="flex items-center gap-2">
                             <Avatar className="h-8 w-8">
-                              <AvatarImage src={ticket.owner?.avatar?.url} alt={ticket.owner?.name} />
+                              <AvatarImage
+                                src={ticket.owner?.avatar?.url}
+                                alt={ticket.owner?.name}
+                              />
                               <AvatarFallback>{getInitials(ticket.owner?.name)}</AvatarFallback>
                             </Avatar>
                             <div>
-                              <p className="text-sm font-medium">{ticket.owner?.name || 'Unknown'}</p>
+                              <p className="text-sm font-medium">
+                                {ticket.owner?.name || 'Unknown'}
+                              </p>
                               <p className="text-muted-foreground text-xs">
                                 {ticket.owner?.email || '—'}
                               </p>
@@ -448,9 +456,7 @@ const TicketDetailPage: React.FC = () => {
                         {attachments.length > 0 ? (
                           attachments.map((attachment, index) => {
                             const displayName =
-                              attachment.name ||
-                              attachment.filename ||
-                              `Attachment ${index + 1}`;
+                              attachment.name || attachment.filename || `Attachment ${index + 1}`;
                             return (
                               <div
                                 key={attachment._id ?? `${displayName}-${index}`}
@@ -631,10 +637,7 @@ const TicketDetailPage: React.FC = () => {
                 <div className="space-y-2">
                   <Label className="text-muted-foreground text-xs">Category</Label>
                   {isStaff() ? (
-                    <Select
-                      value={normalizedCategory}
-                      onValueChange={handleCategoryChange}
-                    >
+                    <Select value={normalizedCategory} onValueChange={handleCategoryChange}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
@@ -668,7 +671,6 @@ const TicketDetailPage: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
-
           </div>
         </div>
       </div>
@@ -677,4 +679,3 @@ const TicketDetailPage: React.FC = () => {
 };
 
 export default TicketDetailPage;
-

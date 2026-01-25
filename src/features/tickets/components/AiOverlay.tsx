@@ -215,7 +215,7 @@ const AiOverlay: React.FC<AIAssistantOverlayProps> = ({
             size="icon"
             onClick={onNavigate}
             aria-label="Schließen"
-            className="absolute right-4 top-4"
+            className="absolute top-4 right-4"
           >
             <X className="size-4" />
           </Button>

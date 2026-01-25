@@ -68,7 +68,7 @@ function TicketRow({ ticket, onTicketClick, onUserClick, role }: TicketRowProps)
             <AvatarImage src={ownerAvatarUrl} alt={ownerName} />
             <AvatarFallback>{ownerInitial}</AvatarFallback>
           </Avatar>
-          {(role === 'admin') && ownerId ? (
+          {role === 'admin' && ownerId ? (
             <span className="font-medium">
               <button onClick={handleOwnerClick} className="cursor-pointer hover:underline">
                 {ownerName}
