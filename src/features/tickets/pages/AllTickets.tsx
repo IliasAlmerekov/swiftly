@@ -38,7 +38,7 @@ export function AllTickets() {
   });
 
   const handleTicketClick = useCallback(
-    (ticketId: string) => navigate(`/tickets/${ticketId}`),
+    (ticketId: string) => navigate(`/tickets/${ticketId}?tab=all-tickets`),
     [navigate],
   );
 

@@ -31,7 +31,7 @@ export function MyTickets({ userId }: MyTicketsProps) {
   });
 
   const handleTicketClick = (ticketId: string): void => {
-    navigate(`/tickets/${ticketId}`, { state: { role } });
+    navigate(`/tickets/${ticketId}?tab=my-tickets`, { state: { role } });
   };
 
   const handleCreateTicket = () => {

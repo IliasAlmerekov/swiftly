@@ -28,7 +28,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, title = 'HelpDesk', cur
       const tabParam = params.get('tab');
 
       if (path.includes('/tickets/')) {
-        setCurrentSidebarTab('my-tickets');
+        if (tabParam === 'all-tickets' || tabParam === 'my-tickets') {
+          setCurrentSidebarTab(tabParam as TabType);
+        } else {
+          setCurrentSidebarTab('my-tickets');
+        }
       } else if (path === '/dashboard') {
         if (tabParam) {
           setCurrentSidebarTab(tabParam as TabType);
