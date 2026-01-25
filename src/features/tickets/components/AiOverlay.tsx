@@ -1,8 +1,21 @@
 import { sendChatMessage } from '@/api/ai';
-import type { ChatRequest, AIResponse } from '@/types';
+import type { AIResponse, ChatRequest } from '@/types';
 import React, { useEffect, useState } from 'react';
-import { Bot } from 'lucide-react';
-import sendIcon from '@/assets/send.png';
+import { Bot, Send, X } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
+import { Badge } from '@/shared/components/ui/badge';
+import { Button } from '@/shared/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/shared/components/ui/card';
+import { Separator } from '@/shared/components/ui/separator';
+import { Textarea } from '@/shared/components/ui/textarea';
+import { cn } from '@/shared/lib/utils';
 
 // Format AI messages to show numbered lists properly
 const formatAIMessage = (content: string) => {
@@ -66,9 +79,9 @@ const AiOverlay: React.FC<AIAssistantOverlayProps> = ({
       const initialMessage: ChatRequest = {
         role: 'assistant',
         message:
-          'Hallo😊! Ich bin Ihr ITO-Assistent. Bevor Sie ein neues Ticket erstellen, kann ich Ihnen vielleicht direkt helfen. Beschreiben Sie mir bitte Ihr Problem, und ich suche nach einer Lösung für Sie.',
+          'Hallo 😊! Ich bin Ihr ITO-Assistent. Bevor Sie ein neues Ticket erstellen, kann ich Ihnen vielleicht direkt helfen. Beschreiben Sie mir bitte Ihr Problem, und ich suche nach einer Lösung für Sie.',
         content:
-          'Hallo😊! Ich bin Ihr ITO-Assistent. Bevor Sie ein neues Ticket erstellen, kann ich Ihnen vielleicht direkt helfen. Beschreiben Sie mir bitte Ihr Problem, und ich suche nach einer Lösung für Sie.',
+          'Hallo 😊! Ich bin Ihr ITO-Assistent. Bevor Sie ein neues Ticket erstellen, kann ich Ihnen vielleicht direkt helfen. Beschreiben Sie mir bitte Ihr Problem, und ich suche nach einer Lösung für Sie.',
         timestamp: new Date().toISOString(),
       };
       setMessage([initialMessage]);
@@ -164,7 +177,7 @@ const AiOverlay: React.FC<AIAssistantOverlayProps> = ({
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -178,104 +191,154 @@ const AiOverlay: React.FC<AIAssistantOverlayProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black backdrop-blur-sm">
-      <div className="mx-4 flex h-[600px] w-full max-w-2xl flex-col rounded-xl bg-white shadow-2xl dark:bg-gray-900">
-        <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-gray-700">
-          <h2 className="flex items-center gap-3 text-xl font-semibold text-gray-900 dark:text-gray-100">
-            <Bot className="h-10 w-10 rounded-full" />
-            AI-Helpdesk-Assistent
-          </h2>
-          <button
-            className="flex h-8 w-8 items-center justify-center rounded-full p-1 text-xl font-bold text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+      <Card className="flex h-[75vh] min-h-[640px] w-full max-w-5xl flex-col overflow-hidden shadow-2xl">
+        <CardHeader className="relative flex-row items-start justify-between gap-4 space-y-0">
+          <div className="flex items-center gap-4">
+            <Avatar className="size-11 border">
+              <AvatarFallback className="bg-primary/10 text-primary">
+                <Bot className="size-5" />
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <CardTitle className="text-lg">AI-Helpdesk-Assistent</CardTitle>
+              <CardDescription>
+                Soforthilfe für häufige Probleme, bevor Sie ein Ticket erstellen.
+              </CardDescription>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary">ITO Support</Badge>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onNavigate}
             aria-label="Schließen"
+            className="absolute right-4 top-4"
           >
-            ✕
-          </button>
-        </div>
+            <X className="size-4" />
+          </Button>
+        </CardHeader>
+        <Separator />
+        <CardContent className="flex min-h-0 flex-1 flex-col gap-4 px-4 py-4">
+          <div className="bg-muted/20 flex min-h-0 flex-1 flex-col gap-4 overflow-hidden rounded-xl border p-4">
+            <div className="flex-1 space-y-5 overflow-y-auto pr-2">
+              {message.map((msg, index) => {
+                const isUser = msg.role === 'user';
+                const timeLabel = new Date(msg.timestamp).toLocaleTimeString('de-DE', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                });
 
-        <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex-1 space-y-4 overflow-y-auto p-4">
-            {message.map((msg, index) => (
-              <div
-                key={index}
-                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-xs rounded-lg px-4 py-2 lg:max-w-md ${
-                    msg.role === 'user'
-                      ? 'rounded-br-none bg-blue-600 text-white'
-                      : 'rounded-bl-none bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100'
-                  }`}
-                >
-                  <div className="text-sm leading-relaxed">
-                    {msg.role === 'assistant' ? formatAIMessage(msg.content || '') : msg.content}
-                  </div>
+                return (
                   <div
-                    className={`mt-1 text-xs ${
-                      msg.role === 'user' ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'
-                    }`}
+                    key={index}
+                    className={cn(
+                      'flex items-start gap-3',
+                      isUser ? 'justify-end' : 'justify-start',
+                    )}
                   >
-                    {new Date(msg.timestamp).toLocaleTimeString()}
+                    {!isUser && (
+                      <Avatar className="mt-1 size-8 border">
+                        <AvatarFallback className="bg-primary/10 text-primary">
+                          <Bot className="size-5" />
+                        </AvatarFallback>
+                      </Avatar>
+                    )}
+                    <div
+                      className={cn(
+                        'max-w-[72%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm',
+                        isUser
+                          ? 'bg-primary text-primary-foreground rounded-br-sm'
+                          : 'bg-background text-foreground rounded-bl-sm border',
+                      )}
+                    >
+                      <div className="text-sm leading-relaxed">
+                        {msg.role === 'assistant'
+                          ? formatAIMessage(msg.content || '')
+                          : msg.content}
+                      </div>
+                      <div
+                        className={cn(
+                          'mt-2 text-xs',
+                          isUser ? 'text-primary-foreground/70' : 'text-muted-foreground',
+                        )}
+                      >
+                        {timeLabel}
+                      </div>
+                    </div>
+                    {isUser && (
+                      <Avatar className="mt-1 size-8 border">
+                        <AvatarFallback className="bg-muted text-muted-foreground">
+                          DU
+                        </AvatarFallback>
+                      </Avatar>
+                    )}
+                  </div>
+                );
+              })}
+              {isLoading && (
+                <div className="flex items-start gap-3">
+                  <Avatar className="mt-1 size-8 border">
+                    <AvatarFallback className="bg-primary/10 text-primary">
+                      <Bot className="size-5" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="bg-background rounded-2xl rounded-bl-sm border px-4 py-3 shadow-sm">
+                    <div className="flex items-center gap-1.5">
+                      <span className="bg-muted-foreground h-2 w-2 animate-bounce rounded-full" />
+                      <span
+                        className="bg-muted-foreground h-2 w-2 animate-bounce rounded-full"
+                        style={{ animationDelay: '0.1s' }}
+                      />
+                      <span
+                        className="bg-muted-foreground h-2 w-2 animate-bounce rounded-full"
+                        style={{ animationDelay: '0.2s' }}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-            {isLoading && (
-              <div className="flex justify-start">
-                <div className="max-w-xs rounded-lg rounded-bl-none bg-gray-100 px-4 py-2 text-gray-900 lg:max-w-md dark:bg-gray-800 dark:text-gray-100">
-                  <div className="flex space-x-1">
-                    <div className="h-2 w-2 animate-bounce rounded-full bg-gray-400 dark:bg-gray-500"></div>
-                    <div
-                      className="h-2 w-2 animate-bounce rounded-full bg-gray-400 dark:bg-gray-500"
-                      style={{ animationDelay: '0.1s' }}
-                    ></div>
-                    <div
-                      className="h-2 w-2 animate-bounce rounded-full bg-gray-400 dark:bg-gray-500"
-                      style={{ animationDelay: '0.2s' }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-
-          <div className="border-t border-gray-200 p-4 dark:border-gray-700">
-            <div className="mb-2 flex gap-2">
-              <textarea
-                value={currentMessage}
-                onChange={(e) => setCurrentMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Beschreiben Sie Ihr Problem..."
-                className="flex-1 resize-none rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-400 dark:disabled:bg-gray-700"
-                disabled={isLoading}
-                rows={2}
-              />
-              <button
-                onClick={handleSendMessage}
-                disabled={isLoading || !currentMessage.trim()}
-                className="flex min-w-[48px] items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
-              >
-                <img src={sendIcon} alt="Send" className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="text-center">
-              <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">
-                Bitte erstellen Sie ein Ticket, falls der AI-Assistent Ihnen nicht weiterhelfen
-                konnte. So können wir uns auf komplexe Probleme konzentrieren. Vielen Dank für Ihr
-                Verständnis! Ihr ITO-Team
-              </p>
-              <button
-                onClick={handleCreateTicket}
-                className="w-full rounded-lg bg-green-600 px-4 py-3 font-medium text-white transition-colors hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-gray-900"
-              >
-                Create Ticket
-              </button>
+              )}
+              <div ref={messagesEndRef} />
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+        <Separator />
+        <CardFooter className="flex-col gap-4 px-4 py-4">
+          <div className="flex w-full gap-3">
+            <Textarea
+              value={currentMessage}
+              onChange={(e) => setCurrentMessage(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Beschreiben Sie Ihr Problem in 1-2 Sätzen..."
+              className="min-h-[56px] flex-1"
+              disabled={isLoading}
+              rows={2}
+            />
+            <Button
+              onClick={handleSendMessage}
+              disabled={isLoading || !currentMessage.trim()}
+              className="h-auto min-w-[52px] px-4"
+            >
+              <Send className="size-4" />
+            </Button>
+          </div>
+          <div className="flex w-full flex-col gap-3 text-left sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-muted-foreground text-sm sm:max-w-[70%]">
+              Wenn der Assistent nicht weiterhilft, erstellen Sie bitte ein Ticket. So können wir
+              uns gezielt um komplexe Fälle kümmern. Vielen Dank für Ihr Verständnis! Ihr ITO-Team.
+            </p>
+            <Button
+              onClick={handleCreateTicket}
+              variant="secondary"
+              className="w-full sm:w-auto sm:min-w-[200px]"
+            >
+              Ticket erstellen
+            </Button>
+          </div>
+        </CardFooter>
+      </Card>
     </div>
   );
 };
