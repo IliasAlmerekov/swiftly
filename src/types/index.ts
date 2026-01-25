@@ -87,6 +87,15 @@ export interface Comment {
   createdAt: string;
 }
 
+export interface TicketAttachment {
+  _id?: string;
+  url: string;
+  name?: string;
+  filename?: string;
+  size?: number;
+  uploadedAt?: string;
+}
+
 export interface Ticket {
   _id: string;
   owner: User;
@@ -98,6 +107,7 @@ export interface Ticket {
   createdBy: User;
   assignedTo?: User;
   comments: Comment[];
+  attachments?: TicketAttachment[];
   createdAt: string;
   updatedAt: string;
 }
@@ -105,6 +115,8 @@ export interface Ticket {
 export interface CreateTicketFormData {
   title: string;
   description: string;
+  priority?: 'low' | 'medium' | 'high';
+  category?: string;
 }
 
 export interface UpdateTicketFormData {

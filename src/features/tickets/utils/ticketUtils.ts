@@ -27,3 +27,12 @@ export const getStatusColor = (status: string) => {
       return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
   }
 };
+
+export const CATEGORY_OPTIONS = [
+  { value: 'Hardware', label: 'Hardware' },
+  { value: 'Software', label: 'Software' },
+  { value: 'Network', label: 'Network' },
+  { value: 'Account', label: 'Account' },
+  { value: 'Email', label: 'Email' },
+  { value: 'Other', label: 'Other' },
+];

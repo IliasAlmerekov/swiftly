@@ -9,6 +9,13 @@ import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Textarea } from '@/shared/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/shared/components/ui/select';
 import type { CreateTicketFormData } from '@/types';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -17,15 +24,19 @@ import AiOverlay from '@/features/tickets/components/AiOverlay';
 import ConfirmOverlay from '@/features/tickets/components/ConfirmOverlay';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { getApiErrorMessage } from '@/shared/lib/apiErrors';
+import { CATEGORY_OPTIONS } from '@/features/tickets/utils/ticketUtils';
 
 export function CreateTicket() {
   const navigate = useNavigate();
   const { role } = useAuth();
+  const isStaff = role === 'admin' || role === 'support1';
 
   // Zustand für Ticketdaten initialisieren
   const [ticketData, setTicketData] = useState<CreateTicketFormData>({
     title: '',
     description: '',
+    priority: undefined,
+    category: undefined,
   });
   const [attachment, setAttachment] = useState<File | null>(null);
   const attachmentRef = useRef<HTMLInputElement | null>(null);
@@ -42,13 +53,13 @@ export function CreateTicket() {
 
   // Show AI Assistant when component mounts
   useEffect(() => {
-    if (role === 'admin' || role === 'support1') {
+    if (isStaff) {
       setShowAIAssistant(false);
       setCanCreateTicket(true);
     } else {
       setShowAIAssistant(true);
     }
-  }, [role]);
+  }, [isStaff]);
 
   // Handler für Änderungen in Formularfeldern
   const handleChange = (
@@ -74,7 +85,10 @@ export function CreateTicket() {
     setError(null);
 
     try {
-      const createdTicket = await createTicket(ticketData);
+      const payload: CreateTicketFormData = isStaff
+        ? ticketData
+        : { title: ticketData.title, description: ticketData.description };
+      const createdTicket = await createTicket(payload);
       if (attachment) {
         try {
           await uploadTicketAttachment(createdTicket._id, attachment);
@@ -91,6 +105,8 @@ export function CreateTicket() {
       setTicketData({
         title: '',
         description: '',
+        priority: undefined,
+        category: undefined,
       });
       setAttachment(null);
       if (attachmentRef.current) {
@@ -163,6 +179,29 @@ export function CreateTicket() {
                     required
                   />
                 </div>
+                {isStaff && (
+                  <div className="space-y-2">
+                    <Label htmlFor="priority">Priority</Label>
+                    <Select
+                      value={ticketData.priority}
+                      onValueChange={(value) =>
+                        setTicketData((prev) => ({
+                          ...prev,
+                          priority: value as CreateTicketFormData['priority'],
+                        }))
+                      }
+                    >
+                      <SelectTrigger id="priority">
+                        <SelectValue placeholder="Select priority" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">Low</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -178,6 +217,34 @@ export function CreateTicket() {
                   required
                 />
               </div>
+
+              {isStaff && (
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Category</Label>
+                    <Select
+                      value={ticketData.category}
+                      onValueChange={(value) =>
+                        setTicketData((prev) => ({
+                          ...prev,
+                          category: value,
+                        }))
+                      }
+                    >
+                      <SelectTrigger id="category">
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CATEGORY_OPTIONS.map((category) => (
+                          <SelectItem key={category.value} value={category.value}>
+                            {category.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="file">Attach a file (optional)</Label>
