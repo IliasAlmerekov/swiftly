@@ -67,12 +67,16 @@ export default function UserProfile({ isViewingOtherUser = false }: UserProfileP
 
         // If viewing another user and we have a userId param, check permissions
         if (isViewingOtherUser && userId) {
-          if (!isStaff) {
-            setError('Access restricted: you cannot view other user profiles.');
-            setLoading(false);
-            return;
+          if (userId === currentUserData._id) {
+            userData = currentUserData;
+          } else {
+            if (!isStaff) {
+              setError('Access restricted: you cannot view other user profiles.');
+              setLoading(false);
+              return;
+            }
+            userData = await getUserProfileById(userId);
           }
-          userData = await getUserProfileById(userId);
         } else {
           // Otherwise, get current user's profile
           userData = currentUserData;

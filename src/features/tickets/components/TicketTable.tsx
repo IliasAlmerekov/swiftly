@@ -24,6 +24,9 @@ function TicketRow({ ticket, onTicketClick, onUserClick, role }: TicketRowProps)
   const { className } = useTicketStatus(ticket);
   const ownerName = ticket.owner?.name ?? 'Unknown User';
   const ownerId = ticket.owner?._id;
+  const assigneeId = ticket.assignedTo?._id;
+  const assigneeAvatarUrl = ticket.assignedTo?.avatar?.url;
+  const assigneeName = ticket.assignedTo?.name ?? 'Unassigned';
   const ownerAvatarUrl = ticket.owner?.avatar?.url;
   const ownerInitial = ownerName.charAt(0).toUpperCase() || '?';
   const priorityLabel = ticket.priority ?? 'untriaged';
@@ -36,6 +39,16 @@ function TicketRow({ ticket, onTicketClick, onUserClick, role }: TicketRowProps)
     }
 
     onUserClick?.(ownerId);
+  };
+
+  const handleAssigneeClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+
+    if (!assigneeId) {
+      return;
+    }
+
+    onUserClick?.(assigneeId);
   };
 
   return (
@@ -55,7 +68,7 @@ function TicketRow({ ticket, onTicketClick, onUserClick, role }: TicketRowProps)
             <AvatarImage src={ownerAvatarUrl} alt={ownerName} />
             <AvatarFallback>{ownerInitial}</AvatarFallback>
           </Avatar>
-          {(role === 'admin' || role === 'support1') && ownerId ? (
+          {(role === 'admin') && ownerId ? (
             <span className="font-medium">
               <button onClick={handleOwnerClick} className="cursor-pointer hover:underline">
                 {ownerName}
@@ -73,13 +86,20 @@ function TicketRow({ ticket, onTicketClick, onUserClick, role }: TicketRowProps)
         <Badge className={getStatusColor(ticket.status)}>{ticket.status}</Badge>
       </td>
       <td className="flex items-center p-3">
-        <Avatar className="mr-2 inline-block h-8 w-8 overflow-hidden rounded-full align-middle">
-          <AvatarImage
-            src={ticket.assignedTo?.avatar?.url}
-            alt={ticket.assignedTo?.name || 'Unassigned'}
-          />
-        </Avatar>
-        {ticket.assignedTo?.name ?? 'Unassigned'}
+        <div className="truncate">
+          <Avatar className="mr-2 inline-block h-8 w-8 overflow-hidden rounded-full align-middle">
+            <AvatarImage src={assigneeAvatarUrl} alt={assigneeName} />
+          </Avatar>
+          {(role === 'admin' || role === 'support1') && assigneeId ? (
+            <span className="font-medium">
+              <button onClick={handleAssigneeClick} className="cursor-pointer hover:underline">
+                {assigneeName}
+              </button>
+            </span>
+          ) : (
+            <span>{assigneeName}</span>
+          )}
+        </div>
       </td>
       <td className="text-muted-foreground p-3 text-sm">{ticket.createdAt.slice(0, 10)}</td>
     </tr>

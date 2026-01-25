@@ -15,9 +15,20 @@ export const getUserTickets = async (): Promise<Ticket[]> => {
   }
 };
 
-export const getTicketStatsOfMonth = async () => {
+export interface TicketStatsOfMonth {
+  stats: Array<{
+    month: string;
+    monthNumber: number;
+    count: number;
+    year: number;
+  }>;
+  currentMonth: number;
+  currentYear: number;
+}
+
+export const getTicketStatsOfMonth = async (): Promise<TicketStatsOfMonth> => {
   try {
-    return await apiClient.get('/tickets/stats');
+    return await apiClient.get<TicketStatsOfMonth>('/tickets/stats');
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
