@@ -1,10 +1,10 @@
-import type { User } from '../../types';
+import type { AdminUsersResponse, User } from '../../types';
 import { ApiError } from '../../types';
 import { apiClient } from '@/shared/api';
 
-export const getSupportUsers = async () => {
+export const getSupportUsers = async (): Promise<AdminUsersResponse> => {
   try {
-    return await apiClient.get('/users/support');
+    return await apiClient.get<AdminUsersResponse>('/users/support');
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;

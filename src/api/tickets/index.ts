@@ -26,6 +26,17 @@ export interface TicketStatsOfMonth {
   currentYear: number;
 }
 
+export interface UserTicketStats {
+  stats: Array<{
+    count: number;
+    year: number;
+    monthNumber: number;
+    month: string;
+  }>;
+  period: string;
+  userId: number;
+}
+
 export const getTicketStatsOfMonth = async (): Promise<TicketStatsOfMonth> => {
   try {
     return await apiClient.get<TicketStatsOfMonth>('/tickets/stats');
@@ -37,9 +48,9 @@ export const getTicketStatsOfMonth = async (): Promise<TicketStatsOfMonth> => {
   }
 };
 
-export const getUserTicketStats = async () => {
+export const getUserTicketStats = async (): Promise<UserTicketStats> => {
   try {
-    return await apiClient.get('/tickets/user/stats');
+    return await apiClient.get<UserTicketStats>('/tickets/user/stats');
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
