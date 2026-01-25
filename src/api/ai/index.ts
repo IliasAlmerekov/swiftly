@@ -36,7 +36,7 @@ export const submitAIFeedback = async (
 
 export const getAIStats = async () => {
   try {
-    return await apiClient.get('/ai/stats');
+    return await apiClient.get('/ai/stats', { cache: 'no-store' });
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;

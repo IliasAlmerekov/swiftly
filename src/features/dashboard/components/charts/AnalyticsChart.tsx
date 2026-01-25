@@ -20,15 +20,18 @@ import { getAIStats } from '@/api/ai';
 
 export const description = 'Ai analytics chart';
 
-interface AIStatsData {
-  stats: Array<{
-    ai_requests: number;
-    date: string;
-  }>;
-}
+type AIStatEntry = {
+  ai_requests: number;
+  date: string;
+};
+
+type AIStatsData = {
+  stats: AIStatEntry[];
+};
+type AIStatsResponse = AIStatsData | AIStatEntry[];
 
 export function AnalyticsChart() {
-  const [data, setData] = useState<AIStatsData | null>(null);
+  const [data, setData] = useState<AIStatsResponse | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,16 +45,18 @@ export function AnalyticsChart() {
     fetchData();
   }, []);
 
-  const chartData = useMemo(
-    () =>
-      data?.stats && Array.isArray(data.stats)
-        ? data.stats.map((stat) => ({
-            date: stat.date,
-            requests: stat.ai_requests || 0,
-          }))
-        : [],
-    [data?.stats],
-  );
+  const chartData = useMemo(() => {
+    const stats = Array.isArray(data)
+      ? data
+      : data && Array.isArray((data as AIStatsData).stats)
+        ? (data as AIStatsData).stats
+        : [];
+
+    return stats.map((stat) => ({
+      date: stat.date,
+      requests: stat.ai_requests || 0,
+    }));
+  }, [data]);
 
   const chartConfig = useMemo(
     () =>
