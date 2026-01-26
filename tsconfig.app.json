@@ -14,7 +14,7 @@
     },
 
     /* Silence baseUrl deprecation warning until TS 7.0 migration */
-    "ignoreDeprecations": "5.0",
+    "ignoreDeprecations": "6.0",
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -30,7 +30,10 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    /* Testing */
+    "types": ["vitest/globals"]
   },
   "include": ["src"]
 }
