@@ -1,4 +1,4 @@
-import { sendChatMessage } from '@/api/ai';
+import { sendChatMessage } from '@/features/tickets/api/ai';
 import type { AIResponse, ChatRequest } from '@/types';
 import React, { useEffect, useState } from 'react';
 import { Bot, Send, X } from 'lucide-react';

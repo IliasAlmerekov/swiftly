@@ -1,6 +1,6 @@
 ﻿import { Button } from '@/shared/components/ui/button';
 import { useState, useEffect, useCallback } from 'react';
-import { getAllUsers, getUserProfile, getUserProfileById } from '@/api/users';
+import { getAllUsers, getUserProfile, getUserProfileById } from '@/features/users/api';
 import type { User } from '@/types';
 import { useParams } from 'react-router-dom';
 import {

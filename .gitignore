@@ -29,3 +29,5 @@ coverage/
 
 coverage
 .nyc_output
+*storybook.log
+storybook-static

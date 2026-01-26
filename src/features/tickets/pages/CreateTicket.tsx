@@ -19,7 +19,9 @@ import {
 import type { CreateTicketFormData } from '@/types';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createTicket, uploadTicketAttachment } from '@/api/tickets';
+
+import { paths } from '@/config/paths';
+import { createTicket, uploadTicketAttachment } from '@/features/tickets/api';
 import AiOverlay from '@/features/tickets/components/AiOverlay';
 import ConfirmOverlay from '@/features/tickets/components/ConfirmOverlay';
 import { useAuth } from '@/shared/hooks/useAuth';
@@ -30,6 +32,7 @@ export function CreateTicket() {
   const navigate = useNavigate();
   const { role } = useAuth();
   const isStaff = role === 'admin' || role === 'support1';
+  const isRoleReady = role !== undefined && role !== null;
 
   // Zustand für Ticketdaten initialisieren
   const [ticketData, setTicketData] = useState<CreateTicketFormData>({
@@ -48,18 +51,20 @@ export function CreateTicket() {
   const [showOverlay, setShowOverlay] = useState<boolean>(false);
 
   // AI Assistant States
-  const [showAIAssistant, setShowAIAssistant] = useState<boolean>(true);
+  const [showAIAssistant, setShowAIAssistant] = useState<boolean>(false);
   const [canCreateTicket, setCanCreateTicket] = useState<boolean>(false);
 
   // Show AI Assistant when component mounts
   useEffect(() => {
+    if (!isRoleReady) return;
     if (isStaff) {
       setShowAIAssistant(false);
       setCanCreateTicket(true);
     } else {
       setShowAIAssistant(true);
+      setCanCreateTicket(false);
     }
-  }, [isStaff]);
+  }, [isStaff, isRoleReady]);
 
   // Handler für Änderungen in Formularfeldern
   const handleChange = (
@@ -134,16 +139,18 @@ export function CreateTicket() {
   };
 
   const handleToNavigate = (): void => {
-    navigate('/dashboard?tab=dashboard');
+    navigate(paths.app.dashboard.getHref(paths.tabs.dashboard));
   };
   return (
     <div className="space-y-6">
-      <AiOverlay
-        isOpen={showAIAssistant}
-        onAllowCreateTicket={handleAllowCreateTicket}
-        onNavigate={handleToNavigate}
-      />
-      {canCreateTicket && (
+      {isRoleReady && !isStaff && (
+        <AiOverlay
+          isOpen={showAIAssistant}
+          onAllowCreateTicket={handleAllowCreateTicket}
+          onNavigate={handleToNavigate}
+        />
+      )}
+      {(isStaff || canCreateTicket) && (
         <Card>
           <CardHeader>
             <CardTitle>Create New Support Ticket</CardTitle>

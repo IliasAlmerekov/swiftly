@@ -1,5 +1,5 @@
-import { getAdminUsers } from '@/api/auth';
-import { addComment, getTicketById, updateTicket } from '@/api/tickets';
+import { getAdminUsers } from '@/features/auth/api';
+import { addComment, getTicketById, updateTicket } from '@/features/tickets/api';
 import { useAuthContext } from '@/shared/context/AuthContext';
 import { Button } from '@/shared/components/ui/button';
 import { Textarea } from '@/shared/components/ui/textarea';

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+
+import { paths } from '@/config/paths';
 import { SidebarProvider, SidebarTrigger } from '@/shared/components/ui/sidebar';
 import AppSidebar from '@/shared/components/layout/Sidebar';
 import { useAuth } from '@/shared/hooks/useAuth';
@@ -28,12 +30,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, title = 'HelpDesk', cur
       const tabParam = params.get('tab');
 
       if (path.includes('/tickets/')) {
-        if (tabParam === 'all-tickets' || tabParam === 'my-tickets') {
+        if (tabParam === paths.tabs.allTickets || tabParam === paths.tabs.myTickets) {
           setCurrentSidebarTab(tabParam as TabType);
         } else {
-          setCurrentSidebarTab('my-tickets');
+          setCurrentSidebarTab(paths.tabs.myTickets);
         }
-      } else if (path === '/dashboard') {
+      } else if (path === paths.app.dashboard.path) {
         if (tabParam) {
           setCurrentSidebarTab(tabParam as TabType);
         } else {
@@ -54,25 +56,25 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, title = 'HelpDesk', cur
     switch (tabId) {
       case 'dashboard':
       case 'admin-dashboard':
-        navigate(`/dashboard?tab=${tabId}`);
+        navigate(paths.app.dashboard.getHref(tabId));
         break;
       case 'my-tickets':
-        navigate('/dashboard?tab=my-tickets');
+        navigate(paths.app.dashboard.getHref(paths.tabs.myTickets));
         break;
       case 'all-tickets':
-        navigate('/dashboard?tab=all-tickets');
+        navigate(paths.app.dashboard.getHref(paths.tabs.allTickets));
         break;
       case 'create-ticket':
-        navigate('/dashboard?tab=create-ticket');
+        navigate(paths.app.dashboard.getHref(paths.tabs.createTicket));
         break;
       case 'analytics':
-        navigate('/dashboard?tab=analytics');
+        navigate(paths.app.dashboard.getHref(paths.tabs.analytics));
         break;
       case 'user-profile':
-        navigate('/user-profile');
+        navigate(paths.app.profile.getHref());
         break;
       default:
-        navigate('/dashboard');
+        navigate(paths.app.dashboard.getHref());
         break;
     }
   };

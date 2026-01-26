@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { getUserTickets } from '@/api/tickets';
-import { activityInterval, getSupportUsers, setUserStatusOnline } from '@/api/users';
+import { getUserTickets } from '@/features/tickets/api';
+import { activityInterval, getSupportUsers, setUserStatusOnline } from '@/features/users/api';
 import {
   Card,
   CardContent,

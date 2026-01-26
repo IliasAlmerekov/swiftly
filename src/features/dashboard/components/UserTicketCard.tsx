@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getUserTickets } from '@/api/tickets';
+import { getUserTickets } from '@/features/tickets/api';
 import type { Ticket } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { IconTicket, IconUsers, IconCircleCheck, IconClock } from '@tabler/icons-react';

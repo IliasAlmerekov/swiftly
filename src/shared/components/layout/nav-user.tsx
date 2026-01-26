@@ -20,9 +20,11 @@ import {
   useSidebar,
 } from '@/shared/components/ui/sidebar';
 import { useNavigate } from 'react-router-dom';
+
+import { paths } from '@/config/paths';
 import { Button } from '@/shared/components/ui/button';
 import { ModeToggle } from '@/shared/components/ui/mode-toogle';
-import { getUserProfile, setUserStatusOffline } from '@/api/users';
+import { getUserProfile, setUserStatusOffline } from '@/features/users/api';
 import { useAuthContext } from '@/shared/context/AuthContext';
 import { useEffect, useState } from 'react';
 import type { User } from '@/types';
@@ -62,12 +64,12 @@ export function NavUser({
       // ignore status errors during logout
     } finally {
       logout();
-      navigate('/login', { replace: true });
+      navigate(paths.auth.login.getHref(), { replace: true });
     }
   }
 
   function handleAccount() {
-    navigate('/user-profile');
+    navigate(paths.app.profile.getHref());
   }
 
   return (

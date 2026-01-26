@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { updateUserProfile, updateUserProfileById } from '@/api/users';
+import { updateUserProfile, updateUserProfileById } from '@/features/users/api';
 import type { User } from '@/types';
 import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 

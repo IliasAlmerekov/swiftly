@@ -15,7 +15,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/shared/components/ui/chart';
-import { getTicketStatsOfMonth, type TicketStatsOfMonth } from '@/api/tickets';
+import { getTicketStatsOfMonth, type TicketStatsOfMonth } from '@/features/tickets/api';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 export const description = 'Ticket of month chart';

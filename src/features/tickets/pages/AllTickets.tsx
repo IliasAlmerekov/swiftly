@@ -3,9 +3,11 @@ import { TicketSearchBar } from '@/features/tickets/components/TicketSearchBar';
 import { TicketStats } from '@/features/tickets/components/TicketStats';
 import { useTicketFilter } from '@/shared/hooks/useTicketFilter';
 import { useNavigate } from 'react-router-dom';
+
+import { paths } from '@/config/paths';
 import { useCallback, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getAllTickets } from '@/api/tickets';
+import { getAllTickets } from '@/features/tickets/api';
 import type { Ticket } from '@/types';
 import { Skeleton } from '@/shared/components/ui/skeleton';
 import { useAuth } from '@/shared/hooks/useAuth';
@@ -38,16 +40,19 @@ export function AllTickets() {
   });
 
   const handleTicketClick = useCallback(
-    (ticketId: string) => navigate(`/tickets/${ticketId}?tab=all-tickets`),
+    (ticketId: string) => navigate(paths.app.ticket.getHref(ticketId, paths.tabs.allTickets)),
     [navigate],
   );
 
   const handleCreateTicket = useCallback(
-    () => navigate('/dashboard?tab=create-ticket'),
+    () => navigate(paths.app.dashboard.getHref(paths.tabs.createTicket)),
     [navigate],
   );
 
-  const handleUserClick = useCallback((userId: string) => navigate(`/users/${userId}`), [navigate]);
+  const handleUserClick = useCallback(
+    (userId: string) => navigate(paths.app.user.getHref(userId)),
+    [navigate],
+  );
 
   const description = useMemo(() => {
     const suffix = searchQuery ? ` for "${searchQuery}"` : '';

@@ -1,5 +1,5 @@
 ﻿import { useMemo } from 'react';
-import { getAllTickets } from '@/api/tickets';
+import { getAllTickets } from '@/features/tickets/api';
 import { useQuery } from '@tanstack/react-query';
 import { Pie, PieChart } from 'recharts';
 import type { Ticket } from '@/types';

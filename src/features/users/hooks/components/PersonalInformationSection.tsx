@@ -8,6 +8,8 @@ import type { User } from '@/types';
 import { memo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { paths } from '@/config/paths';
+
 interface PersonalInformationSectionProps {
   user: User;
   currentUser: User | null;
@@ -40,7 +42,7 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
   );
 
   const handleUserClick = (userId: string): void => {
-    navigate(`/users/${userId}`);
+    navigate(paths.app.user.getHref(userId));
   };
 
   const handleOwnerClick = (event: React.MouseEvent<HTMLButtonElement>) => {

@@ -1,11 +1,13 @@
 import { useNavigate } from 'react-router-dom';
+
+import { paths } from '@/config/paths';
 import { TicketTable } from '@/features/tickets/components/TicketTable';
 import { TicketSearchBar } from '@/features/tickets/components/TicketSearchBar';
 import { useTicketFilter } from '@/shared/hooks/useTicketFilter';
 import { useState } from 'react';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
-import { getUserTickets } from '@/api/tickets';
+import { getUserTickets } from '@/features/tickets/api';
 
 interface MyTicketsProps {
   userId?: string;
@@ -31,11 +33,11 @@ export function MyTickets({ userId }: MyTicketsProps) {
   });
 
   const handleTicketClick = (ticketId: string): void => {
-    navigate(`/tickets/${ticketId}?tab=my-tickets`, { state: { role } });
+    navigate(paths.app.ticket.getHref(ticketId, paths.tabs.myTickets), { state: { role } });
   };
 
   const handleCreateTicket = () => {
-    navigate('/dashboard?tab=create-ticket');
+    navigate(paths.app.dashboard.getHref(paths.tabs.createTicket));
   };
 
   if (isLoading) return <div>Loading...</div>;
