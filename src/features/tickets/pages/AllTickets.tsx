@@ -5,12 +5,26 @@ import { useTicketFilter } from '@/shared/hooks/useTicketFilter';
 import { useNavigate } from 'react-router-dom';
 
 import { paths } from '@/config/paths';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { DEFAULT_TICKET_PAGE_SIZE, getAllTickets } from '@/features/tickets/api';
 import { Skeleton } from '@/shared/components/ui/skeleton';
 import { useAuth } from '@/shared/hooks/useAuth';
-import { Button } from '@/shared/components/ui/button';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/shared/components/ui/pagination';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/shared/components/ui/select';
 import { ticketKeys } from '@/features/tickets/hooks/useTickets';
 
 export function AllTickets() {
@@ -18,6 +32,7 @@ export function AllTickets() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const { role } = useAuth();
   const isStaff = role === 'admin' || role === 'support1';
+  const [pageSize, setPageSize] = useState(DEFAULT_TICKET_PAGE_SIZE);
 
   // fetch all tickets
 
@@ -27,8 +42,8 @@ export function AllTickets() {
   const cursor = useMemo(() => pageCursors[pageIndex] ?? null, [pageCursors, pageIndex]);
 
   const { data, isLoading, isError, error, isFetching } = useQuery({
-    queryKey: ticketKeys.list({ scope: 'all', mode: 'page', pageIndex, cursor }),
-    queryFn: () => getAllTickets({ cursor, limit: DEFAULT_TICKET_PAGE_SIZE }),
+    queryKey: ticketKeys.list({ scope: 'all', mode: 'page', pageIndex, pageSize, cursor }),
+    queryFn: () => getAllTickets({ cursor, limit: pageSize }),
     placeholderData: (previous) => previous,
     staleTime: 30_000, // 30 seconds
     gcTime: 5 * 60_000, // 5 minutes
@@ -40,6 +55,13 @@ export function AllTickets() {
   const pageInfo = data?.pageInfo;
   const hasNextPage = Boolean(pageInfo?.hasNextPage);
   const hasPreviousPage = pageIndex > 0;
+  const isPrevDisabled = !hasPreviousPage || isFetching;
+  const isNextDisabled = !hasNextPage || isFetching;
+
+  useEffect(() => {
+    setPageIndex(0);
+    setPageCursors([null]);
+  }, [pageSize]);
 
   const filteredTickets = useTicketFilter({
     tickets: allTickets,
@@ -134,32 +156,68 @@ export function AllTickets() {
         }}
       />
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="text-muted-foreground text-sm">Page {pageIndex + 1}</div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setPageIndex((prev) => Math.max(0, prev - 1))}
-            disabled={!hasPreviousPage || isFetching}
-          >
-            Previous
-          </Button>
-          <Button
-            onClick={() => {
-              if (!pageInfo?.nextCursor) return;
-              setPageCursors((prev) => {
-                const next = [...prev];
-                if (!next[pageIndex + 1]) {
-                  next[pageIndex + 1] = pageInfo.nextCursor;
-                }
-                return next;
-              });
-              setPageIndex((prev) => prev + 1);
-            }}
-            disabled={!hasNextPage || isFetching}
-          >
-            Next
-          </Button>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                aria-disabled={isPrevDisabled}
+                tabIndex={isPrevDisabled ? -1 : 0}
+                className={isPrevDisabled ? 'pointer-events-none opacity-50' : undefined}
+                onClick={(event) => {
+                  event.preventDefault();
+                  if (isPrevDisabled) return;
+                  setPageIndex((prev) => Math.max(0, prev - 1));
+                }}
+              />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink
+                href="#"
+                isActive
+                size="default"
+                className="pointer-events-none"
+                onClick={(event) => event.preventDefault()}
+              >
+                {pageIndex + 1}
+              </PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                aria-disabled={isNextDisabled}
+                tabIndex={isNextDisabled ? -1 : 0}
+                className={isNextDisabled ? 'pointer-events-none opacity-50' : undefined}
+                onClick={(event) => {
+                  event.preventDefault();
+                  if (isNextDisabled || !pageInfo?.nextCursor) return;
+                  setPageCursors((prev) => {
+                    const next = [...prev];
+                    if (!next[pageIndex + 1]) {
+                      next[pageIndex + 1] = pageInfo.nextCursor;
+                    }
+                    return next;
+                  });
+                  setPageIndex((prev) => prev + 1);
+                }}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+
+        <div className="flex items-center justify-between gap-3 md:justify-end">
+          <span className="text-muted-foreground text-sm">Rows per page</span>
+          <Select value={String(pageSize)} onValueChange={(value) => setPageSize(Number(value))}>
+            <SelectTrigger className="h-8 w-[90px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+              <SelectItem value="100">100</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
