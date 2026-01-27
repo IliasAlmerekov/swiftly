@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { getUserTickets } from '@/features/tickets/api';
-import type { Ticket } from '@/types';
+import { getUserTickets, type TicketListResponse } from '@/features/tickets/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { IconTicket, IconUsers, IconCircleCheck, IconClock } from '@tabler/icons-react';
+import { ticketKeys } from '@/features/tickets/hooks/useTickets';
+import type { Ticket } from '@/types';
 
 interface UserTicketCardProps {
   title: string;
@@ -14,16 +15,22 @@ interface UserTicketCardProps {
 export default function UserTicketCard() {
   // Fetch user tickets data
   const { data: userTickets } = useQuery({
-    queryKey: ['user-tickets'],
-    queryFn: getUserTickets,
-    select: (tickets: Ticket[]) => ({
-      totalTickets: tickets.length ?? 0,
-      openTickets: tickets.filter((ticket) => ticket.status === 'open').length ?? 0,
-      inProgressTickets: tickets.filter((ticket) => ticket.status === 'in-progress').length ?? 0,
-      resolvedTickets:
-        tickets.filter((ticket) => ticket.status === 'resolved' || ticket.status === 'closed')
-          .length ?? 0,
-    }),
+    queryKey: [...ticketKeys.userTickets(), 'summary'],
+    queryFn: () => getUserTickets(),
+    select: (ticketPage: TicketListResponse) => {
+      const tickets = ticketPage?.items ?? [];
+
+      return {
+        totalTickets: tickets.length ?? 0,
+        openTickets: tickets.filter((ticket: Ticket) => ticket.status === 'open').length ?? 0,
+        inProgressTickets:
+          tickets.filter((ticket: Ticket) => ticket.status === 'in-progress').length ?? 0,
+        resolvedTickets:
+          tickets.filter(
+            (ticket: Ticket) => ticket.status === 'resolved' || ticket.status === 'closed',
+          ).length ?? 0,
+      };
+    },
   });
 
   // Simple metrics data

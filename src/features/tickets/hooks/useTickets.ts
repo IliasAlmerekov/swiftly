@@ -32,14 +32,16 @@ export const ticketKeys = {
 export function useUserTickets() {
   return useQuery({
     queryKey: ticketKeys.userTickets(),
-    queryFn: getUserTickets,
+    queryFn: () => getUserTickets(),
+    select: (ticketPage) => ticketPage.items,
   });
 }
 
 export function useAllTickets() {
   return useQuery({
-    queryKey: ticketKeys.lists(),
-    queryFn: getAllTickets,
+    queryKey: ticketKeys.list({ scope: 'all' }),
+    queryFn: () => getAllTickets(),
+    select: (ticketPage) => ticketPage.items,
   });
 }
 

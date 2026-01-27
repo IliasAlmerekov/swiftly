@@ -5,6 +5,17 @@ export interface ApiResponse<T = unknown> {
   message?: string;
 }
 
+export interface CursorPageInfo {
+  limit: number;
+  hasNextPage: boolean;
+  nextCursor: string | null;
+}
+
+export interface CursorPage<T> {
+  items: T[];
+  pageInfo: CursorPageInfo;
+}
+
 export class ApiError extends Error {
   public status: number;
   public details?: unknown;

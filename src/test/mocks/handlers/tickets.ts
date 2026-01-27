@@ -5,15 +5,37 @@ const API_URL = '/api';
 
 export const ticketHandlers = [
   // GET /api/tickets/user - Get user's tickets
-  http.get(`${API_URL}/tickets/user`, () => {
-    return HttpResponse.json(db.tickets);
+  http.get(`${API_URL}/tickets/user`, ({ request }) => {
+    const url = new URL(request.url);
+    const limit = Number(url.searchParams.get('limit')) || 50;
+    const cursor = Number(url.searchParams.get('cursor') ?? 0);
+    const offset = Number.isNaN(cursor) ? 0 : cursor;
+
+    const tickets = [...db.tickets].sort((a, b) => {
+      const dateDiff = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      if (dateDiff !== 0) return dateDiff;
+      return b._id.localeCompare(a._id);
+    });
+
+    const paginatedTickets = tickets.slice(offset, offset + limit);
+    const hasNextPage = offset + limit < tickets.length;
+
+    return HttpResponse.json({
+      items: paginatedTickets,
+      pageInfo: {
+        limit,
+        hasNextPage,
+        nextCursor: hasNextPage ? String(offset + limit) : null,
+      },
+    });
   }),
 
   // GET /api/tickets - Get all tickets (admin)
   http.get(`${API_URL}/tickets`, ({ request }) => {
     const url = new URL(request.url);
-    const page = Number(url.searchParams.get('page')) || 1;
-    const limit = Number(url.searchParams.get('limit')) || 10;
+    const limit = Number(url.searchParams.get('limit')) || 50;
+    const cursor = Number(url.searchParams.get('cursor') ?? 0);
+    const offset = Number.isNaN(cursor) ? 0 : cursor;
     const status = url.searchParams.get('status');
 
     let tickets = [...db.tickets];
@@ -22,14 +44,21 @@ export const ticketHandlers = [
       tickets = tickets.filter((t) => t.status === status);
     }
 
-    const start = (page - 1) * limit;
-    const paginatedTickets = tickets.slice(start, start + limit);
+    tickets.sort((a, b) => {
+      const dateDiff = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      if (dateDiff !== 0) return dateDiff;
+      return b._id.localeCompare(a._id);
+    });
+    const paginatedTickets = tickets.slice(offset, offset + limit);
+    const hasNextPage = offset + limit < tickets.length;
 
     return HttpResponse.json({
-      tickets: paginatedTickets,
-      total: tickets.length,
-      page,
-      limit,
+      items: paginatedTickets,
+      pageInfo: {
+        limit,
+        hasNextPage,
+        nextCursor: hasNextPage ? String(offset + limit) : null,
+      },
     });
   }),
 

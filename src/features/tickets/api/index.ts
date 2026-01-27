@@ -1,4 +1,10 @@
-import type { ApiResponse, CreateTicketFormData, Ticket, UpdateTicketFormData } from '@/types';
+import type {
+  ApiResponse,
+  CreateTicketFormData,
+  CursorPage,
+  Ticket,
+  UpdateTicketFormData,
+} from '@/types';
 import { ApiError } from '@/types';
 import { apiClient } from '@/shared/api';
 
@@ -26,12 +32,57 @@ export interface UserTicketStats {
   userId: number;
 }
 
+export interface TicketListParams {
+  cursor?: string | null;
+  limit?: number;
+}
+
+export type TicketListResponse = CursorPage<Ticket>;
+
+export const DEFAULT_TICKET_PAGE_SIZE = 20;
+
+const buildTicketListEndpoint = (basePath: string, params: TicketListParams = {}) => {
+  const searchParams = new URLSearchParams();
+  if (params.cursor) searchParams.set('cursor', params.cursor);
+  if (params.limit) searchParams.set('limit', String(params.limit));
+
+  const query = searchParams.toString();
+  return query ? `${basePath}?${query}` : basePath;
+};
+
+const normalizeTicketListResponse = (
+  data: TicketListResponse | null | undefined,
+  fallbackLimit: number,
+): TicketListResponse => {
+  const items = Array.isArray(data?.items) ? data.items : [];
+  const pageInfo = data?.pageInfo ?? {
+    limit: fallbackLimit,
+    hasNextPage: false,
+    nextCursor: null,
+  };
+
+  return {
+    items,
+    pageInfo: {
+      limit: pageInfo.limit ?? fallbackLimit,
+      hasNextPage: Boolean(pageInfo.hasNextPage),
+      nextCursor: pageInfo.nextCursor ?? null,
+    },
+  };
+};
+
 // ============ API Functions ============
 
-export const getUserTickets = async (): Promise<Ticket[]> => {
+export const getUserTickets = async (
+  params: TicketListParams = {},
+): Promise<TicketListResponse> => {
   try {
-    const data = await apiClient.get<Ticket[]>('/tickets/user');
-    return Array.isArray(data) ? data : [];
+    const endpoint = buildTicketListEndpoint('/tickets/user', {
+      limit: DEFAULT_TICKET_PAGE_SIZE,
+      ...params,
+    });
+    const data = await apiClient.get<TicketListResponse>(endpoint);
+    return normalizeTicketListResponse(data, params.limit ?? DEFAULT_TICKET_PAGE_SIZE);
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
@@ -62,10 +113,14 @@ export const getUserTicketStats = async (): Promise<UserTicketStats> => {
   }
 };
 
-export const getAllTickets = async (): Promise<Ticket[]> => {
+export const getAllTickets = async (params: TicketListParams = {}): Promise<TicketListResponse> => {
   try {
-    const data = await apiClient.get<Ticket[]>('/tickets');
-    return Array.isArray(data) ? data : [];
+    const endpoint = buildTicketListEndpoint('/tickets', {
+      limit: DEFAULT_TICKET_PAGE_SIZE,
+      ...params,
+    });
+    const data = await apiClient.get<TicketListResponse>(endpoint);
+    return normalizeTicketListResponse(data, params.limit ?? DEFAULT_TICKET_PAGE_SIZE);
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;

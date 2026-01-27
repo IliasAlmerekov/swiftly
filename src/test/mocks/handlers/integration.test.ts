@@ -11,7 +11,10 @@ describe('MSW Integration', () => {
       const data = await response.json();
 
       expect(response.ok).toBe(true);
-      expect(data).toEqual([]);
+      expect(data.items).toEqual([]);
+      expect(data.pageInfo).toMatchObject({
+        hasNextPage: false,
+      });
     });
 
     it('returns seeded tickets', async () => {
@@ -25,9 +28,10 @@ describe('MSW Integration', () => {
       const response = await fetch('/api/tickets/user');
       const data = await response.json();
 
-      expect(data).toHaveLength(2);
-      expect(data[0].title).toBe('Test 1');
-      expect(data[1].title).toBe('Test 2');
+      expect(data.items).toHaveLength(2);
+      expect(data.items.map((ticket: { title: string }) => ticket.title)).toEqual(
+        expect.arrayContaining(['Test 1', 'Test 2']),
+      );
     });
 
     it('creates a new ticket', async () => {

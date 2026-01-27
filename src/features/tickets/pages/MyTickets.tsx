@@ -4,10 +4,12 @@ import { paths } from '@/config/paths';
 import { TicketTable } from '@/features/tickets/components/TicketTable';
 import { TicketSearchBar } from '@/features/tickets/components/TicketSearchBar';
 import { useTicketFilter } from '@/shared/hooks/useTicketFilter';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
-import { getUserTickets } from '@/features/tickets/api';
+import { DEFAULT_TICKET_PAGE_SIZE, getUserTickets } from '@/features/tickets/api';
+import { Button } from '@/shared/components/ui/button';
+import { ticketKeys } from '@/features/tickets/hooks/useTickets';
 
 interface MyTicketsProps {
   userId?: string;
@@ -19,11 +21,21 @@ export function MyTickets({ userId }: MyTicketsProps) {
   const [currentSearchQuery, setCurrentSearchQuery] = useState(searchQuery);
   const { role } = useAuth();
 
-  // fetch user's tickets
-  const { data: tickets = [], isLoading } = useQuery({
-    queryKey: ['user-tickets', userId],
-    queryFn: getUserTickets,
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageCursors, setPageCursors] = useState<Array<string | null>>([null]);
+
+  const cursor = useMemo(() => pageCursors[pageIndex] ?? null, [pageCursors, pageIndex]);
+
+  const { data, isLoading, isFetching } = useQuery({
+    queryKey: [...ticketKeys.userTickets(), userId, 'page', pageIndex, cursor],
+    queryFn: () => getUserTickets({ cursor, limit: DEFAULT_TICKET_PAGE_SIZE }),
+    placeholderData: (previous) => previous,
   });
+
+  const tickets = data?.items ?? [];
+  const pageInfo = data?.pageInfo;
+  const hasNextPage = Boolean(pageInfo?.hasNextPage);
+  const hasPreviousPage = pageIndex > 0;
 
   const filteredTickets = useTicketFilter({
     tickets,
@@ -60,6 +72,35 @@ export function MyTickets({ userId }: MyTicketsProps) {
         }`}
         onTicketClick={handleTicketClick}
       />
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="text-muted-foreground text-sm">Page {pageIndex + 1}</div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setPageIndex((prev) => Math.max(0, prev - 1))}
+            disabled={!hasPreviousPage || isFetching}
+          >
+            Previous
+          </Button>
+          <Button
+            onClick={() => {
+              if (!pageInfo?.nextCursor) return;
+              setPageCursors((prev) => {
+                const next = [...prev];
+                if (!next[pageIndex + 1]) {
+                  next[pageIndex + 1] = pageInfo.nextCursor;
+                }
+                return next;
+              });
+              setPageIndex((prev) => prev + 1);
+            }}
+            disabled={!hasNextPage || isFetching}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

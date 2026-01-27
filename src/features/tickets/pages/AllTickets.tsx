@@ -7,10 +7,11 @@ import { useNavigate } from 'react-router-dom';
 import { paths } from '@/config/paths';
 import { useCallback, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getAllTickets } from '@/features/tickets/api';
-import type { Ticket } from '@/types';
+import { DEFAULT_TICKET_PAGE_SIZE, getAllTickets } from '@/features/tickets/api';
 import { Skeleton } from '@/shared/components/ui/skeleton';
 import { useAuth } from '@/shared/hooks/useAuth';
+import { Button } from '@/shared/components/ui/button';
+import { ticketKeys } from '@/features/tickets/hooks/useTickets';
 
 export function AllTickets() {
   const navigate = useNavigate();
@@ -20,19 +21,25 @@ export function AllTickets() {
 
   // fetch all tickets
 
-  const {
-    data: allTickets = [],
-    isLoading,
-    isError,
-    error,
-  } = useQuery<Ticket[]>({
-    queryKey: ['all-tickets'],
-    queryFn: getAllTickets,
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageCursors, setPageCursors] = useState<Array<string | null>>([null]);
+
+  const cursor = useMemo(() => pageCursors[pageIndex] ?? null, [pageCursors, pageIndex]);
+
+  const { data, isLoading, isError, error, isFetching } = useQuery({
+    queryKey: ticketKeys.list({ scope: 'all', mode: 'page', pageIndex, cursor }),
+    queryFn: () => getAllTickets({ cursor, limit: DEFAULT_TICKET_PAGE_SIZE }),
+    placeholderData: (previous) => previous,
     staleTime: 30_000, // 30 seconds
     gcTime: 5 * 60_000, // 5 minutes
     retry: 1, // Retry once on failure
     enabled: isStaff,
   });
+
+  const allTickets = data?.items ?? [];
+  const pageInfo = data?.pageInfo;
+  const hasNextPage = Boolean(pageInfo?.hasNextPage);
+  const hasPreviousPage = pageIndex > 0;
 
   const filteredTickets = useTicketFilter({
     tickets: allTickets,
@@ -126,6 +133,35 @@ export function AllTickets() {
           onAction: handleCreateTicket,
         }}
       />
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="text-muted-foreground text-sm">Page {pageIndex + 1}</div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setPageIndex((prev) => Math.max(0, prev - 1))}
+            disabled={!hasPreviousPage || isFetching}
+          >
+            Previous
+          </Button>
+          <Button
+            onClick={() => {
+              if (!pageInfo?.nextCursor) return;
+              setPageCursors((prev) => {
+                const next = [...prev];
+                if (!next[pageIndex + 1]) {
+                  next[pageIndex + 1] = pageInfo.nextCursor;
+                }
+                return next;
+              });
+              setPageIndex((prev) => prev + 1);
+            }}
+            disabled={!hasNextPage || isFetching}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
 
       {/* Quick Stats */}
       <TicketStats tickets={allTickets} />
