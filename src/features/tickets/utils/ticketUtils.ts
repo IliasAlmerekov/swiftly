@@ -36,3 +36,37 @@ export const CATEGORY_OPTIONS = [
   { value: 'Email', label: 'Email' },
   { value: 'Other', label: 'Other' },
 ];
+
+export const normalizeCategoryValue = (category?: string): string | undefined => {
+  if (!category) return undefined;
+  const trimmed = category.trim();
+  if (!trimmed) return undefined;
+  const normalized = trimmed.toLowerCase();
+  const known = CATEGORY_OPTIONS.find(
+    (option) =>
+      option.value.toLowerCase() === normalized || option.label.toLowerCase() === normalized,
+  );
+  return known ? known.value : trimmed;
+};
+
+export const formatCategoryLabel = (category?: string): string => {
+  if (!category) return 'Not set';
+  const trimmed = category.trim();
+  if (!trimmed) return 'Not set';
+  const normalized = trimmed.toLowerCase();
+  const known = CATEGORY_OPTIONS.find(
+    (option) =>
+      option.value.toLowerCase() === normalized || option.label.toLowerCase() === normalized,
+  );
+  return known ? known.label : trimmed;
+};
+
+export const getInitials = (value?: string): string => {
+  if (!value) return 'U';
+  const parts = value.trim().split(' ');
+  const letters = parts
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join('');
+  return letters.toUpperCase();
+};
