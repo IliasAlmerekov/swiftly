@@ -2,6 +2,8 @@ import js from '@eslint/js';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import pluginReact from 'eslint-plugin-react';
+import pluginReactHooks from 'eslint-plugin-react-hooks';
+import pluginReactRefresh from 'eslint-plugin-react-refresh';
 import checkFile from 'eslint-plugin-check-file';
 
 // ============ Architecture Rules - Cross-feature import restrictions ============
@@ -34,9 +36,13 @@ const featureRestrictions = {
 };
 
 export default tseslint.config(
+  // Ignore CommonJS config files and build output
+  {
+    ignores: ['**/*.cjs', 'dist/**'],
+  },
   // Base JS config
   {
-    files: ['**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    files: ['**/*.{js,mjs,ts,mts,cts,jsx,tsx}'],
     extends: [js.configs.recommended],
     languageOptions: { globals: globals.browser },
   }, // TypeScript config
@@ -46,9 +52,17 @@ export default tseslint.config(
     settings: {
       react: { version: 'detect' },
     },
+    plugins: {
+      ...pluginReact.configs.flat.recommended.plugins,
+      'react-hooks': pluginReactHooks,
+      'react-refresh': pluginReactRefresh,
+    },
     rules: {
       ...pluginReact.configs.flat.recommended.rules,
+      ...pluginReactHooks.configs.recommended.rules,
       'react/react-in-jsx-scope': 'off', // Not needed with React 17+ JSX transform
+      'react/prop-types': 'off', // TypeScript handles prop validation
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   }, // ============ Architecture Rules ============
   {

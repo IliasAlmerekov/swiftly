@@ -46,6 +46,13 @@ format:check:
   allow_failure: true
 
 # -------- TESTS --------
+test:unit:
+  stage: test
+  script:
+    - npm run test:run
+  allow_failure: false
+  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
+
 test:types:
   stage: test
   script:

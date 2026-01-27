@@ -24,7 +24,7 @@ import { useNavigate } from 'react-router-dom';
 import { paths } from '@/config/paths';
 import { Button } from '@/shared/components/ui/button';
 import { ModeToggle } from '@/shared/components/ui/mode-toogle';
-import { getUserProfile, setUserStatusOffline } from '@/features/users/api';
+import { getUserProfile, setUserStatusOffline } from '@/shared/api';
 import { useAuthContext } from '@/shared/context/AuthContext';
 import { useEffect, useState } from 'react';
 import type { User } from '@/types';

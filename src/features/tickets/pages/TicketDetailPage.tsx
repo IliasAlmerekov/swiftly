@@ -1,4 +1,4 @@
-import { getAdminUsers } from '@/features/auth/api';
+import { getAdminUsers } from '@/shared/api';
 import { addComment, getTicketById, updateTicket } from '@/features/tickets/api';
 import { useAuthContext } from '@/shared/context/AuthContext';
 import { Button } from '@/shared/components/ui/button';

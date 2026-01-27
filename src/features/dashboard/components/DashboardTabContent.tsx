@@ -38,7 +38,7 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({ curren
               {greeting}, {userName}!
             </h1>
             <p className="text-muted-foreground">
-              Welcome back. Here's an overview of your support tickets.
+              Welcome back. Here&apos;s an overview of your support tickets.
             </p>
           </div>
           <div className="px-4 py-6 lg:px-6">

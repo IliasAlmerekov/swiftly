@@ -1,4 +1,4 @@
-import type { AuthToken, AdminUsersResponse, UserRole } from '@/types';
+import type { AuthToken, AdminUsersResponse } from '@/types';
 import { ApiError } from '@/types';
 import { apiClient } from '@/shared/api';
 

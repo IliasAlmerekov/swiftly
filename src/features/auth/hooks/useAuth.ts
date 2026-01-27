@@ -48,7 +48,7 @@ export function useRegisterMutation() {
       password: string;
       name: string;
       role?: UserRole;
-    }) => registerUser(email, password, name ),
+    }) => registerUser(email, password, name),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: authKeys.all });
     },
