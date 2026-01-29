@@ -1,9 +1,10 @@
 ﻿import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent } from '@/shared/components/ui/card';
-import { Pen, Upload } from 'lucide-react';
-import { memo } from 'react';
+import { Pen, Upload, X } from 'lucide-react';
+import { memo, useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui/popover';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
+import { Dialog, DialogContent, DialogClose, DialogTitle } from '@/shared/components/ui/dialog';
 import type { User } from '@/types';
 
 interface UserCardProps {
@@ -21,6 +22,8 @@ const UserCard = memo(function UserCard({
   onAvatarRemove,
   uploadingAvatar,
 }: UserCardProps) {
+  const [isAvatarOpen, setIsAvatarOpen] = useState(false);
+
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -28,83 +31,121 @@ const UserCard = memo(function UserCard({
     }
   };
 
+  const handleAvatarClick = () => {
+    if (user.avatar?.url) {
+      setIsAvatarOpen(true);
+    }
+  };
+
   return (
-    <Card>
-      <CardContent className="p-4 sm:p-6">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
-            <div className="relative">
-              <Avatar className="h-24 w-24 sm:h-32 sm:w-32">
-                <AvatarImage src={user.avatar?.url || ''} alt="Profile" />
-                <AvatarFallback className="text-2xl sm:text-4xl">
-                  {user.name.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              {!isViewingOtherUser && (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="hover:bg-muted absolute right-0 -bottom-2 h-9 w-9 rounded-full border shadow-sm sm:-top-2 sm:-right-2 sm:bottom-auto"
-                      disabled={uploadingAvatar}
-                    >
-                      <Pen className="h-4 w-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64 p-4" align="center" sideOffset={8}>
-                    <div className="space-y-3">
-                      <h4 className="text-sm font-medium">Change Avatar</h4>
-                      <div className="space-y-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full justify-start bg-transparent"
-                          onClick={() => document.getElementById('avatar-upload')?.click()}
-                          disabled={uploadingAvatar}
-                        >
-                          <Upload className="mr-2 h-4 w-4" />
-                          {uploadingAvatar ? 'Uploading...' : 'Upload new photo'}
-                        </Button>
-                        <input
-                          id="avatar-upload"
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={handleFileSelect}
-                          disabled={uploadingAvatar}
-                        />
-                        {user.avatar?.url && (
+    <>
+      <Card>
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
+              <div className="relative">
+                <Avatar
+                  className={`h-24 w-24 sm:h-32 sm:w-32 ${user.avatar?.url ? 'cursor-pointer transition-transform hover:scale-105' : ''}`}
+                  onClick={handleAvatarClick}
+                >
+                  <AvatarImage src={user.avatar?.url || ''} alt="Profile" />
+                  <AvatarFallback className="text-2xl sm:text-4xl">
+                    {user.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                {!isViewingOtherUser && (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="hover:bg-muted absolute right-0 -bottom-2 h-9 w-9 rounded-full border shadow-sm sm:-top-2 sm:-right-2 sm:bottom-auto"
+                        disabled={uploadingAvatar}
+                      >
+                        <Pen className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64 p-4" align="center" sideOffset={8}>
+                      <div className="space-y-3">
+                        <h4 className="text-sm font-medium">Change Avatar</h4>
+                        <div className="space-y-2">
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
-                            className="text-destructive hover:text-destructive w-full justify-start"
-                            onClick={onAvatarRemove}
+                            className="w-full justify-start bg-transparent"
+                            onClick={() => document.getElementById('avatar-upload')?.click()}
                             disabled={uploadingAvatar}
                           >
-                            Remove photo
+                            <Upload className="mr-2 h-4 w-4" />
+                            {uploadingAvatar ? 'Uploading...' : 'Upload new photo'}
                           </Button>
-                        )}
+                          <input
+                            id="avatar-upload"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleFileSelect}
+                            disabled={uploadingAvatar}
+                          />
+                          {user.avatar?.url && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-destructive hover:text-destructive w-full justify-start"
+                              onClick={onAvatarRemove}
+                              disabled={uploadingAvatar}
+                            >
+                              Remove photo
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              )}
-            </div>
-            <div className="text-center sm:text-left">
-              <h1 className="text-foreground text-2xl font-semibold sm:text-3xl">{user.name}</h1>
-              <p className="text-muted-foreground text-sm">{user.email}</p>
-              {user.position && <p className="text-muted-foreground text-sm">{user.position}</p>}
-              {(user.city || user.country) && (
-                <p className="text-muted-foreground text-sm">
-                  {[user.city, user.country].filter(Boolean).join(', ')}
-                </p>
-              )}
+                    </PopoverContent>
+                  </Popover>
+                )}
+              </div>
+              <div className="text-center sm:text-left">
+                <h1 className="text-foreground text-2xl font-semibold sm:text-3xl">{user.name}</h1>
+                <p className="text-muted-foreground text-sm">{user.email}</p>
+                {user.position && <p className="text-muted-foreground text-sm">{user.position}</p>}
+                {(user.city || user.country) && (
+                  <p className="text-muted-foreground text-sm">
+                    {[user.city, user.country].filter(Boolean).join(', ')}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      {/* Avatar Lightbox Dialog */}
+      <Dialog open={isAvatarOpen} onOpenChange={setIsAvatarOpen}>
+        <DialogContent
+          className="flex max-w-lg items-center justify-center border-none bg-transparent p-0 shadow-none sm:max-w-xl"
+          hideCloseButton
+        >
+          <DialogTitle className="sr-only">Avatar Preview</DialogTitle>
+          <div className="relative">
+            <img
+              src={user.avatar?.url || ''}
+              alt={`${user.name}'s avatar`}
+              className="h-80 w-80 rounded-full object-cover sm:h-96 sm:w-96"
+            />
+            <DialogClose asChild>
+              <Button
+                variant="secondary"
+                size="icon"
+                className="absolute top-2 right-2 h-8 w-8 rounded-full shadow-lg"
+              >
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+              </Button>
+            </DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 });
 
