@@ -1,159 +1,151 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useCallback, useMemo, useState, memo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 
 import { paths } from '@/config/paths';
 import { TicketTable } from '@/features/tickets/components/TicketTable';
 import { TicketSearchBar } from '@/features/tickets/components/TicketSearchBar';
 import { TicketStats } from '@/features/tickets/components/TicketStats';
-import {
-  DEFAULT_TICKET_PAGE_SIZE,
-  getTickets,
-  type TicketDateFilter,
-  type TicketScope,
-} from '@/features/tickets/api';
+import { DEFAULT_TICKET_PAGE_SIZE, getTickets } from '@/features/tickets/api';
 import { ticketKeys } from '@/features/tickets/hooks/useTickets';
+import {
+  useTicketFilters,
+  STAFF_TABS,
+  USER_STATUS_SELECT_OPTIONS,
+} from '@/features/tickets/hooks/useTicketFilters';
 import { useTicketFilter } from '@/shared/hooks/useTicketFilter';
 import { useAuth } from '@/shared/hooks/useAuth';
+import { usePagination } from '@/shared/hooks/usePagination';
 import FilterSelect from '@/shared/components/filters/FilterSelect';
 import { Skeleton } from '@/shared/components/ui/skeleton';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/shared/components/ui/pagination';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/components/ui/select';
+import { PaginationControls } from '@/shared/components/ui/pagination-controls';
+import { PageSizeSelector } from '@/shared/components/ui/page-size-selector';
 
-const USER_STATUS_OPTIONS = [
-  { value: 'all', label: 'All tickets', status: undefined },
-  { value: 'open', label: 'Open', status: ['open'] },
-  { value: 'in-progress', label: 'In progress', status: ['in-progress'] },
-  { value: 'closed', label: 'Closed', status: ['closed', 'resolved'] },
-];
-
-const USER_STATUS_SELECT_OPTIONS = USER_STATUS_OPTIONS.map(({ value, label }) => ({
-  value,
-  label,
-}));
-
-interface StaffTab {
-  value: string;
-  label: string;
-  scope: TicketScope;
-  status?: string[];
-  date?: TicketDateFilter;
-  includeUnassigned?: boolean;
+// ============ Loading State Component ============
+interface TicketsLoadingProps {
+  onSearch: (query: string) => void;
+  onCreateTicket: () => void;
 }
 
-const STAFF_TABS: StaffTab[] = [
-  {
-    value: 'assigned',
-    label: 'My in progress',
-    scope: 'assignedToMe',
-    includeUnassigned: true,
-  },
-  { value: 'all', label: 'All tickets', scope: 'all' },
-  { value: 'open', label: 'All open', scope: 'all', status: ['open'] },
-  { value: 'in-progress', label: 'All in progress', scope: 'all', status: ['in-progress'] },
-  { value: 'today', label: "Today's tickets", scope: 'all', date: 'today' },
-  { value: 'closed', label: 'Closed', scope: 'all', status: ['closed', 'resolved'] },
-];
+const TicketsLoading = memo(function TicketsLoading({
+  onSearch,
+  onCreateTicket,
+}: TicketsLoadingProps) {
+  return (
+    <div className="space-y-6" aria-busy="true" aria-live="polite">
+      <TicketSearchBar onSearch={onSearch} onCreateTicket={onCreateTicket} />
+      <Skeleton className="h-[125px] w-[250px] rounded-xl" />
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-[250px]" />
+        <Skeleton className="h-4 w-[250px]" />
+      </div>
+    </div>
+  );
+});
 
+// ============ Error State Component ============
+interface TicketsErrorProps {
+  error: Error | null;
+  onSearch: (query: string) => void;
+  onCreateTicket: () => void;
+}
+
+const TicketsError = memo(function TicketsError({
+  error,
+  onSearch,
+  onCreateTicket,
+}: TicketsErrorProps) {
+  return (
+    <div className="space-y-6">
+      <TicketSearchBar onSearch={onSearch} onCreateTicket={onCreateTicket} />
+      <div role="alert" className="border-destructive rounded-xl border p-4">
+        <p className="font-medium">Failed to load tickets</p>
+        <p className="text-sm opacity-80">{error?.message ?? 'Unknown error'}</p>
+      </div>
+    </div>
+  );
+});
+
+// ============ Pagination Footer Component ============
+interface PaginationFooterProps {
+  pageIndex: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+  isFetching: boolean;
+  pageSize: number;
+  nextCursor: string | null;
+  onPreviousPage: () => void;
+  onNextPage: (cursor: string | null) => void;
+  onPageSizeChange: (size: number) => void;
+}
+
+const PaginationFooter = memo(function PaginationFooter({
+  pageIndex,
+  hasPreviousPage,
+  hasNextPage,
+  isFetching,
+  pageSize,
+  nextCursor,
+  onPreviousPage,
+  onNextPage,
+  onPageSizeChange,
+}: PaginationFooterProps) {
+  return (
+    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <PaginationControls
+        pageIndex={pageIndex}
+        hasPreviousPage={hasPreviousPage}
+        hasNextPage={hasNextPage}
+        isDisabled={isFetching}
+        onPreviousPage={onPreviousPage}
+        onNextPage={() => onNextPage(nextCursor)}
+      />
+      <PageSizeSelector pageSize={pageSize} onPageSizeChange={onPageSizeChange} />
+    </div>
+  );
+});
+
+// ============ Main Component ============
+/**
+ * Tickets page component.
+ *
+ * Follows bulletproof-react patterns:
+ * - Custom hooks for filters and pagination
+ * - Memoized sub-components for state isolation
+ * - Separation of concerns: data fetching, presentation, navigation
+ */
 export function Tickets() {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
   const { role } = useAuth();
   const isStaff = role === 'admin' || role === 'support1';
 
+  // Search state - debounced value from TicketSearchBar
   const [searchQuery, setSearchQuery] = useState('');
-  const [pageSize, setPageSize] = useState(DEFAULT_TICKET_PAGE_SIZE);
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageCursors, setPageCursors] = useState<Array<string | null>>([null]);
 
-  const resolveFilterValue = useCallback((value: string | null, staffMode: boolean): string => {
-    if (staffMode) {
-      return value !== null && STAFF_TABS.some((tab) => tab.value === value)
-        ? value
-        : STAFF_TABS[1].value;
-    }
-    return value !== null && USER_STATUS_OPTIONS.some((option) => option.value === value)
-      ? value
-      : USER_STATUS_OPTIONS[0].value;
+  // Memoized search handler to prevent TicketSearchBar re-renders
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query);
   }, []);
 
-  const activeFilterValue = useMemo(
-    () => resolveFilterValue(searchParams.get('filter'), isStaff),
-    [isStaff, resolveFilterValue, searchParams],
-  );
+  // Filter state from custom hook
+  const { activeFilterValue, activeStaffTab, queryFilters, filterKey, onFilterChange } =
+    useTicketFilters({ isStaff });
 
-  const activeTabValue = useMemo(
-    () => resolveFilterValue(searchParams.get('filter'), true),
-    [resolveFilterValue, searchParams],
-  );
+  // Pagination state from custom hook
+  const {
+    pageIndex,
+    pageSize,
+    cursor,
+    hasPreviousPage,
+    setPageSize,
+    goToPreviousPage,
+    goToNextPage,
+  } = usePagination({
+    initialPageSize: DEFAULT_TICKET_PAGE_SIZE,
+    resetKey: filterKey,
+  });
 
-  useEffect(() => {
-    const current = searchParams.get('filter');
-    if (current === activeFilterValue) return;
-    const nextParams = new URLSearchParams(searchParams);
-    nextParams.set('filter', activeFilterValue);
-    setSearchParams(nextParams, { replace: true });
-  }, [activeFilterValue, searchParams, setSearchParams]);
-
-  const cursor = useMemo(() => pageCursors[pageIndex] ?? null, [pageCursors, pageIndex]);
-
-  const activeStaffTab = useMemo(
-    () => STAFF_TABS.find((tab) => tab.value === activeTabValue) ?? STAFF_TABS[1],
-    [activeTabValue],
-  );
-
-  const activeUserFilter = useMemo(
-    () =>
-      USER_STATUS_OPTIONS.find((option) => option.value === activeFilterValue) ??
-      USER_STATUS_OPTIONS[0],
-    [activeFilterValue],
-  );
-
-  const queryFilters = useMemo((): {
-    scope: TicketScope;
-    status?: string[];
-    date?: TicketDateFilter;
-    includeUnassigned?: boolean;
-  } => {
-    if (isStaff) {
-      return {
-        scope: activeStaffTab.scope,
-        status: activeStaffTab.status,
-        date: activeStaffTab.date,
-        includeUnassigned: activeStaffTab.includeUnassigned,
-      };
-    }
-    return {
-      scope: 'mine',
-      status: activeUserFilter.status,
-    };
-  }, [activeStaffTab, activeUserFilter, isStaff]);
-
-  const filterKey = useMemo(() => {
-    const statusKey = queryFilters.status ? queryFilters.status.join(',') : 'all';
-    return `${queryFilters.scope}-${statusKey}-${queryFilters.date ?? 'any'}-${
-      queryFilters.includeUnassigned ? 'with-unassigned' : 'assigned-only'
-    }`;
-  }, [queryFilters]);
-
-  useEffect(() => {
-    setPageIndex(0);
-    setPageCursors([null]);
-  }, [pageSize, filterKey]);
-
+  // Data fetching
   const { data, isLoading, isError, error, isFetching } = useQuery({
     queryKey: ticketKeys.list({
       scope: queryFilters.scope,
@@ -182,15 +174,14 @@ export function Tickets() {
   const tickets = data?.items ?? [];
   const pageInfo = data?.pageInfo;
   const hasNextPage = Boolean(pageInfo?.hasNextPage);
-  const hasPreviousPage = pageIndex > 0;
-  const isPrevDisabled = !hasPreviousPage || isFetching;
-  const isNextDisabled = !hasNextPage || isFetching;
 
+  // Client-side search filtering
   const filteredTickets = useTicketFilter({
     tickets,
     searchQuery,
   });
 
+  // ============ Navigation Handlers ============
   const handleTicketClick = useCallback(
     (ticketId: string) => navigate(paths.app.ticket.getHref(ticketId, paths.tabs.tickets)),
     [navigate],
@@ -206,6 +197,7 @@ export function Tickets() {
     [navigate],
   );
 
+  // ============ Computed Values ============
   const description = useMemo(() => {
     const suffix = searchQuery ? ` for "${searchQuery}"` : '';
     return `${filteredTickets.length} ticket(s) found${suffix}`;
@@ -213,53 +205,30 @@ export function Tickets() {
 
   const showStats = isStaff && activeStaffTab.value === 'all';
 
+  // ============ Render States ============
   if (isLoading) {
-    return (
-      <div className="space-y-6" aria-busy="true" aria-live="polite">
-        <TicketSearchBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onCreateTicket={handleCreateTicket}
-        />
-        <Skeleton className="h-[125px] w-[250px] rounded-xl" />
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-[250px]" />
-          <Skeleton className="h-4 w-[250px]" />
-        </div>
-      </div>
-    );
+    return <TicketsLoading onSearch={handleSearch} onCreateTicket={handleCreateTicket} />;
   }
 
   if (isError) {
     return (
-      <div className="space-y-6">
-        <TicketSearchBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onCreateTicket={handleCreateTicket}
-        />
-        <div role="alert" className="border-destructive rounded-xl border p-4">
-          <p className="font-medium">Failed to load tickets</p>
-          <p className="text-sm opacity-80">{(error as Error)?.message ?? 'Unknown error'}</p>
-        </div>
-      </div>
+      <TicketsError
+        error={error as Error | null}
+        onSearch={handleSearch}
+        onCreateTicket={handleCreateTicket}
+      />
     );
   }
 
   return (
     <div className="space-y-6">
       <TicketSearchBar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
+        onSearch={handleSearch}
         onCreateTicket={handleCreateTicket}
         filters={
           <FilterSelect
-            value={isStaff ? activeTabValue : activeFilterValue}
-            onValueChange={(value) => {
-              const nextParams = new URLSearchParams(searchParams);
-              nextParams.set('filter', value);
-              setSearchParams(nextParams);
-            }}
+            value={isStaff ? activeStaffTab.value : activeFilterValue}
+            onValueChange={onFilterChange}
             options={
               isStaff
                 ? STAFF_TABS.map((tab) => ({ value: tab.value, label: tab.label }))
@@ -286,70 +255,17 @@ export function Tickets() {
         }}
       />
 
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                aria-disabled={isPrevDisabled}
-                tabIndex={isPrevDisabled ? -1 : 0}
-                className={isPrevDisabled ? 'pointer-events-none opacity-50' : undefined}
-                onClick={(event) => {
-                  event.preventDefault();
-                  if (isPrevDisabled) return;
-                  setPageIndex((prev) => Math.max(0, prev - 1));
-                }}
-              />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink
-                href="#"
-                isActive
-                size="default"
-                className="pointer-events-none"
-                onClick={(event) => event.preventDefault()}
-              >
-                {pageIndex + 1}
-              </PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationNext
-                href="#"
-                aria-disabled={isNextDisabled}
-                tabIndex={isNextDisabled ? -1 : 0}
-                className={isNextDisabled ? 'pointer-events-none opacity-50' : undefined}
-                onClick={(event) => {
-                  event.preventDefault();
-                  if (isNextDisabled || !pageInfo?.nextCursor) return;
-                  setPageCursors((prev) => {
-                    const next = [...prev];
-                    if (!next[pageIndex + 1]) {
-                      next[pageIndex + 1] = pageInfo.nextCursor;
-                    }
-                    return next;
-                  });
-                  setPageIndex((prev) => prev + 1);
-                }}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-
-        <div className="flex items-center justify-between gap-3 md:justify-end">
-          <span className="text-muted-foreground text-sm">Rows per page</span>
-          <Select value={String(pageSize)} onValueChange={(value) => setPageSize(Number(value))}>
-            <SelectTrigger className="h-8 w-[90px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="20">20</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-              <SelectItem value="100">100</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+      <PaginationFooter
+        pageIndex={pageIndex}
+        hasPreviousPage={hasPreviousPage}
+        hasNextPage={hasNextPage}
+        isFetching={isFetching}
+        pageSize={pageSize}
+        nextCursor={pageInfo?.nextCursor ?? null}
+        onPreviousPage={goToPreviousPage}
+        onNextPage={goToNextPage}
+        onPageSizeChange={setPageSize}
+      />
 
       {showStats && <TicketStats tickets={tickets} />}
     </div>
