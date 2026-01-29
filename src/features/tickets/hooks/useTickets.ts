@@ -9,7 +9,6 @@ import {
   getTickets,
   getTicketById,
   getTicketStatsOfMonth,
-  getUserTickets,
   getUserTicketStats,
   updateTicket,
   uploadTicketAttachment,

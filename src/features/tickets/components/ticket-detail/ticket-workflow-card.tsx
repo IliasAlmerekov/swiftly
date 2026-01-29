@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
 import { Label } from '@/shared/components/ui/label';
@@ -17,8 +18,21 @@ import {
   formatCategoryLabel,
 } from '@/features/tickets/utils/ticketUtils';
 
-const STATUS_OPTIONS: Ticket['status'][] = ['open', 'in-progress', 'resolved', 'closed'];
+// ============ Constants ============
+const STATUS_OPTIONS: { value: Ticket['status']; label: string }[] = [
+  { value: 'open', label: 'Open' },
+  { value: 'in-progress', label: 'In Progress' },
+  { value: 'resolved', label: 'Resolved' },
+  { value: 'closed', label: 'Closed' },
+];
 
+const PRIORITY_OPTIONS = [
+  { value: 'low', label: 'Low' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'high', label: 'High' },
+];
+
+// ============ Types ============
 interface TicketWorkflowCardProps {
   ticket: Ticket;
   isStaff: boolean;
@@ -31,7 +45,31 @@ interface TicketWorkflowCardProps {
   isUpdating?: boolean;
 }
 
-export const TicketWorkflowCard = ({
+// ============ Sub-components ============
+interface WorkflowFieldProps {
+  label: string;
+  children: React.ReactNode;
+}
+
+const WorkflowField = memo(function WorkflowField({ label, children }: WorkflowFieldProps) {
+  return (
+    <div className="space-y-2">
+      <Label className="text-muted-foreground text-xs">{label}</Label>
+      {children}
+    </div>
+  );
+});
+
+// ============ Main Component ============
+/**
+ * Ticket workflow card component.
+ *
+ * Follows bulletproof-react patterns:
+ * - Memoized with extracted sub-components
+ * - Configuration-driven options
+ * - Clear separation between staff and user views
+ */
+export const TicketWorkflowCard = memo(function TicketWorkflowCard({
   ticket,
   isStaff,
   currentUserId,
@@ -41,19 +79,35 @@ export const TicketWorkflowCard = ({
   onPriorityChange,
   onCategoryChange,
   isUpdating = false,
-}: TicketWorkflowCardProps) => {
+}: TicketWorkflowCardProps) {
   const priorityLabel = ticket.priority ?? 'untriaged';
   const normalizedCategory = normalizeCategoryValue(ticket.category);
 
-  const categoryOptions = ticket.category
-    ? CATEGORY_OPTIONS.some(
-        (option) =>
-          option.value === normalizedCategory ||
-          option.label.toLowerCase() === (ticket.category ?? '').trim().toLowerCase(),
-      )
+  const categoryOptions = useMemo(() => {
+    if (!ticket.category) return CATEGORY_OPTIONS;
+
+    const exists = CATEGORY_OPTIONS.some(
+      (option) =>
+        option.value === normalizedCategory ||
+        option.label.toLowerCase() === (ticket.category ?? '').trim().toLowerCase(),
+    );
+
+    return exists
       ? CATEGORY_OPTIONS
-      : [{ value: ticket.category, label: ticket.category }, ...CATEGORY_OPTIONS]
-    : CATEGORY_OPTIONS;
+      : [{ value: ticket.category, label: ticket.category }, ...CATEGORY_OPTIONS];
+  }, [ticket.category, normalizedCategory]);
+
+  const assigneeOptions = useMemo(() => {
+    const options = adminUsers
+      .filter((admin) => admin._id !== currentUserId)
+      .map((admin) => ({ value: admin._id, label: admin.name }));
+
+    if (currentUserId) {
+      options.unshift({ value: currentUserId, label: 'Assign to me' });
+    }
+
+    return options;
+  }, [adminUsers, currentUserId]);
 
   return (
     <Card>
@@ -62,17 +116,16 @@ export const TicketWorkflowCard = ({
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Status */}
-        <div className="space-y-2">
-          <Label className="text-muted-foreground text-xs">Status</Label>
+        <WorkflowField label="Status">
           {isStaff ? (
             <Select value={ticket.status} onValueChange={onStatusChange} disabled={isUpdating}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {STATUS_OPTIONS.map((status) => (
-                  <SelectItem key={status} value={status}>
-                    {status}
+                {STATUS_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -80,35 +133,30 @@ export const TicketWorkflowCard = ({
           ) : (
             <Badge className={`${getStatusColor(ticket.status)} capitalize`}>{ticket.status}</Badge>
           )}
-        </div>
+        </WorkflowField>
 
         {/* Assignee */}
-        <div className="space-y-2">
-          <Label className="text-muted-foreground text-xs">Assignee</Label>
+        <WorkflowField label="Assignee">
           {isStaff ? (
             <Select onValueChange={onAssignTicket} disabled={isUpdating}>
               <SelectTrigger>
                 <SelectValue placeholder={ticket.assignedTo?.name || 'Unassigned'} />
               </SelectTrigger>
               <SelectContent>
-                {currentUserId && <SelectItem value={currentUserId}>Assign to me</SelectItem>}
-                {adminUsers
-                  .filter((admin) => admin._id !== currentUserId)
-                  .map((admin) => (
-                    <SelectItem key={admin._id} value={admin._id}>
-                      {admin.name}
-                    </SelectItem>
-                  ))}
+                {assigneeOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           ) : (
             <p className="text-sm">{ticket.assignedTo?.name || 'Unassigned'}</p>
           )}
-        </div>
+        </WorkflowField>
 
         {/* Priority */}
-        <div className="space-y-2">
-          <Label className="text-muted-foreground text-xs">Priority</Label>
+        <WorkflowField label="Priority">
           {isStaff ? (
             <Select
               value={ticket.priority ?? undefined}
@@ -119,9 +167,11 @@ export const TicketWorkflowCard = ({
                 <SelectValue placeholder="Select priority" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
+                {PRIORITY_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           ) : (
@@ -129,11 +179,10 @@ export const TicketWorkflowCard = ({
               {priorityLabel}
             </Badge>
           )}
-        </div>
+        </WorkflowField>
 
         {/* Category */}
-        <div className="space-y-2">
-          <Label className="text-muted-foreground text-xs">Category</Label>
+        <WorkflowField label="Category">
           {isStaff ? (
             <Select
               value={normalizedCategory}
@@ -154,8 +203,8 @@ export const TicketWorkflowCard = ({
           ) : (
             <Badge variant="outline">{formatCategoryLabel(ticket.category)}</Badge>
           )}
-        </div>
+        </WorkflowField>
       </CardContent>
     </Card>
   );
-};
+});
