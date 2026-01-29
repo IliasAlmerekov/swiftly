@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getUserTickets, type TicketListResponse } from '@/features/tickets/api';
+import { getTickets, type TicketListResponse } from '@/features/tickets/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { IconTicket, IconUsers, IconCircleCheck, IconClock } from '@tabler/icons-react';
 import { ticketKeys } from '@/features/tickets/hooks/useTickets';
@@ -15,8 +15,8 @@ interface UserTicketCardProps {
 export default function UserTicketCard() {
   // Fetch user tickets data
   const { data: userTickets } = useQuery({
-    queryKey: [...ticketKeys.userTickets(), 'summary'],
-    queryFn: () => getUserTickets(),
+    queryKey: ticketKeys.list({ scope: 'mine', view: 'summary' }),
+    queryFn: () => getTickets({ scope: 'mine' }),
     select: (ticketPage: TicketListResponse) => {
       const tickets = ticketPage?.items ?? [];
 

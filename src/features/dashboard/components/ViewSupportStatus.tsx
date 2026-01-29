@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { getUserTickets, type TicketListResponse } from '@/features/tickets/api';
+import { getTickets, type TicketListResponse } from '@/features/tickets/api';
 import { activityInterval, getSupportUsers, setUserStatusOnline } from '@/features/users/api';
 import {
   Card,
@@ -11,7 +11,6 @@ import {
 } from '@/shared/components/ui/card';
 import { IconClock, IconTicket, IconUser } from '@tabler/icons-react';
 import { ticketKeys } from '@/features/tickets/hooks/useTickets';
-import type { Ticket } from '@/types';
 
 export default function ViewSupportStatus() {
   const { data: supportUsers } = useQuery({
@@ -26,19 +25,11 @@ export default function ViewSupportStatus() {
   });
 
   const { data: ticketsTodayCount = 0 } = useQuery({
-    queryKey: [...ticketKeys.userTickets(), 'today'],
-    queryFn: () => getUserTickets(),
+    queryKey: ticketKeys.list({ scope: 'mine', date: 'today' }),
+    queryFn: () => getTickets({ scope: 'mine', date: 'today' }),
     select: (ticketPage: TicketListResponse) => {
       const tickets = ticketPage?.items ?? [];
-
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      return tickets.filter((ticket: Ticket) => {
-        const created = new Date(ticket.createdAt);
-        created.setHours(0, 0, 0, 0);
-        return created.getTime() === today.getTime();
-      }).length;
+      return tickets.length;
     },
     refetchInterval: 5 * 60_000,
   });
