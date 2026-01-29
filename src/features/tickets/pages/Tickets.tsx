@@ -1,15 +1,22 @@
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+
+import { paths } from '@/config/paths';
 import { TicketTable } from '@/features/tickets/components/TicketTable';
 import { TicketSearchBar } from '@/features/tickets/components/TicketSearchBar';
 import { TicketStats } from '@/features/tickets/components/TicketStats';
+import {
+  DEFAULT_TICKET_PAGE_SIZE,
+  getTickets,
+  type TicketDateFilter,
+  type TicketScope,
+} from '@/features/tickets/api';
+import { ticketKeys } from '@/features/tickets/hooks/useTickets';
 import { useTicketFilter } from '@/shared/hooks/useTicketFilter';
-import { useNavigate } from 'react-router-dom';
-
-import { paths } from '@/config/paths';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { DEFAULT_TICKET_PAGE_SIZE, getAllTickets } from '@/features/tickets/api';
-import { Skeleton } from '@/shared/components/ui/skeleton';
 import { useAuth } from '@/shared/hooks/useAuth';
+import FilterSelect from '@/shared/components/filters/FilterSelect';
+import { Skeleton } from '@/shared/components/ui/skeleton';
 import {
   Pagination,
   PaginationContent,
@@ -25,51 +32,167 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/components/ui/select';
-import { ticketKeys } from '@/features/tickets/hooks/useTickets';
 
-export function AllTickets() {
+const USER_STATUS_OPTIONS = [
+  { value: 'all', label: 'All tickets', status: undefined },
+  { value: 'open', label: 'Open', status: ['open'] },
+  { value: 'in-progress', label: 'In progress', status: ['in-progress'] },
+  { value: 'closed', label: 'Closed', status: ['closed', 'resolved'] },
+];
+
+const USER_STATUS_SELECT_OPTIONS = USER_STATUS_OPTIONS.map(({ value, label }) => ({
+  value,
+  label,
+}));
+
+interface StaffTab {
+  value: string;
+  label: string;
+  scope: TicketScope;
+  status?: string[];
+  date?: TicketDateFilter;
+  includeUnassigned?: boolean;
+}
+
+const STAFF_TABS: StaffTab[] = [
+  {
+    value: 'assigned',
+    label: 'My in progress',
+    scope: 'assignedToMe',
+    includeUnassigned: true,
+  },
+  { value: 'all', label: 'All tickets', scope: 'all' },
+  { value: 'open', label: 'All open', scope: 'all', status: ['open'] },
+  { value: 'in-progress', label: 'All in progress', scope: 'all', status: ['in-progress'] },
+  { value: 'today', label: "Today's tickets", scope: 'all', date: 'today' },
+  { value: 'closed', label: 'Closed', scope: 'all', status: ['closed', 'resolved'] },
+];
+
+export function Tickets() {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchParams, setSearchParams] = useSearchParams();
   const { role } = useAuth();
   const isStaff = role === 'admin' || role === 'support1';
+
+  const [searchQuery, setSearchQuery] = useState('');
   const [pageSize, setPageSize] = useState(DEFAULT_TICKET_PAGE_SIZE);
-
-  // fetch all tickets
-
   const [pageIndex, setPageIndex] = useState(0);
   const [pageCursors, setPageCursors] = useState<Array<string | null>>([null]);
 
+  const resolveFilterValue = useCallback((value: string | null, staffMode: boolean): string => {
+    if (staffMode) {
+      return value !== null && STAFF_TABS.some((tab) => tab.value === value)
+        ? value
+        : STAFF_TABS[1].value;
+    }
+    return value !== null && USER_STATUS_OPTIONS.some((option) => option.value === value)
+      ? value
+      : USER_STATUS_OPTIONS[0].value;
+  }, []);
+
+  const activeFilterValue = useMemo(
+    () => resolveFilterValue(searchParams.get('filter'), isStaff),
+    [isStaff, resolveFilterValue, searchParams],
+  );
+
+  const activeTabValue = useMemo(
+    () => resolveFilterValue(searchParams.get('filter'), true),
+    [resolveFilterValue, searchParams],
+  );
+
+  useEffect(() => {
+    const current = searchParams.get('filter');
+    if (current === activeFilterValue) return;
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('filter', activeFilterValue);
+    setSearchParams(nextParams, { replace: true });
+  }, [activeFilterValue, searchParams, setSearchParams]);
+
   const cursor = useMemo(() => pageCursors[pageIndex] ?? null, [pageCursors, pageIndex]);
 
+  const activeStaffTab = useMemo(
+    () => STAFF_TABS.find((tab) => tab.value === activeTabValue) ?? STAFF_TABS[1],
+    [activeTabValue],
+  );
+
+  const activeUserFilter = useMemo(
+    () =>
+      USER_STATUS_OPTIONS.find((option) => option.value === activeFilterValue) ??
+      USER_STATUS_OPTIONS[0],
+    [activeFilterValue],
+  );
+
+  const queryFilters = useMemo((): {
+    scope: TicketScope;
+    status?: string[];
+    date?: TicketDateFilter;
+    includeUnassigned?: boolean;
+  } => {
+    if (isStaff) {
+      return {
+        scope: activeStaffTab.scope,
+        status: activeStaffTab.status,
+        date: activeStaffTab.date,
+        includeUnassigned: activeStaffTab.includeUnassigned,
+      };
+    }
+    return {
+      scope: 'mine',
+      status: activeUserFilter.status,
+    };
+  }, [activeStaffTab, activeUserFilter, isStaff]);
+
+  const filterKey = useMemo(() => {
+    const statusKey = queryFilters.status ? queryFilters.status.join(',') : 'all';
+    return `${queryFilters.scope}-${statusKey}-${queryFilters.date ?? 'any'}-${
+      queryFilters.includeUnassigned ? 'with-unassigned' : 'assigned-only'
+    }`;
+  }, [queryFilters]);
+
+  useEffect(() => {
+    setPageIndex(0);
+    setPageCursors([null]);
+  }, [pageSize, filterKey]);
+
   const { data, isLoading, isError, error, isFetching } = useQuery({
-    queryKey: ticketKeys.list({ scope: 'all', mode: 'page', pageIndex, pageSize, cursor }),
-    queryFn: () => getAllTickets({ cursor, limit: pageSize }),
+    queryKey: ticketKeys.list({
+      scope: queryFilters.scope,
+      status: queryFilters.status?.join(',') ?? 'all',
+      date: queryFilters.date ?? 'any',
+      includeUnassigned: Boolean(queryFilters.includeUnassigned),
+      pageIndex,
+      pageSize,
+      cursor,
+    }),
+    queryFn: () =>
+      getTickets({
+        scope: queryFilters.scope,
+        status: queryFilters.status,
+        date: queryFilters.date,
+        includeUnassigned: queryFilters.includeUnassigned,
+        cursor,
+        limit: pageSize,
+      }),
     placeholderData: (previous) => previous,
-    staleTime: 30_000, // 30 seconds
-    gcTime: 5 * 60_000, // 5 minutes
-    retry: 1, // Retry once on failure
-    enabled: isStaff,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    retry: 1,
   });
 
-  const allTickets = data?.items ?? [];
+  const tickets = data?.items ?? [];
   const pageInfo = data?.pageInfo;
   const hasNextPage = Boolean(pageInfo?.hasNextPage);
   const hasPreviousPage = pageIndex > 0;
   const isPrevDisabled = !hasPreviousPage || isFetching;
   const isNextDisabled = !hasNextPage || isFetching;
 
-  useEffect(() => {
-    setPageIndex(0);
-    setPageCursors([null]);
-  }, [pageSize]);
-
   const filteredTickets = useTicketFilter({
-    tickets: allTickets,
+    tickets,
     searchQuery,
   });
 
   const handleTicketClick = useCallback(
-    (ticketId: string) => navigate(paths.app.ticket.getHref(ticketId, paths.tabs.allTickets)),
+    (ticketId: string) => navigate(paths.app.ticket.getHref(ticketId, paths.tabs.tickets)),
     [navigate],
   );
 
@@ -88,16 +211,7 @@ export function AllTickets() {
     return `${filteredTickets.length} ticket(s) found${suffix}`;
   }, [filteredTickets.length, searchQuery]);
 
-  if (!isStaff) {
-    return (
-      <div className="space-y-6">
-        <div role="alert" className="border-destructive rounded-xl border p-4">
-          <p className="font-medium">Access restricted</p>
-          <p className="text-sm opacity-80">You do not have permission to view all tickets.</p>
-        </div>
-      </div>
-    );
-  }
+  const showStats = isStaff && activeStaffTab.value === 'all';
 
   if (isLoading) {
     return (
@@ -134,17 +248,33 @@ export function AllTickets() {
 
   return (
     <div className="space-y-6">
-      {/* Search and Create */}
       <TicketSearchBar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onCreateTicket={handleCreateTicket}
+        filters={
+          <FilterSelect
+            value={isStaff ? activeTabValue : activeFilterValue}
+            onValueChange={(value) => {
+              const nextParams = new URLSearchParams(searchParams);
+              nextParams.set('filter', value);
+              setSearchParams(nextParams);
+            }}
+            options={
+              isStaff
+                ? STAFF_TABS.map((tab) => ({ value: tab.value, label: tab.label }))
+                : USER_STATUS_SELECT_OPTIONS
+            }
+            placeholder="Filter tickets"
+            ariaLabel="Ticket filter"
+            className="h-10 w-full sm:w-[200px]"
+          />
+        }
       />
 
-      {/* Tickets Table */}
       <TicketTable
         tickets={filteredTickets}
-        title="All Tickets"
+        title="Tickets"
         description={description}
         onTicketClick={handleTicketClick}
         onUserClick={handleUserClick}
@@ -221,8 +351,7 @@ export function AllTickets() {
         </div>
       </div>
 
-      {/* Quick Stats */}
-      <TicketStats tickets={allTickets} />
+      {showStats && <TicketStats tickets={tickets} />}
     </div>
   );
 }
