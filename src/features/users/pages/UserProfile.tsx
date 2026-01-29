@@ -1,5 +1,4 @@
-﻿import { Button } from '@/shared/components/ui/button';
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import { getAllUsers, getUserProfile, getUserProfileById } from '@/features/users/api';
 import type { User } from '@/types';
 import { useParams } from 'react-router-dom';
@@ -34,24 +33,16 @@ export default function UserProfile({ isViewingOtherUser = false }: UserProfileP
     (errorMessage: string) => setError(errorMessage),
   );
 
-  const {
-    editMode,
-    formData,
-    selectedManagerId,
-    setEditMode,
-    handleSaveProfile,
-    handleInputChange,
-    handleCancelEdit,
-  } = useProfileEditor(
+  const { handleSaveProfile } = useProfileEditor({
     user,
     currentUser,
     isViewingOtherUser,
     userId,
-    (updatedUser: User) => {
+    onUserUpdate: (updatedUser: User) => {
       setUser(updatedUser);
     },
-    (errorMessage: string) => setError(errorMessage),
-  );
+    onError: (errorMessage: string) => setError(errorMessage),
+  });
 
   // Fetch user profile on component mount
   useEffect(() => {
@@ -110,13 +101,6 @@ export default function UserProfile({ isViewingOtherUser = false }: UserProfileP
     fetchAllUsers();
   }, [currentUser]);
 
-  // Create stable handlers with useCallback
-  const handleEdit = useCallback(() => setEditMode(true), [setEditMode]);
-
-  const handleCancel = useCallback(() => {
-    handleCancelEdit();
-  }, [handleCancelEdit]);
-
   const handleErrorClose = useCallback(() => setError(null), []);
 
   if (loading) {
@@ -155,27 +139,14 @@ export default function UserProfile({ isViewingOtherUser = false }: UserProfileP
           uploadingAvatar={uploadingAvatar}
         />
 
-        {/* Personal Information Section */}
+        {/* Personal Information Section - form state is isolated inside */}
         <PersonalInformationSection
           user={user}
           currentUser={currentUser}
-          editMode={editMode}
-          formData={formData}
-          selectedManagerId={selectedManagerId}
           allUsers={allUserList}
-          onEdit={handleEdit}
           onSave={handleSaveProfile}
-          onInputChange={handleInputChange}
+          onError={(msg) => setError(msg)}
         />
-
-        {editMode && currentUser?.role === 'admin' && (
-          <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
-            <Button onClick={handleSaveProfile}>Save Changes</Button>
-            <Button variant="outline" onClick={handleCancel}>
-              Cancel
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );
