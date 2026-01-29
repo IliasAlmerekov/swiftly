@@ -6,6 +6,7 @@ import {
   addComment,
   createTicket,
   getAllTickets,
+  getTickets,
   getTicketById,
   getTicketStatsOfMonth,
   getUserTickets,
@@ -20,7 +21,6 @@ export const ticketKeys = {
   all: ['tickets'] as const,
   lists: () => [...ticketKeys.all, 'list'] as const,
   list: (filters: Record<string, unknown>) => [...ticketKeys.lists(), filters] as const,
-  userTickets: () => [...ticketKeys.all, 'user'] as const,
   details: () => [...ticketKeys.all, 'detail'] as const,
   detail: (id: string) => [...ticketKeys.details(), id] as const,
   stats: () => [...ticketKeys.all, 'stats'] as const,
@@ -31,8 +31,8 @@ export const ticketKeys = {
 
 export function useUserTickets() {
   return useQuery({
-    queryKey: ticketKeys.userTickets(),
-    queryFn: () => getUserTickets(),
+    queryKey: ticketKeys.list({ scope: 'mine' }),
+    queryFn: () => getTickets({ scope: 'mine' }),
     select: (ticketPage) => ticketPage.items,
   });
 }

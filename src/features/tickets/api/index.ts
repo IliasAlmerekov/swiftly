@@ -3,6 +3,7 @@ import type {
   CreateTicketFormData,
   CursorPage,
   Ticket,
+  TicketAttachment,
   UpdateTicketFormData,
 } from '@/types';
 import { ApiError } from '@/types';
@@ -32,19 +33,43 @@ export interface UserTicketStats {
   userId: number;
 }
 
+export type TicketScope = 'all' | 'mine' | 'assignedToMe' | undefined;
+export type TicketDateFilter = 'today';
+
 export interface TicketListParams {
   cursor?: string | null;
   limit?: number;
+  scope?: TicketScope;
+  status?: string[] | string;
+  date?: TicketDateFilter;
+  includeUnassigned?: boolean;
 }
 
 export type TicketListResponse = CursorPage<Ticket>;
 
 export const DEFAULT_TICKET_PAGE_SIZE = 20;
 
+const unwrapTicketResponse = (data: ApiResponse<Ticket> | Ticket): Ticket => {
+  if (data && typeof data === 'object' && 'data' in data) {
+    return (data as ApiResponse<Ticket>).data;
+  }
+  return data as Ticket;
+};
+
 const buildTicketListEndpoint = (basePath: string, params: TicketListParams = {}) => {
   const searchParams = new URLSearchParams();
   if (params.cursor) searchParams.set('cursor', params.cursor);
   if (params.limit) searchParams.set('limit', String(params.limit));
+  if (params.scope) searchParams.set('scope', params.scope);
+  if (params.date) searchParams.set('date', params.date);
+  if (params.includeUnassigned) searchParams.set('includeUnassigned', 'true');
+
+  const statusValues = Array.isArray(params.status) ? params.status : params.status?.split(',');
+  const normalizedStatus = statusValues
+    ?.map((status) => status.trim())
+    .filter(Boolean)
+    .join(',');
+  if (normalizedStatus) searchParams.set('status', normalizedStatus);
 
   const query = searchParams.toString();
   return query ? `${basePath}?${query}` : basePath;
@@ -77,9 +102,10 @@ export const getUserTickets = async (
   params: TicketListParams = {},
 ): Promise<TicketListResponse> => {
   try {
-    const endpoint = buildTicketListEndpoint('/tickets/user', {
+    const endpoint = buildTicketListEndpoint('/tickets', {
       limit: DEFAULT_TICKET_PAGE_SIZE,
       ...params,
+      scope: 'mine',
     });
     const data = await apiClient.get<TicketListResponse>(endpoint);
     return normalizeTicketListResponse(data, params.limit ?? DEFAULT_TICKET_PAGE_SIZE);
@@ -118,6 +144,7 @@ export const getAllTickets = async (params: TicketListParams = {}): Promise<Tick
     const endpoint = buildTicketListEndpoint('/tickets', {
       limit: DEFAULT_TICKET_PAGE_SIZE,
       ...params,
+      scope: 'all',
     });
     const data = await apiClient.get<TicketListResponse>(endpoint);
     return normalizeTicketListResponse(data, params.limit ?? DEFAULT_TICKET_PAGE_SIZE);
@@ -126,6 +153,22 @@ export const getAllTickets = async (params: TicketListParams = {}): Promise<Tick
       throw error;
     }
     throw new ApiError('Failed to fetch all tickets', 500);
+  }
+};
+
+export const getTickets = async (params: TicketListParams = {}): Promise<TicketListResponse> => {
+  try {
+    const endpoint = buildTicketListEndpoint('/tickets', {
+      limit: DEFAULT_TICKET_PAGE_SIZE,
+      ...params,
+    });
+    const data = await apiClient.get<TicketListResponse>(endpoint);
+    return normalizeTicketListResponse(data, params.limit ?? DEFAULT_TICKET_PAGE_SIZE);
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError('Failed to fetch tickets', 500);
   }
 };
 
@@ -142,8 +185,8 @@ export const getTicketById = async (ticketId: string): Promise<Ticket> => {
 
 export const createTicket = async (ticketData: CreateTicketFormData): Promise<Ticket> => {
   try {
-    const data = await apiClient.post<ApiResponse<Ticket>>('/tickets', ticketData);
-    return data.data;
+    const data = await apiClient.post<ApiResponse<Ticket> | Ticket>('/tickets', ticketData);
+    return unwrapTicketResponse(data);
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
@@ -157,8 +200,11 @@ export const updateTicket = async (
   updatedData: UpdateTicketFormData,
 ): Promise<Ticket> => {
   try {
-    const data = await apiClient.put<ApiResponse<Ticket>>(`/tickets/${ticketId}`, updatedData);
-    return data.data;
+    const data = await apiClient.put<ApiResponse<Ticket> | Ticket>(
+      `/tickets/${ticketId}`,
+      updatedData,
+    );
+    return unwrapTicketResponse(data);
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
@@ -169,10 +215,13 @@ export const updateTicket = async (
 
 export const addComment = async (ticketId: string, content: string): Promise<Ticket> => {
   try {
-    const data = await apiClient.post<ApiResponse<Ticket>>(`/tickets/${ticketId}/comments`, {
-      content,
-    });
-    return data.data;
+    const data = await apiClient.post<ApiResponse<Ticket> | Ticket>(
+      `/tickets/${ticketId}/comments`,
+      {
+        content,
+      },
+    );
+    return unwrapTicketResponse(data);
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
@@ -184,12 +233,12 @@ export const addComment = async (ticketId: string, content: string): Promise<Tic
 export const uploadTicketAttachment = async (
   ticketId: string,
   file: File,
-): Promise<ApiResponse<Ticket>> => {
+): Promise<{ success: boolean; attachments: TicketAttachment[] }> => {
   try {
     const formData = new FormData();
     formData.append('file', file, file.name);
 
-    return await apiClient.upload<ApiResponse<Ticket>>(
+    return await apiClient.upload<{ success: boolean; attachments: TicketAttachment[] }>(
       `/tickets/${ticketId}/attachments`,
       formData,
     );
