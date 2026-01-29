@@ -49,8 +49,7 @@ export const paths = {
   // ============ Dashboard Tabs ============
   tabs: {
     dashboard: 'dashboard',
-    myTickets: 'my-tickets',
-    allTickets: 'all-tickets',
+    tickets: 'tickets',
     createTicket: 'create-ticket',
     analytics: 'analytics',
   },

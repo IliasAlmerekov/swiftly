@@ -171,8 +171,7 @@ export interface SolutionSearchResult {
 // Navigation Types
 export type TabType =
   | 'dashboard'
-  | 'my-tickets'
-  | 'all-tickets'
+  | 'tickets'
   | 'analytics'
   | 'create-ticket'
   | 'admin-dashboard'
