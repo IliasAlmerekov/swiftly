@@ -1,48 +1,46 @@
 import { useMemo } from 'react';
 import type { Ticket } from '@/types';
 
+export type TicketPredicate = (ticket: Ticket) => boolean;
+
 interface UseTicketFilterOptions {
   tickets: Ticket[];
-  searchQuery: string;
-  filterMyTickets?: boolean;
-  userId?: string;
+  searchQuery?: string;
+  predicates?: TicketPredicate[];
+  searchFields?: Array<(ticket: Ticket) => string | undefined | null>;
 }
+
+const defaultSearchFields = [
+  (ticket: Ticket) => ticket.title,
+  (ticket: Ticket) => ticket._id,
+  (ticket: Ticket) => ticket.assignedTo?.name,
+  (ticket: Ticket) => ticket.createdBy?.name,
+  (ticket: Ticket) => ticket.category,
+  (ticket: Ticket) => ticket.owner?.name,
+];
 
 export function useTicketFilter({
   tickets,
-  searchQuery,
-  filterMyTickets = false,
-  userId,
+  searchQuery = '',
+  predicates = [],
+  searchFields = defaultSearchFields,
 }: UseTicketFilterOptions) {
   const filteredList = useMemo(() => {
     let filtered = tickets;
 
-    // Filter by user's tickets if needed
-    if (filterMyTickets && userId) {
-      filtered = filtered.filter(
-        (ticket) =>
-          ticket.createdBy?._id === userId ||
-          ticket.owner?._id === userId ||
-          ticket.assignedTo?._id === userId,
-      );
+    if (predicates.length > 0) {
+      filtered = filtered.filter((ticket) => predicates.every((predicate) => predicate(ticket)));
     }
 
-    // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (ticket) =>
-          ticket.title?.toLowerCase().includes(query) ||
-          ticket._id?.toLowerCase().includes(query) ||
-          ticket.assignedTo?.name?.toLowerCase().includes(query) ||
-          ticket.createdBy?.name?.toLowerCase().includes(query) ||
-          ticket.category?.toLowerCase().includes(query) ||
-          ticket.owner?.name?.toLowerCase().includes(query),
+      filtered = filtered.filter((ticket) =>
+        searchFields.some((field) => field(ticket)?.toLowerCase().includes(query)),
       );
     }
 
     return filtered;
-  }, [tickets, searchQuery, filterMyTickets, userId]);
+  }, [tickets, searchQuery, predicates, searchFields]);
 
   return filteredList;
 }
