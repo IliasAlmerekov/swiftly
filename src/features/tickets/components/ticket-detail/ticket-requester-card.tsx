@@ -20,7 +20,7 @@ export const TicketRequesterCard = ({ owner }: TicketRequesterCardProps) => {
         </Avatar>
         <div>
           <p className="text-sm font-medium">{owner?.name || 'Unknown'}</p>
-          <p className="text-muted-foreground text-xs">{owner?.email || '—'}</p>
+          <p className="text-muted-foreground text-xs">{owner?.position || '—'}</p>
         </div>
       </CardContent>
     </Card>

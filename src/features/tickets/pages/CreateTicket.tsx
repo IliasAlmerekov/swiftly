@@ -28,6 +28,8 @@ import { useAuth } from '@/shared/hooks/useAuth';
 import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 import { CATEGORY_OPTIONS } from '@/features/tickets/utils/ticketUtils';
 
+const MAX_ATTACHMENT_SIZE_BYTES = 25 * 1024 * 1024;
+
 export function CreateTicket() {
   const navigate = useNavigate();
   const { role } = useAuth();
@@ -79,6 +81,21 @@ export function CreateTicket() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const file = e.target.files?.[0] || null;
+    if (!file) {
+      setAttachment(null);
+      return;
+    }
+
+    if (file.size > MAX_ATTACHMENT_SIZE_BYTES) {
+      setError('File size must not exceed 25MB');
+      setAttachment(null);
+      if (attachmentRef.current) {
+        attachmentRef.current.value = '';
+      }
+      return;
+    }
+
+    setError(null);
     setAttachment(file);
   };
 
@@ -261,7 +278,12 @@ export function CreateTicket() {
                   name="file"
                   ref={attachmentRef}
                   onChange={handleFileChange}
+                  accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.mp3,.mp4"
                 />
+                <p className="text-muted-foreground text-xs">
+                  Max size 25MB. Supported: jpg, png, gif, webp, pdf, doc/docx, xls/xlsx, mp3,
+                  mp4.
+                </p>
               </div>
 
               <div className="flex gap-4">
