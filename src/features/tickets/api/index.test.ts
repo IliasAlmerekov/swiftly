@@ -33,9 +33,7 @@ describe('createTicket', () => {
   it('returns ticket for raw API responses', async () => {
     const ticket = buildTicket();
     server.use(
-      http.post(`${API_BASE_URL}/tickets`, () =>
-        HttpResponse.json(ticket, { status: 201 }),
-      ),
+      http.post(`${API_BASE_URL}/tickets`, () => HttpResponse.json(ticket, { status: 201 })),
     );
 
     const result = await createTicket({ title: 'Title', description: 'Desc' });

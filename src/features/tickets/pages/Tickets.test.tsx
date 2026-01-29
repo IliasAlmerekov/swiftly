@@ -20,9 +20,7 @@ const emptyList = {
 };
 
 beforeEach(() => {
-  server.use(
-    http.get(`${API_BASE_URL}/tickets`, () => HttpResponse.json(emptyList)),
-  );
+  server.use(http.get(`${API_BASE_URL}/tickets`, () => HttpResponse.json(emptyList)));
 });
 
 describe('Tickets', () => {
