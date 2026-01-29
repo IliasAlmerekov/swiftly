@@ -1,8 +1,7 @@
 import React from 'react';
 import { DashboardContent } from '@/features/dashboard/components/DashboardContent';
-import { AllTickets } from '@/features/tickets/pages/AllTickets';
 import { CreateTicket } from '@/features/tickets/pages/CreateTicket';
-import { MyTickets } from '@/features/tickets/pages/MyTickets';
+import { Tickets } from '@/features/tickets/pages/Tickets';
 import Analytics from '@/features/dashboard/pages/Analytics';
 import type { TabType } from '@/types';
 import { useGreeting } from '../hooks/useGreeting';
@@ -16,7 +15,7 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({ curren
   const greeting = useGreeting().greeting;
   const { userName, role } = useAuth();
   const isStaff = role === 'admin' || role === 'support1';
-  const staffOnlyTabs: TabType[] = ['admin-dashboard', 'all-tickets', 'analytics'];
+  const staffOnlyTabs: TabType[] = ['admin-dashboard', 'analytics'];
 
   if (staffOnlyTabs.includes(currentTab) && !isStaff) {
     return (
@@ -61,27 +60,15 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({ curren
           </div>
         </div>
       );
-    case 'my-tickets':
+    case 'tickets':
       return (
         <div className="@container/main flex-1 overflow-auto">
           <div className="border-b px-4 py-6 lg:px-6">
-            <h1 className="text-2xl font-semibold">My Tickets</h1>
-            <p className="text-muted-foreground">Manage and track your support tickets</p>
-          </div>
-          <div className="p-4 lg:p-6">
-            <MyTickets />
-          </div>
-        </div>
-      );
-    case 'all-tickets':
-      return (
-        <div className="@container/main flex-1 overflow-auto">
-          <div className="border-b px-4 py-6 lg:px-6">
-            <h1 className="text-2xl font-semibold">All Tickets</h1>
-            <p className="text-muted-foreground">View and manage all support tickets</p>
+            <h1 className="text-2xl font-semibold">Tickets</h1>
+            <p className="text-muted-foreground">View and manage support tickets</p>
           </div>
           <div className="px-4 py-6 lg:px-6">
-            <AllTickets />
+            <Tickets />
           </div>
         </div>
       );
