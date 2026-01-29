@@ -7,7 +7,7 @@ import { db, createMockTicket, seedDb } from '@/test/mocks/db';
 describe('MSW Integration', () => {
   describe('Ticket Handlers', () => {
     it('returns empty array when no tickets exist', async () => {
-      const response = await fetch('/api/tickets/user');
+      const response = await fetch('/api/tickets?scope=mine');
       const data = await response.json();
 
       expect(response.ok).toBe(true);
@@ -25,7 +25,7 @@ describe('MSW Integration', () => {
 
       seedDb({ tickets: mockTickets });
 
-      const response = await fetch('/api/tickets/user');
+      const response = await fetch('/api/tickets?scope=mine');
       const data = await response.json();
 
       expect(data.items).toHaveLength(2);
@@ -99,12 +99,12 @@ describe('MSW Integration', () => {
     it('can override handlers for specific tests', async () => {
       // Override the default handler for this test only
       server.use(
-        http.get('/api/tickets/user', () => {
+        http.get('/api/tickets', () => {
           return HttpResponse.json({ error: 'Server error' }, { status: 500 });
         }),
       );
 
-      const response = await fetch('/api/tickets/user');
+      const response = await fetch('/api/tickets?scope=mine');
 
       expect(response.status).toBe(500);
     });

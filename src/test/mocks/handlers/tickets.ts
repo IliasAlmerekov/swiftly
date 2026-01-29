@@ -4,44 +4,25 @@ import { db, createMockTicket } from '../db';
 const API_URL = '/api';
 
 export const ticketHandlers = [
-  // GET /api/tickets/user - Get user's tickets
-  http.get(`${API_URL}/tickets/user`, ({ request }) => {
-    const url = new URL(request.url);
-    const limit = Number(url.searchParams.get('limit')) || 50;
-    const cursor = Number(url.searchParams.get('cursor') ?? 0);
-    const offset = Number.isNaN(cursor) ? 0 : cursor;
-
-    const tickets = [...db.tickets].sort((a, b) => {
-      const dateDiff = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      if (dateDiff !== 0) return dateDiff;
-      return b._id.localeCompare(a._id);
-    });
-
-    const paginatedTickets = tickets.slice(offset, offset + limit);
-    const hasNextPage = offset + limit < tickets.length;
-
-    return HttpResponse.json({
-      items: paginatedTickets,
-      pageInfo: {
-        limit,
-        hasNextPage,
-        nextCursor: hasNextPage ? String(offset + limit) : null,
-      },
-    });
-  }),
-
-  // GET /api/tickets - Get all tickets (admin)
+  // GET /api/tickets - Get tickets with optional filters
   http.get(`${API_URL}/tickets`, ({ request }) => {
     const url = new URL(request.url);
     const limit = Number(url.searchParams.get('limit')) || 50;
     const cursor = Number(url.searchParams.get('cursor') ?? 0);
     const offset = Number.isNaN(cursor) ? 0 : cursor;
-    const status = url.searchParams.get('status');
+    const statusFilter = url.searchParams.get('status');
+    const dateFilter = url.searchParams.get('date');
 
     let tickets = [...db.tickets];
 
-    if (status) {
-      tickets = tickets.filter((t) => t.status === status);
+    if (statusFilter) {
+      const statusValues = statusFilter.split(',').map((value) => value.trim());
+      tickets = tickets.filter((ticket) => statusValues.includes(ticket.status));
+    }
+
+    if (dateFilter === 'today') {
+      const today = new Date().toISOString().slice(0, 10);
+      tickets = tickets.filter((ticket) => ticket.createdAt?.slice(0, 10) === today);
     }
 
     tickets.sort((a, b) => {
