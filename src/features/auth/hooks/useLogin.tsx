@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
-import { loginUser } from '@/api/auth';
+import { loginUser } from '@/features/auth/api';
 import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 import { useAuthContext } from '@/shared/context/AuthContext';
 
@@ -27,7 +27,7 @@ export function useLogin({ onLoginSuccess }: UseLoginProps) {
     try {
       const { token } = (await loginUser(email, password)) as LoginResponse;
 
-      // Используем централизованный метод login из AuthContext
+      // Use centralized login method from AuthContext
       login(token, keepLoggedIn);
 
       onLoginSuccess();

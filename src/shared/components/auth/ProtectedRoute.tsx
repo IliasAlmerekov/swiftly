@@ -42,7 +42,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowe
         <div className="text-center">
           <h1 className="text-destructive text-2xl font-bold">Access Denied</h1>
           <p className="text-muted-foreground mt-2">
-            You don't have permission to access this page.
+            You don&apos;t have permission to access this page.
           </p>
           <Navigate to="/dashboard" replace />
         </div>

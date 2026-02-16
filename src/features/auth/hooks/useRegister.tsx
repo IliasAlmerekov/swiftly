@@ -1,7 +1,8 @@
-import { registerUser } from '@/api/auth';
+import { registerUser } from '@/features/auth/api';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { UserRole } from '@/types';
+
+import { paths } from '@/config/paths';
 import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 import { useAuthContext } from '@/shared/context/AuthContext';
 
@@ -11,7 +12,6 @@ export default function useRegister() {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [name, setName] = useState<string>('');
-  const [role, setRole] = useState<UserRole>('user');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
 
@@ -20,13 +20,13 @@ export default function useRegister() {
     setError(null);
 
     try {
-      const { token } = await registerUser(email, password, name, role);
+      const { token } = await registerUser(email, password, name);
       if (token) {
-        // Используем централизованный метод login из AuthContext
+        // Use centralized login method from AuthContext
         login(token, true);
         setSuccess(true);
         setTimeout(() => {
-          navigate('/login');
+          navigate(paths.auth.login.getHref());
         }, 2000);
       }
     } catch (err) {
@@ -46,21 +46,15 @@ export default function useRegister() {
     setName(e.target.value);
   };
 
-  const handleRoleChange = (value: UserRole) => {
-    setRole(value);
-  };
-
   return {
     email,
     password,
     name,
-    role,
     error,
     success,
     handleSubmit,
     handleEmailChange,
     handlePasswordChange,
     handleNameChange,
-    handleRoleChange,
   };
 }

@@ -1,4 +1,6 @@
 import React, { Component, type ReactNode, type ErrorInfo } from 'react';
+
+import { paths } from '@/config/paths';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
@@ -34,7 +36,7 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({
   showDetails = false,
 }) => {
   const handleGoHome = () => {
-    window.location.href = '/dashboard';
+    window.location.href = paths.app.dashboard.getHref();
   };
 
   return (

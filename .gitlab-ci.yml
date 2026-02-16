@@ -46,6 +46,13 @@ format:check:
   allow_failure: true
 
 # -------- TESTS --------
+test:unit:
+  stage: test
+  script:
+    - npm run test:run
+  allow_failure: false
+  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
+
 test:types:
   stage: test
   script:
@@ -61,6 +68,18 @@ test:build:
       - dist/
     when: always
     expire_in: 1 week
+
+test:e2e:
+  stage: test
+  image: mcr.microsoft.com/playwright:v1.58.0-jammy
+  variables:
+    PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+  script:
+    - npm run e2e
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - when: never
 
 # -------- DEPLOYMENT --------
 deploy:develop:

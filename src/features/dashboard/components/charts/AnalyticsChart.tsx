@@ -16,7 +16,7 @@ import {
   ChartTooltipContent,
 } from '@/shared/components/ui/chart';
 import { useEffect, useMemo, useState } from 'react';
-import { getAIStats } from '@/api/ai';
+import { getAIStats } from '@/features/tickets/api/ai';
 
 export const description = 'Ai analytics chart';
 

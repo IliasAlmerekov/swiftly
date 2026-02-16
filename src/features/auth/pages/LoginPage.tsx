@@ -2,11 +2,13 @@ import LoginForm from '@/features/auth/components/LoginForm';
 import Aurora from '@/components/Aurora';
 import { useNavigate } from 'react-router-dom';
 
+import { paths } from '@/config/paths';
+
 const LoginPage = () => {
   const navigate = useNavigate();
 
   const handleLoginSuccess = (): void => {
-    navigate('/dashboard');
+    navigate(paths.app.dashboard.getHref());
   };
 
   return (

@@ -21,13 +21,12 @@ import scooteqLogo from '@/assets/sidebarLogo.png';
 const MENU_CONFIG = {
   user: [
     { id: 'dashboard' as const, label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'my-tickets' as const, label: 'My Tickets', icon: Ticket },
+    { id: 'tickets' as const, label: 'Tickets', icon: Ticket },
     { id: 'create-ticket' as const, label: 'Support', icon: HelpCircle },
   ],
   support1: [
     { id: 'dashboard' as const, label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'my-tickets' as const, label: 'My Tickets', icon: Ticket },
-    { id: 'all-tickets' as const, label: 'All Tickets', icon: Ticket },
+    { id: 'tickets' as const, label: 'Tickets', icon: Ticket },
     { id: 'analytics' as const, label: 'Analytics', icon: BarChart3 },
     { id: 'create-ticket' as const, label: 'Support', icon: HelpCircle },
   ],
@@ -37,8 +36,7 @@ const MENU_CONFIG = {
       label: 'Admin Dashboard',
       icon: LayoutDashboard,
     },
-    { id: 'my-tickets' as const, label: 'My Tickets', icon: Ticket },
-    { id: 'all-tickets' as const, label: 'All Tickets', icon: Ticket },
+    { id: 'tickets' as const, label: 'Tickets', icon: Ticket },
     { id: 'analytics' as const, label: 'Analytics', icon: BarChart3 },
     { id: 'create-ticket' as const, label: 'Support', icon: HelpCircle },
   ],

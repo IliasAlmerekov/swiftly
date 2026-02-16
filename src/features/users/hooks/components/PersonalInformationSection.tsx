@@ -5,55 +5,147 @@ import { Label } from '@/shared/components/ui/label';
 import { Avatar, AvatarImage } from '@/shared/components/ui/avatar';
 import ManagerSelect from './ManagerSelect';
 import type { User } from '@/types';
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { paths } from '@/config/paths';
+
+/**
+ * Schema for profile form validation
+ */
+const profileFormSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  company: z.string().optional(),
+  department: z.string().optional(),
+  position: z.string().optional(),
+  manager: z.string().optional(),
+  country: z.string().optional(),
+  city: z.string().optional(),
+  address: z.string().optional(),
+  postalCode: z.string().optional(),
+});
+
+type ProfileFormData = z.infer<typeof profileFormSchema>;
 
 interface PersonalInformationSectionProps {
   user: User;
   currentUser: User | null;
-  editMode: boolean;
-  formData: Partial<User>;
-  selectedManagerId: string;
   allUsers: User[];
-  onEdit: () => void;
-  onSave: () => void;
-  onInputChange: (field: keyof User, value: string | number) => void;
+  onSave: (data: ProfileFormData) => Promise<void>;
+  onError?: (message: string) => void;
 }
 
+/**
+ * Personal information form section with isolated form state.
+ * Uses react-hook-form to prevent parent re-renders on input changes.
+ */
 const PersonalInformationSection = memo(function PersonalInformationSection({
   user,
   currentUser,
-  editMode,
-  formData,
-  selectedManagerId,
   allUsers,
-  onEdit,
   onSave,
-  onInputChange,
+  onError,
 }: PersonalInformationSectionProps) {
   const navigate = useNavigate();
+  const [editMode, setEditMode] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const isAdmin = currentUser?.role === 'admin';
+  const isStaff = currentUser?.role === 'admin' || currentUser?.role === 'support1';
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<ProfileFormData>({
+    resolver: zodResolver(profileFormSchema),
+    defaultValues: {
+      name: user.name || '',
+      company: user.company || '',
+      department: user.department || '',
+      position: user.position || '',
+      manager: user.manager?._id || '',
+      country: user.country || '',
+      city: user.city || '',
+      address: user.address || '',
+      postalCode: user.postalCode?.toString() || '',
+    },
+  });
+
+  // Sync form with user data when user prop changes
+  useEffect(() => {
+    reset({
+      name: user.name || '',
+      company: user.company || '',
+      department: user.department || '',
+      position: user.position || '',
+      manager: user.manager?._id || '',
+      country: user.country || '',
+      city: user.city || '',
+      address: user.address || '',
+      postalCode: user.postalCode?.toString() || '',
+    });
+  }, [user, reset]);
+
+  const selectedManagerId = watch('manager');
+
   const handleManagerChange = useCallback(
     (value: string) => {
-      onInputChange('manager', value);
+      if (value === user._id) {
+        onError?.('A user cannot be their own manager');
+        return;
+      }
+      setValue('manager', value);
     },
-    [onInputChange],
+    [setValue, user._id, onError],
   );
 
   const handleUserClick = (userId: string): void => {
-    navigate(`/users/${userId}`);
+    navigate(paths.app.user.getHref(userId));
   };
 
   const handleOwnerClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
-
-    if (!selectedManagerId) {
-      return;
-    }
-
+    if (!selectedManagerId) return;
     handleUserClick(selectedManagerId);
   };
 
-  const isStaff = currentUser?.role === 'admin' || currentUser?.role === 'support1';
+  const handleEdit = useCallback(() => {
+    setEditMode(true);
+  }, []);
+
+  const handleCancel = useCallback(() => {
+    setEditMode(false);
+    reset({
+      name: user.name || '',
+      company: user.company || '',
+      department: user.department || '',
+      position: user.position || '',
+      manager: user.manager?._id || '',
+      country: user.country || '',
+      city: user.city || '',
+      address: user.address || '',
+      postalCode: user.postalCode?.toString() || '',
+    });
+  }, [reset, user]);
+
+  const onSubmit = useCallback(
+    async (data: ProfileFormData) => {
+      setIsSaving(true);
+      try {
+        await onSave(data);
+        setEditMode(false);
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [onSave],
+  );
 
   return (
     <Card>
@@ -61,15 +153,24 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
         <CardTitle className="text-foreground text-lg font-semibold">
           Personal Information
         </CardTitle>
-        {currentUser?.role === 'admin' ? (
-          <Button
-            variant={editMode ? 'default' : 'outline'}
-            size="sm"
-            onClick={editMode ? onSave : onEdit}
-          >
-            {editMode ? 'Save' : 'Edit'}
-          </Button>
-        ) : null}
+        {isAdmin && (
+          <div className="flex gap-2">
+            {editMode ? (
+              <>
+                <Button variant="outline" size="sm" onClick={handleCancel} disabled={isSaving}>
+                  Cancel
+                </Button>
+                <Button size="sm" onClick={handleSubmit(onSubmit)} disabled={isSaving}>
+                  {isSaving ? 'Saving...' : 'Save'}
+                </Button>
+              </>
+            ) : (
+              <Button variant="outline" size="sm" onClick={handleEdit}>
+                Edit
+              </Button>
+            )}
+          </div>
+        )}
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -78,14 +179,16 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
               Full Name
             </Label>
             {editMode ? (
-              <Input
-                id="name"
-                name="name"
-                autoComplete="name"
-                value={formData.name || ''}
-                onChange={(e) => onInputChange('name', e.target.value)}
-                className="mt-1"
-              />
+              <>
+                <Input
+                  id="name"
+                  autoComplete="name"
+                  {...register('name')}
+                  className="mt-1"
+                  aria-invalid={!!errors.name}
+                />
+                {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>}
+              </>
             ) : (
               <p className="mt-1 text-[var(--ring)]">{user.name}</p>
             )}
@@ -95,6 +198,7 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
             <p className="mt-1 text-[var(--ring)]">{user.email}</p>
           </div>
         </div>
+
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <div>
             <Label htmlFor="company" className="text-foreground text-sm font-medium">
@@ -103,10 +207,8 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
             {editMode ? (
               <Input
                 id="company"
-                name="company"
                 autoComplete="organization"
-                value={formData.company || ''}
-                onChange={(e) => onInputChange('company', e.target.value)}
+                {...register('company')}
                 className="mt-1"
               />
             ) : (
@@ -118,13 +220,7 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
               Department
             </Label>
             {editMode ? (
-              <Input
-                id="department"
-                name="department"
-                value={formData.department || ''}
-                onChange={(e) => onInputChange('department', e.target.value)}
-                className="mt-1"
-              />
+              <Input id="department" {...register('department')} className="mt-1" />
             ) : (
               <p className="mt-1 text-[var(--ring)]">{user.department || 'N/A'}</p>
             )}
@@ -134,13 +230,7 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
               Position
             </Label>
             {editMode ? (
-              <Input
-                id="position"
-                name="position"
-                value={formData.position || ''}
-                onChange={(e) => onInputChange('position', e.target.value)}
-                className="mt-1"
-              />
+              <Input id="position" {...register('position')} className="mt-1" />
             ) : (
               <p className="mt-1 text-[var(--ring)]">{user.position || 'N/A'}</p>
             )}
@@ -149,7 +239,7 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
             <span className="text-foreground text-sm font-medium">Manager</span>
             {editMode ? (
               <ManagerSelect
-                selectedManagerId={selectedManagerId}
+                selectedManagerId={selectedManagerId || ''}
                 allUsers={allUsers}
                 disabled={!editMode}
                 onValueChange={handleManagerChange}
@@ -187,10 +277,8 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
               {editMode ? (
                 <Input
                   id="country"
-                  name="country"
                   autoComplete="country-name"
-                  value={formData.country || ''}
-                  onChange={(e) => onInputChange('country', e.target.value)}
+                  {...register('country')}
                   className="mt-1"
                 />
               ) : (
@@ -204,10 +292,8 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
               {editMode ? (
                 <Input
                   id="city"
-                  name="city"
-                  value={formData.city || ''}
                   autoComplete="address-level2"
-                  onChange={(e) => onInputChange('city', e.target.value)}
+                  {...register('city')}
                   className="mt-1"
                 />
               ) : (
@@ -221,10 +307,8 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
               {editMode ? (
                 <Input
                   id="address"
-                  name="address"
                   autoComplete="street-address"
-                  value={formData.address || ''}
-                  onChange={(e) => onInputChange('address', e.target.value)}
+                  {...register('address')}
                   className="mt-1"
                 />
               ) : (
@@ -238,11 +322,9 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
               {editMode ? (
                 <Input
                   id="postalCode"
-                  name="postalCode"
                   type="number"
                   autoComplete="postal-code"
-                  value={formData.postalCode ? formData.postalCode.toString() : ''}
-                  onChange={(e) => onInputChange('postalCode', e.target.value)}
+                  {...register('postalCode')}
                   className="mt-1"
                   min="1"
                 />
@@ -258,3 +340,5 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
 });
 
 export default PersonalInformationSection;
+
+export type { ProfileFormData };

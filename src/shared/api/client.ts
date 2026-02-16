@@ -1,12 +1,10 @@
 import { ApiError } from '@/types';
 import { getStoredToken, clearStoredToken } from '@/shared/utils/token';
+import { API_BASE_URL } from '@/config/env';
 
 // ============ Configuration ============
 
-/**
- * API base URL
- */
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+export { API_BASE_URL };
 
 /**
  * Default request timeout in milliseconds
