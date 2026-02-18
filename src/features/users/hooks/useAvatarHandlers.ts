@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { updateUserProfile, uploadUserAvatar } from '@/api/users';
+import { updateUserProfile, uploadUserAvatar } from '@/features/users/api';
 import type { User } from '@/types';
 import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 

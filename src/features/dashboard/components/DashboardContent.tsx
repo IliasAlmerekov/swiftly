@@ -3,18 +3,16 @@ import UserTicketCard from './UserTicketCard';
 import AdminTicketCard from './AdminTicketCard';
 import ViewSupportStatus from './ViewSupportStatus';
 import TicketsofThisWeek from './charts/TicketsofThisWeek';
-import type { Ticket } from '@/types';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { HardwareChart } from './charts/HardwareChart';
 import { UserTicketStats } from './charts/UserTicketStats';
 
 interface DashboardContentProps {
-  userTickets?: Ticket[];
   loading?: boolean;
   error?: string | null;
 }
 
-export function DashboardContent({ userTickets, loading, error }: DashboardContentProps) {
+export function DashboardContent({ loading, error }: DashboardContentProps) {
   const { role } = useAuth();
   const isStaff = role === 'admin' || role === 'support1';
 
@@ -34,7 +32,7 @@ export function DashboardContent({ userTickets, loading, error }: DashboardConte
           {isStaff ? <AdminTicketCard /> : <UserTicketCard />}
         </div>
       )}
-      {isStaff ? <TicketsofThisWeek /> : <RecentTickets userTickets={userTickets} />}
+      {isStaff ? <TicketsofThisWeek /> : <RecentTickets />}
       {/* Recent Tickets Table */}
 
       {/* Quick Stats */}

@@ -16,7 +16,7 @@ import {
   ChartTooltipContent,
 } from '@/shared/components/ui/chart';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { getUserTicketStats, type UserTicketStats } from '@/api/tickets';
+import { getUserTicketStats, type UserTicketStats } from '@/features/tickets/api';
 
 export const description = 'User ticket stats chart';
 

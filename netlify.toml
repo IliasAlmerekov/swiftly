@@ -8,14 +8,14 @@ NODE_VERSION = "20"
 
 # Production environment (main branch)
 [context.production.environment]
-VITE_API_URL = "https://scooteq-helpdesk-backend.onrender.com/api"
+VITE_API_URL = "https://swiftly-helpdesk-backend.onrender.com/api"
 
 # Development environment (develop branch or deploy previews)
 [context.deploy-preview.environment]
-VITE_API_URL = "https://scooteq-helpdesk-backend-dev.onrender.com/api"
+VITE_API_URL = "https://swiftly-helpdesk-backend-dev.onrender.com/api"
 
 [context.branch-deploy.environment]
-VITE_API_URL = "https://scooteq-helpdesk-backend-dev.onrender.com/api"
+VITE_API_URL = "https://swiftly-helpdesk-backend-dev.onrender.com/api"
 
 [[headers]]
 for = "/*.js"

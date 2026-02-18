@@ -15,19 +15,18 @@ import { NavUser } from './nav-user';
 import type { TabType, UserRole } from '@/types';
 
 // Import logo
-import scooteqLogo from '@/assets/sidebarLogo.png';
+import SwiftlyLogo from '@/assets/sidebarLogo.png';
 
 // Menu configuration
 const MENU_CONFIG = {
   user: [
     { id: 'dashboard' as const, label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'my-tickets' as const, label: 'My Tickets', icon: Ticket },
+    { id: 'tickets' as const, label: 'Tickets', icon: Ticket },
     { id: 'create-ticket' as const, label: 'Support', icon: HelpCircle },
   ],
   support1: [
     { id: 'dashboard' as const, label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'my-tickets' as const, label: 'My Tickets', icon: Ticket },
-    { id: 'all-tickets' as const, label: 'All Tickets', icon: Ticket },
+    { id: 'tickets' as const, label: 'Tickets', icon: Ticket },
     { id: 'analytics' as const, label: 'Analytics', icon: BarChart3 },
     { id: 'create-ticket' as const, label: 'Support', icon: HelpCircle },
   ],
@@ -37,8 +36,7 @@ const MENU_CONFIG = {
       label: 'Admin Dashboard',
       icon: LayoutDashboard,
     },
-    { id: 'my-tickets' as const, label: 'My Tickets', icon: Ticket },
-    { id: 'all-tickets' as const, label: 'All Tickets', icon: Ticket },
+    { id: 'tickets' as const, label: 'Tickets', icon: Ticket },
     { id: 'analytics' as const, label: 'Analytics', icon: BarChart3 },
     { id: 'create-ticket' as const, label: 'Support', icon: HelpCircle },
   ],
@@ -83,9 +81,9 @@ const AppSidebar: React.FC<SidebarProps> = ({ role, email, currentTab, onTabChan
     <Sidebar className="border-r">
       <SidebarHeader className="border-b px-4 py-4">
         <div className="flex items-center gap-3">
-          <img src={scooteqLogo} alt="Solutions IT" className="h-8 w-8 rounded-sm" />
+          <img src={SwiftlyLogo} alt="Swiftly" className="h-8 w-8 rounded-sm" />
           <div className="flex">
-            <h1 className="text-lg font-semibold">Solutions IT</h1>
+            <h1 className="text-lg font-semibold">Swiftly</h1>
           </div>
         </div>
       </SidebarHeader>

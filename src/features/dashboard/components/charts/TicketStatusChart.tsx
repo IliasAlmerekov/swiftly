@@ -1,7 +1,8 @@
 ﻿import { useMemo } from 'react';
-import { getAllTickets } from '@/api/tickets';
+import { getAllTickets, type TicketListResponse } from '@/features/tickets/api';
 import { useQuery } from '@tanstack/react-query';
 import { Pie, PieChart } from 'recharts';
+import { ticketKeys } from '@/features/tickets/hooks/useTickets';
 import type { Ticket } from '@/types';
 
 import {
@@ -20,16 +21,21 @@ interface TicketStatusChartProps {
 
 export function TicketStatusChart({ variant, showLabel }: TicketStatusChartProps) {
   const { data: ticketsSummary } = useQuery({
-    queryKey: ['all-tickets'],
-    queryFn: getAllTickets,
-    select: (tickets: Ticket[]) => ({
-      totalTickets: tickets.length ?? 0,
-      openTickets: tickets.filter((ticket) => ticket.status === 'open').length ?? 0,
-      inProgressTickets: tickets.filter((ticket) => ticket.status === 'in-progress').length ?? 0,
-      resolvedTickets:
-        tickets.filter((ticket) => ticket.status === 'resolved' || ticket.status === 'closed')
-          .length ?? 0,
-    }),
+    queryKey: ticketKeys.list({ scope: 'all', mode: 'summary' }),
+    queryFn: () => getAllTickets(),
+    select: (ticketPage: TicketListResponse) => {
+      const tickets = ticketPage?.items ?? [];
+      return {
+        totalTickets: tickets.length ?? 0,
+        openTickets: tickets.filter((ticket: Ticket) => ticket.status === 'open').length ?? 0,
+        inProgressTickets:
+          tickets.filter((ticket: Ticket) => ticket.status === 'in-progress').length ?? 0,
+        resolvedTickets:
+          tickets.filter(
+            (ticket: Ticket) => ticket.status === 'resolved' || ticket.status === 'closed',
+          ).length ?? 0,
+      };
+    },
   });
 
   const totalTickets = ticketsSummary?.totalTickets ?? 0;

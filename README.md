@@ -1,10 +1,10 @@
-# Support-Ticket-System der Solutions IT
+# Support-Ticket-System der Swiftly
 
 Ein internes Ticket-System für die Bearbeitung von internen Anfragen der Mitarbeiter.
 
 ## Überblick
 
-Das Support-Ticket-System wurde ausschließlich für die interne Verwendung bei Solutions IT entwickelt und ermöglicht die effiziente Erfassung, Verwaltung und Bearbeitung von Support-Anfragen der Mitarbeiter. Das System bietet eine übersichtliche Benutzeroberfläche für das IT-Support-Team, um die internen Anfragen schnell zu bearbeiten und den Status von Tickets zu verfolgen.
+Das Support-Ticket-System wurde ausschließlich für die interne Verwendung bei Swiftly entwickelt und ermöglicht die effiziente Erfassung, Verwaltung und Bearbeitung von Support-Anfragen der Mitarbeiter. Das System bietet eine übersichtliche Benutzeroberfläche für das IT-Support-Team, um die internen Anfragen schnell zu bearbeiten und den Status von Tickets zu verfolgen.
 
 ## Funktionen
 
@@ -56,4 +56,4 @@ cd backend && npm run dev
 
 ## Entwickelt für
 
-Solutions IT - Internes IT-Support-Team zur Bearbeitung von Mitarbeiteranfragen
+Swiftly - Internes IT-Support-Team zur Bearbeitung von Mitarbeiteranfragen

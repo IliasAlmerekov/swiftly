@@ -9,15 +9,6 @@ import { cn } from '@/shared/lib/utils';
 import React from 'react';
 import { Label } from '@/shared/components/ui/label';
 import { Input } from '@/shared/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectTrigger,
-  SelectItem,
-  SelectLabel,
-  SelectValue,
-} from '@/shared/components/ui/select';
 import { Button } from '@/shared/components/ui/button';
 import useRegister from '../hooks/useRegister';
 
@@ -26,14 +17,12 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
     email,
     password,
     name,
-    role,
     error,
     success,
     handleSubmit,
     handleEmailChange,
     handlePasswordChange,
     handleNameChange,
-    handleRoleChange,
   } = useRegister();
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
@@ -88,24 +77,6 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
                   className="h-10"
                   onChange={handleNameChange}
                 />
-              </div>
-              <div className="grid gap-3">
-                <Label htmlFor="role" className="text-md">
-                  Role
-                </Label>
-                <Select value={role} onValueChange={handleRoleChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Roles</SelectLabel>
-                      <SelectItem value="user">User</SelectItem>
-                      <SelectItem value="support1">Support</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
               </div>
               {error && <p className="text-sm text-red-600">{error}</p>}
               {success && (
