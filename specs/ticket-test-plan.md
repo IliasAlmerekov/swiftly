@@ -2,7 +2,7 @@
 
 ## Application Overview
 
-This test plan covers the Ticket feature of the Solutions IT Helpdesk application. The Ticket feature allows users to create, view, search, edit, and manage support tickets. The system supports three user roles: regular users, support staff (support1), and administrators (admin). Each role has different permissions: regular users can create and view their own tickets, while staff/admins can view all tickets, assign tickets, change priority, status, and category.
+This test plan covers the Ticket feature of the Swiftly Helpdesk application. The Ticket feature allows users to create, view, search, edit, and manage support tickets. The system supports three user roles: regular users, support staff (support1), and administrators (admin). Each role has different permissions: regular users can create and view their own tickets, while staff/admins can view all tickets, assign tickets, change priority, status, and category.
 
 ## Test Scenarios
 

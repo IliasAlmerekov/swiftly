@@ -12,7 +12,7 @@ test.describe('Create Ticket', () => {
     await page.goto('/');
 
     // Login as regular user
-    await page.getByRole('textbox', { name: 'Email' }).fill('lena.hoffmann@scooteq.com');
+    await page.getByRole('textbox', { name: 'Email' }).fill('lena.hoffmann@swiftly.com');
     await page.getByRole('textbox', { name: 'Password' }).fill('pass123');
     await page.getByRole('button', { name: 'Login' }).click();
 

@@ -15,7 +15,7 @@ import { NavUser } from './nav-user';
 import type { TabType, UserRole } from '@/types';
 
 // Import logo
-import scooteqLogo from '@/assets/sidebarLogo.png';
+import SwiftlyLogo from '@/assets/sidebarLogo.png';
 
 // Menu configuration
 const MENU_CONFIG = {
@@ -81,9 +81,9 @@ const AppSidebar: React.FC<SidebarProps> = ({ role, email, currentTab, onTabChan
     <Sidebar className="border-r">
       <SidebarHeader className="border-b px-4 py-4">
         <div className="flex items-center gap-3">
-          <img src={scooteqLogo} alt="Solutions IT" className="h-8 w-8 rounded-sm" />
+          <img src={SwiftlyLogo} alt="Swiftly" className="h-8 w-8 rounded-sm" />
           <div className="flex">
-            <h1 className="text-lg font-semibold">Solutions IT</h1>
+            <h1 className="text-lg font-semibold">Swiftly</h1>
           </div>
         </div>
       </SidebarHeader>

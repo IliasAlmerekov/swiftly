@@ -4,7 +4,7 @@ test.describe('Authentication', () => {
   test('should display login page', async ({ page }) => {
     await page.goto('/login');
 
-    await expect(page).toHaveTitle('Solutions IT');
+    await expect(page).toHaveTitle('Swiftly');
     await expect(page.getByRole('button', { name: /sign in|login|войти/i })).toBeVisible();
   });
 

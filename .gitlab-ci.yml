@@ -89,7 +89,7 @@ deploy:develop:
       node --version && npm --version
       npm ci --cache .npm --prefer-offline --no-audit
       npm install -g netlify-cli@17.34.0
-      echo "VITE_API_URL=https://scooteq-helpdesk-backend-dev.onrender.com/api" > .env.production
+      echo "VITE_API_URL=https://swiftly-helpdesk-backend-dev.onrender.com/api" > .env.production
       echo "=== DEBUG: Created .env.production file ==="
       cat .env.production
       echo "=== END DEBUG ==="
@@ -97,7 +97,7 @@ deploy:develop:
     - |
       npm run build
       echo "=== DEBUG: Checking build files ==="
-      grep -r "scooteq-helpdesk-backend" dist/ || echo "No backend URL found in dist"
+      grep -r "swiftly-helpdesk-backend" dist/ || echo "No backend URL found in dist"
       echo "=== END DEBUG ==="
       echo "Deploying to develop environment (tag $CI_COMMIT_REF_NAME)..."
       echo "Site ID:" $NETLIFY_SITE_ID_DEVELOP
@@ -106,7 +106,7 @@ deploy:develop:
     - netlify deploy --dir=dist --site=$NETLIFY_SITE_ID_DEVELOP --auth=$NETLIFY_AUTH_TOKEN --message "Develop deploy $CI_COMMIT_SHORT_SHA"
   environment:
     name: develop
-    url: https://scooteq-helpdesk-develop.netlify.app/
+    url: https://swiftly-helpdesk-develop.netlify.app/
   when: manual
   only:
     - /^v.*$/
@@ -122,7 +122,7 @@ deploy:production:
       node --version && npm --version
       npm ci --cache .npm --prefer-offline --no-audit
       npm install -g netlify-cli@17.34.0
-      echo "VITE_API_URL=https://scooteq-helpdesk-backend.onrender.com/api" > .env.production
+      echo "VITE_API_URL=https://swiftly-helpdesk-backend.onrender.com/api" > .env.production
       echo "=== DEBUG: Created .env.production file ==="
       cat .env.production
       echo "=== END DEBUG ==="
@@ -130,7 +130,7 @@ deploy:production:
     - |
       npm run build
       echo "=== DEBUG: Checking build files ==="
-      grep -r "scooteq-helpdesk-backend" dist/ || echo "No backend URL found in dist"
+      grep -r "swiftly-helpdesk-backend" dist/ || echo "No backend URL found in dist"
       echo "=== END DEBUG ==="
       echo "Deploying to production environment (tag $CI_COMMIT_REF_NAME)..."
       echo "Site ID:" $NETLIFY_SITE_ID_PRODUCTION
@@ -139,7 +139,7 @@ deploy:production:
     - netlify deploy --dir=dist --site=$NETLIFY_SITE_ID_PRODUCTION --auth=$NETLIFY_AUTH_TOKEN --prod --message "Prod deploy $CI_COMMIT_SHORT_SHA"
   environment:
     name: production
-    url: https://helpdesk-scooteq.netlify.app/
+    url: https://helpdesk-swiftly.netlify.app/
   when: manual
   only:
     - /^v[0-9]+\.[0-9]+\.[0-9]+$/

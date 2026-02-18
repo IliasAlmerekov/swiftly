@@ -56,7 +56,7 @@ export const AppRouter = () => {
             path={paths.app.ticket.path}
             element={
               <ProtectedRoute>
-                <AppLayout title="Solutions IT HelpDesk - Ticket Details" currentTab="tickets">
+                <AppLayout title="Swiftly HelpDesk - Ticket Details" currentTab="tickets">
                   <TicketDetailPage />
                 </AppLayout>
               </ProtectedRoute>

@@ -53,7 +53,7 @@ const ConfirmOverlay: React.FC<ConfirmOverlayProps> = ({
               isDark ? 'bg-blue-800 text-blue-200' : 'bg-blue-100 text-blue-800'
             } rounded-full px-3 py-1 text-xs font-medium tracking-wide uppercase`}
           >
-            Solutions IT
+            Swiftly
           </span>
         </div>
         <h2

@@ -11,7 +11,7 @@ test.describe('Create Ticket', () => {
     await page.goto('/');
 
     // 1. Login as a staff user (admin or support1 role)
-    await page.getByRole('textbox', { name: 'Email' }).fill('ilias.almerekov@scooteq.com');
+    await page.getByRole('textbox', { name: 'Email' }).fill('ilias.almerekov@swiftly.com');
     await page.getByRole('textbox', { name: 'Password' }).fill('pass123');
     await page.getByRole('button', { name: 'Login' }).click();
 
