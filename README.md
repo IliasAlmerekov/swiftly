@@ -1,59 +1,52 @@
-# Support-Ticket-System der Swiftly
+# Swiftly Helpdesk (Ticket System)
 
-Ein internes Ticket-System für die Bearbeitung von internen Anfragen der Mitarbeiter.
+Swiftly Helpdesk is an internal ticket management frontend for creating, tracking, and resolving employee support requests.
 
-## Überblick
+## What It Does
 
-Das Support-Ticket-System wurde ausschließlich für die interne Verwendung bei Swiftly entwickelt und ermöglicht die effiziente Erfassung, Verwaltung und Bearbeitung von Support-Anfragen der Mitarbeiter. Das System bietet eine übersichtliche Benutzeroberfläche für das IT-Support-Team, um die internen Anfragen schnell zu bearbeiten und den Status von Tickets zu verfolgen.
+- User authentication
+- Ticket creation and ticket status tracking
+- Ticket list and filtering
+- Dashboard and support analytics
+- Profile and role-based access flows
 
-## Funktionen
+## Server Integration
 
-- **Benutzerauthentifizierung**: Sichere Anmeldung für Support-Team und Mitarbeiter
-- **Ticket-Erstellung**: Einfaches Erstellen von internen Support-Tickets durch Mitarbeiter
-- **Ticket-Verwaltung**: Übersicht aller offenen und geschlossenen internen Tickets
-- **Statusverfolgung**: Aktueller Bearbeitungsstatus jedes Tickets
-- **Dashboard**: Visualisierung wichtiger Support-Kennzahlen für das IT-Team
-- **Benutzerrechte**: Unterschiedliche Zugriffsebenen für reguläre Mitarbeiter und Support-Administratoren
+This repository contains the frontend app.
+It is connected to an external API server via `VITE_API_URL`.
 
-## Technische Details
+Set `VITE_API_URL` in:
 
-Das Projekt besteht aus zwei Hauptkomponenten:
+- `.env` (project-level), or
+- your shell/profile environment (if you manage server URL there).
 
-### Frontend
+If not set, the app falls back to `http://localhost:4000/api`.
 
-- React mit Vite als Build-Tool
-- Modernes UI-Design mit angepasstem CSS
-- Reaktive Komponenten für Echtzeitaktualisierungen
-- Netlify Deployment-Konfiguration befindet sich zentral in der Datei `../netlify.toml` (Root). Eigene `netlify.toml` im Frontend-Ordner wurde entfernt, um Parsing-Konflikte in CI zu vermeiden.
-
-### Backend
-
-- Node.js mit Express als Server-Framework
-- MongoDB zur Datenspeicherung
-- JWT-basierte Authentifizierung
-- RESTful API für die Kommunikation mit dem Frontend
-
-## Installation und Start
-
-1. Frontend und Backend Abhängigkeiten installieren:
+## Install
 
 ```bash
 npm install
-cd backend && npm install
 ```
 
-2. Frontend starten:
+## Run
+
+Local development:
 
 ```bash
 npm run dev
 ```
 
-3. Backend starten:
+Production build preview:
 
 ```bash
-cd backend && npm run dev
+npm run build
+npm run preview
 ```
 
-## Entwickelt für
+Container workflow (recommended for tooling consistency):
 
-Swiftly - Internes IT-Support-Team zur Bearbeitung von Mitarbeiteranfragen
+```bash
+docker compose up -d
+docker compose exec app npm install
+docker compose exec app npm run dev
+```
