@@ -15,6 +15,24 @@
 - Domain has NO framework or IO dependencies
 - Controllers are thin (no business logic)
 
+## Frontend Import Rules
+
+- Layer direction: `shared -> features -> app`
+- Forbidden: `shared -> features`, `shared -> app`, `features -> app`, `featureA -> featureB`
+- Feature public API: import feature modules only via `src/features/<feature>/index.ts` (`@/features/<feature>`)
+
+Allowed import examples:
+
+- `src/features/tickets/...` -> `@/shared/...`
+- `src/app/router.tsx` -> `@/features/auth`
+
+Forbidden import examples:
+
+- `src/shared/...` -> `@/features/tickets`
+- `src/shared/...` -> `@/app/router`
+- `src/features/dashboard/...` -> `@/app/router`
+- `src/features/dashboard/...` -> `@/features/tickets/api`
+
 ## When to Introduce More Complexity
 
 Introduce microservices ONLY if:

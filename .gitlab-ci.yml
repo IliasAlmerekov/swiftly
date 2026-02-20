@@ -35,7 +35,7 @@ default:
 lint:
   stage: lint
   script:
-    - npm run lint -- --max-warnings 5
+    - npm run lint -- --max-warnings 0
     - npm run lint:css
   allow_failure: false
 
