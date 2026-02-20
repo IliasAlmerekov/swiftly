@@ -4,36 +4,46 @@ import tseslint from 'typescript-eslint';
 import pluginReact from 'eslint-plugin-react';
 import pluginReactHooks from 'eslint-plugin-react-hooks';
 import pluginReactRefresh from 'eslint-plugin-react-refresh';
+import importPlugin from 'eslint-plugin-import';
 import checkFile from 'eslint-plugin-check-file';
 
-// ============ Architecture Rules - Cross-feature import restrictions ============
-const featureRestrictions = {
-  auth: [
-    '@/features/tickets',
-    '@/features/tickets/*',
-    '@/features/users',
-    '@/features/users/*',
-    '@/features/dashboard',
-    '@/features/dashboard/*',
-  ],
-  tickets: [
-    '@/features/auth',
-    '@/features/auth/*',
-    '@/features/users',
-    '@/features/users/*',
-    '@/features/dashboard',
-    '@/features/dashboard/*',
-  ],
-  users: [
-    '@/features/auth',
-    '@/features/auth/*',
-    '@/features/tickets',
-    '@/features/tickets/*',
-    '@/features/dashboard',
-    '@/features/dashboard/*',
-  ],
-  dashboard: ['@/features/auth', '@/features/auth/*'],
-};
+const architectureZones = [
+  {
+    target: './src/features/auth',
+    from: ['./src/features/tickets', './src/features/users', './src/features/dashboard'],
+    message: 'auth feature must not import other features.',
+  },
+  {
+    target: './src/features/tickets',
+    from: ['./src/features/auth', './src/features/users', './src/features/dashboard'],
+    message: 'tickets feature must not import other features.',
+  },
+  {
+    target: './src/features/users',
+    from: ['./src/features/auth', './src/features/tickets', './src/features/dashboard'],
+    message: 'users feature must not import other features.',
+  },
+  {
+    target: './src/features/dashboard',
+    from: ['./src/features/auth', './src/features/tickets', './src/features/users'],
+    message: 'dashboard feature must not import other features.',
+  },
+  {
+    target: './src/shared',
+    from: ['./src/features', './src/app'],
+    message: 'shared layer must not import features or app.',
+  },
+  {
+    target: './src/config',
+    from: ['./src/features', './src/app'],
+    message: 'config layer must not import features or app.',
+  },
+  {
+    target: './src/features',
+    from: './src/app',
+    message: 'features layer must not import app layer.',
+  },
+];
 
 export default tseslint.config(
   // Ignore CommonJS config files and build output
@@ -51,6 +61,11 @@ export default tseslint.config(
     ...pluginReact.configs.flat.recommended,
     settings: {
       react: { version: 'detect' },
+      'import/resolver': {
+        typescript: {
+          project: './tsconfig.json',
+        },
+      },
     },
     plugins: {
       ...pluginReact.configs.flat.recommended.plugins,
@@ -66,31 +81,19 @@ export default tseslint.config(
     },
   }, // ============ Architecture Rules ============
   {
-    name: 'architecture/auth-feature',
-    files: ['src/features/auth/**/*.ts', 'src/features/auth/**/*.tsx'],
-    rules: {
-      'no-restricted-imports': ['error', { patterns: featureRestrictions.auth }],
+    name: 'architecture/no-restricted-paths',
+    files: ['src/**/*.ts', 'src/**/*.tsx'],
+    plugins: {
+      import: importPlugin,
     },
-  },
-  {
-    name: 'architecture/tickets-feature',
-    files: ['src/features/tickets/**/*.ts', 'src/features/tickets/**/*.tsx'],
     rules: {
-      'no-restricted-imports': ['error', { patterns: featureRestrictions.tickets }],
-    },
-  },
-  {
-    name: 'architecture/users-feature',
-    files: ['src/features/users/**/*.ts', 'src/features/users/**/*.tsx'],
-    rules: {
-      'no-restricted-imports': ['error', { patterns: featureRestrictions.users }],
-    },
-  },
-  {
-    name: 'architecture/dashboard-feature',
-    files: ['src/features/dashboard/**/*.ts', 'src/features/dashboard/**/*.tsx'],
-    rules: {
-      'no-restricted-imports': ['error', { patterns: featureRestrictions.dashboard }],
+      'import/no-restricted-paths': [
+        'error',
+        {
+          basePath: '.',
+          zones: architectureZones,
+        },
+      ],
     },
   }, // Shared modules should not import from features or app
   {
@@ -104,8 +107,15 @@ export default tseslint.config(
     rules: {
       'no-restricted-imports': [
         'error',
-        { patterns: ['@/features', '@/features/*', '@/app', '@/app/*'] },
+        { patterns: ['@/features', '@/features/**', '@/app', '@/app/**'] },
       ],
+    },
+  },
+  {
+    name: 'architecture/features-no-app-imports',
+    files: ['src/features/**/*.ts', 'src/features/**/*.tsx'],
+    rules: {
+      'no-restricted-imports': ['error', { patterns: ['@/app', '@/app/**'] }],
     },
   }, // ============ File Naming Convention ============
   {
