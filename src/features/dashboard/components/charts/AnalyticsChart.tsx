@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
 
 import {
@@ -15,48 +16,24 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/shared/components/ui/chart';
-import { useEffect, useMemo, useState } from 'react';
-import { getAIStats } from '@/features/tickets/api/ai';
+import type { DashboardAiRequestStat } from '../../types/dashboard';
 
 export const description = 'Ai analytics chart';
 
-type AIStatEntry = {
-  ai_requests: number;
-  date: string;
-};
+interface AnalyticsChartProps {
+  stats: DashboardAiRequestStat[];
+  isLoading: boolean;
+}
 
-type AIStatsData = {
-  stats: AIStatEntry[];
-};
-type AIStatsResponse = AIStatsData | AIStatEntry[];
-
-export function AnalyticsChart() {
-  const [data, setData] = useState<AIStatsResponse | null>(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const stats = await getAIStats();
-        setData(stats as AIStatsData);
-      } catch {
-        // Error handled silently - data will remain null
-      }
-    };
-    fetchData();
-  }, []);
-
-  const chartData = useMemo(() => {
-    const stats = Array.isArray(data)
-      ? data
-      : data && Array.isArray((data as AIStatsData).stats)
-        ? (data as AIStatsData).stats
-        : [];
-
-    return stats.map((stat) => ({
-      date: stat.date,
-      requests: stat.ai_requests || 0,
-    }));
-  }, [data]);
+export function AnalyticsChart({ stats, isLoading }: AnalyticsChartProps) {
+  const chartData = useMemo(
+    () =>
+      stats.map((stat) => ({
+        date: stat.date,
+        requests: stat.requests || 0,
+      })),
+    [stats],
+  );
 
   const chartConfig = useMemo(
     () =>
@@ -69,7 +46,7 @@ export function AnalyticsChart() {
     [],
   );
 
-  if (!data || !chartData.length) {
+  if (isLoading || !chartData.length) {
     return (
       <Card className="pt-0">
         <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
@@ -80,7 +57,9 @@ export function AnalyticsChart() {
         </CardHeader>
         <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
           <div className="flex h-[250px] w-full items-center justify-center">
-            <p className="text-muted-foreground">{data ? 'No data available' : 'Loading...'}</p>
+            <p className="text-muted-foreground">
+              {isLoading ? 'Loading...' : 'No data available'}
+            </p>
           </div>
         </CardContent>
       </Card>

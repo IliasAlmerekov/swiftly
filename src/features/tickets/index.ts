@@ -18,6 +18,7 @@ export type { TicketTableColumn, TicketColumnRenderContext } from './constants/t
 
 // API
 export * from './api';
+export * from './api/ai';
 
 // React Query Hooks
 export {

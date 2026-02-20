@@ -1,16 +1,11 @@
 import React, { memo, useMemo } from 'react';
-import { DashboardContent } from './DashboardContent';
-import { CreateTicket } from '@/features/tickets/pages/CreateTicket';
-import { Tickets } from '@/features/tickets/pages/Tickets';
-import Analytics from '@/features/dashboard/pages/Analytics';
 import type { TabType } from '@/types';
-import { useGreeting } from '../hooks/useGreeting';
-import { useAuth } from '@/shared/hooks/useAuth';
 import { TabPageLayout } from '@/shared/components/layout/TabPageLayout';
+import type { DashboardTabComponents, DashboardTabRuntime } from '../types/dashboard';
 
-// ============ Types ============
-interface DashboardTabContentProps {
+interface DashboardTabContentProps extends DashboardTabRuntime {
   currentTab: TabType;
+  components: DashboardTabComponents;
 }
 
 interface TabConfig {
@@ -21,7 +16,6 @@ interface TabConfig {
   contentClassName?: string;
 }
 
-// ============ Access Restricted Component ============
 const AccessRestricted = memo(function AccessRestricted() {
   return (
     <TabPageLayout
@@ -33,7 +27,6 @@ const AccessRestricted = memo(function AccessRestricted() {
   );
 });
 
-// ============ Welcome Page Component ============
 const WelcomePage = memo(function WelcomePage() {
   return (
     <TabPageLayout title="Welcome" subtitle="Select an option from the sidebar to get started">
@@ -42,52 +35,8 @@ const WelcomePage = memo(function WelcomePage() {
   );
 });
 
-// ============ Tab Configurations ============
-const TAB_CONFIG: Partial<Record<TabType, TabConfig>> = {
-  dashboard: {
-    title: (userName, greeting) => (
-      <h1 className="text-2xl font-semibold">
-        {greeting}, {userName}!
-      </h1>
-    ),
-    subtitle: "Welcome back. Here's an overview of your support tickets.",
-    component: DashboardContent,
-  },
-  'admin-dashboard': {
-    title: (userName, greeting) => (
-      <>
-        <h1 className="mb-4 text-3xl font-bold">Admin Dashboard</h1>
-        <h2 className="text-2xl font-semibold">
-          {greeting}, {userName}!
-        </h2>
-      </>
-    ),
-    subtitle: 'Administrative overview and controls',
-    component: DashboardContent,
-    staffOnly: true,
-  },
-  tickets: {
-    title: 'Tickets',
-    subtitle: 'View and manage support tickets',
-    component: Tickets,
-  },
-  'create-ticket': {
-    title: 'Create New Ticket',
-    subtitle: 'Submit a new support request',
-    component: CreateTicket,
-    contentClassName: 'p-4 lg:p-6',
-  },
-  analytics: {
-    title: 'Analytics',
-    subtitle: 'Performance metrics and detailed reports',
-    component: Analytics,
-    staffOnly: true,
-  },
-};
-
 const STAFF_ONLY_TABS: TabType[] = ['admin-dashboard', 'analytics'];
 
-// ============ Tab Content Renderer ============
 interface TabContentRendererProps {
   config: TabConfig;
   userName: string;
@@ -113,23 +62,55 @@ const TabContentRenderer = memo(function TabContentRenderer({
   );
 });
 
-// ============ Main Component ============
-/**
- * Dashboard tab content router.
- *
- * Follows bulletproof-react patterns:
- * - Configuration-driven approach for tab definitions
- * - Single Responsibility: Only handles tab routing logic
- * - Memoized sub-components prevent unnecessary re-renders
- * - Centralized access control for staff-only tabs
- */
 export const DashboardTabContent: React.FC<DashboardTabContentProps> = memo(
-  function DashboardTabContent({ currentTab }) {
-    const { greeting } = useGreeting();
-    const { userName, role } = useAuth();
+  function DashboardTabContent({ currentTab, components, role, userName, greeting }) {
     const isStaff = role === 'admin' || role === 'support1';
 
-    // Check access for staff-only tabs
+    const tabConfig = useMemo<Partial<Record<TabType, TabConfig>>>(
+      () => ({
+        dashboard: {
+          title: (resolvedUserName, resolvedGreeting) => (
+            <h1 className="text-2xl font-semibold">
+              {resolvedGreeting}, {resolvedUserName}!
+            </h1>
+          ),
+          subtitle: "Welcome back. Here's an overview of your support tickets.",
+          component: components.dashboard,
+        },
+        'admin-dashboard': {
+          title: (resolvedUserName, resolvedGreeting) => (
+            <>
+              <h1 className="mb-4 text-3xl font-bold">Admin Dashboard</h1>
+              <h2 className="text-2xl font-semibold">
+                {resolvedGreeting}, {resolvedUserName}!
+              </h2>
+            </>
+          ),
+          subtitle: 'Administrative overview and controls',
+          component: components.dashboard,
+          staffOnly: true,
+        },
+        tickets: {
+          title: 'Tickets',
+          subtitle: 'View and manage support tickets',
+          component: components.tickets,
+        },
+        'create-ticket': {
+          title: 'Create New Ticket',
+          subtitle: 'Submit a new support request',
+          component: components.createTicket,
+          contentClassName: 'p-4 lg:p-6',
+        },
+        analytics: {
+          title: 'Analytics',
+          subtitle: 'Performance metrics and detailed reports',
+          component: components.analytics,
+          staffOnly: true,
+        },
+      }),
+      [components],
+    );
+
     const hasAccess = useMemo(() => {
       if (STAFF_ONLY_TABS.includes(currentTab) && !isStaff) {
         return false;
@@ -137,17 +118,20 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = memo(
       return true;
     }, [currentTab, isStaff]);
 
-    // Get tab configuration
-    const tabConfig = TAB_CONFIG[currentTab];
-
     if (!hasAccess) {
       return <AccessRestricted />;
     }
 
-    if (!tabConfig) {
+    if (!tabConfig[currentTab]) {
       return <WelcomePage />;
     }
 
-    return <TabContentRenderer config={tabConfig} userName={userName ?? ''} greeting={greeting} />;
+    return (
+      <TabContentRenderer
+        config={tabConfig[currentTab] as TabConfig}
+        userName={userName}
+        greeting={greeting}
+      />
+    );
   },
 );

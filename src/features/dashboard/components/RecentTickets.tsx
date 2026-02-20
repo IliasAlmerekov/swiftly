@@ -1,6 +1,5 @@
-import { memo, useCallback } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router';
+import { memo } from 'react';
+import type { ReactNode } from 'react';
 
 import {
   Card,
@@ -10,57 +9,41 @@ import {
   CardTitle,
 } from '@/shared/components/ui/card';
 import { Skeleton } from '@/shared/components/ui/skeleton';
+import type { DashboardRecentTicketConfig } from '../types/dashboard';
 
-import { getTickets } from '@/features/tickets';
-import { ticketKeys } from '@/features/tickets/hooks/useTickets';
-import { TicketRow } from '@/features/tickets/components/TicketRow';
-import { TICKET_COLUMNS } from '@/features/tickets/config/ticketColumns';
-import { paths } from '@/config/paths';
+interface RecentTicketsProps {
+  config: DashboardRecentTicketConfig;
+}
 
-// --- Container Component: Handles data fetching ---
-export default function RecentTickets() {
-  const navigate = useNavigate();
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ticketKeys.list({ scope: 'mine', limit: 1 }),
-    queryFn: () => getTickets({ scope: 'mine', limit: 1 }),
-    staleTime: 30_000,
-  });
-
-  const lastTicket = data?.items?.[0] ?? null;
-
-  const handleTicketClick = useCallback(
-    (ticketId: string) => {
-      navigate(paths.app.ticket.getHref(ticketId));
-    },
-    [navigate],
-  );
-
-  if (isLoading) {
+export default function RecentTickets({ config }: RecentTicketsProps) {
+  if (config.isLoading) {
     return <RecentTicketsLoading />;
   }
 
-  if (isError) {
+  if (config.hasError) {
     return <RecentTicketsError />;
   }
 
   return (
-    <RecentTicketsCard>
-      {lastTicket ? (
-        <TicketRow ticket={lastTicket} onTicketClick={handleTicketClick} />
+    <RecentTicketsCard columns={config.columns}>
+      {config.ticket ? (
+        config.renderTicketRow(config.ticket, config.onTicketClick)
       ) : (
-        <EmptyState />
+        <EmptyState columnCount={config.columns.length} />
       )}
     </RecentTicketsCard>
   );
 }
 
-// --- Presentational Components ---
-
 interface RecentTicketsCardProps {
-  children: React.ReactNode;
+  children: ReactNode;
+  columns: Array<{ key: string; title: string }>;
 }
 
-const RecentTicketsCard = memo(function RecentTicketsCard({ children }: RecentTicketsCardProps) {
+const RecentTicketsCard = memo(function RecentTicketsCard({
+  children,
+  columns,
+}: RecentTicketsCardProps) {
   return (
     <Card>
       <CardHeader>
@@ -72,7 +55,7 @@ const RecentTicketsCard = memo(function RecentTicketsCard({ children }: RecentTi
           <table className="w-full">
             <thead>
               <tr className="border-b">
-                {TICKET_COLUMNS.map((column) => (
+                {columns.map((column) => (
                   <th key={column.key} className="p-2 text-left font-medium">
                     {column.title}
                   </th>
@@ -87,10 +70,10 @@ const RecentTicketsCard = memo(function RecentTicketsCard({ children }: RecentTi
   );
 });
 
-const EmptyState = memo(function EmptyState() {
+const EmptyState = memo(function EmptyState({ columnCount }: { columnCount: number }) {
   return (
     <tr>
-      <td colSpan={TICKET_COLUMNS.length} className="text-muted-foreground p-4 text-center">
+      <td colSpan={columnCount} className="text-muted-foreground p-4 text-center">
         No tickets found
       </td>
     </tr>
