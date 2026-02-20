@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback, useMemo } from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts';
 
 import {
@@ -15,35 +16,24 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/shared/components/ui/chart';
-import { getTicketStatsOfMonth, type TicketStatsOfMonth } from '@/features/tickets/api';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { DashboardMonthlyStat } from '../../types/dashboard';
 
 export const description = 'Ticket of month chart';
 
-export function TicketOfMonth() {
-  const [data, setData] = useState<TicketStatsOfMonth | null>(null);
+interface TicketOfMonthProps {
+  stats: DashboardMonthlyStat[];
+  periodLabel: string;
+  isLoading: boolean;
+}
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const stats = await getTicketStatsOfMonth();
-        setData(stats);
-      } catch {
-        // Error handled silently - data will remain null
-      }
-    };
-    fetchStats();
-  }, []);
-
+export function TicketOfMonth({ stats, periodLabel, isLoading }: TicketOfMonthProps) {
   const chartData = useMemo(
     () =>
-      data?.stats && Array.isArray(data.stats)
-        ? data.stats.map((stat) => ({
-            month: stat.month,
-            Ticket: stat.count || 0,
-          }))
-        : [],
-    [data?.stats],
+      stats.map((stat) => ({
+        month: stat.month,
+        ticket: stat.count || 0,
+      })),
+    [stats],
   );
 
   const chartConfig = useMemo(
@@ -65,11 +55,7 @@ export function TicketOfMonth() {
     <Card className="mt-5 w-[500px]">
       <CardHeader>
         <CardTitle>Requests overview</CardTitle>
-        <CardDescription>
-          {data?.currentYear
-            ? `January - ${data.stats[data.stats.length - 1]?.month} ${data?.currentYear}`
-            : 'Loading...'}
-        </CardDescription>
+        <CardDescription>{isLoading ? 'Loading...' : periodLabel}</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
@@ -83,7 +69,7 @@ export function TicketOfMonth() {
               tickFormatter={tickFormatter}
             />
             <ChartTooltip cursor={false} content={tooltipContent} />
-            <Bar dataKey="Ticket" fill="var(--chart-6)" radius={8} />
+            <Bar dataKey="ticket" fill="var(--chart-6)" radius={8} />
           </BarChart>
         </ChartContainer>
       </CardContent>

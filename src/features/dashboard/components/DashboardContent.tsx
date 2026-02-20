@@ -3,19 +3,22 @@ import UserTicketCard from './UserTicketCard';
 import AdminTicketCard from './AdminTicketCard';
 import ViewSupportStatus from './ViewSupportStatus';
 import TicketsofThisWeek from './charts/TicketsofThisWeek';
-import { useAuth } from '@/shared/hooks/useAuth';
 import { HardwareChart } from './charts/HardwareChart';
 import { UserTicketStats } from './charts/UserTicketStats';
+import type { DashboardContentContract } from '../types/dashboard';
 
-interface DashboardContentProps {
-  loading?: boolean;
-  error?: string | null;
-}
-
-export function DashboardContent({ loading, error }: DashboardContentProps) {
-  const { role } = useAuth();
-  const isStaff = role === 'admin' || role === 'support1';
-
+export function DashboardContent({
+  isStaff,
+  loading,
+  error,
+  adminSummary,
+  userSummary,
+  recentTickets,
+  supportStatus,
+  userMonthlyStats,
+  userMonthlyStatsPeriodLabel,
+  isUserMonthlyStatsLoading,
+}: DashboardContentContract) {
   return (
     <div className="space-y-6">
       {/* Metrics Cards */}
@@ -29,16 +32,28 @@ export function DashboardContent({ loading, error }: DashboardContentProps) {
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {isStaff ? <AdminTicketCard /> : <UserTicketCard />}
+          {isStaff ? (
+            <AdminTicketCard summary={adminSummary} />
+          ) : (
+            <UserTicketCard summary={userSummary} />
+          )}
         </div>
       )}
-      {isStaff ? <TicketsofThisWeek /> : <RecentTickets />}
+      {isStaff ? <TicketsofThisWeek /> : <RecentTickets config={recentTickets} />}
       {/* Recent Tickets Table */}
 
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-2">
-        <ViewSupportStatus />
-        {isStaff ? <HardwareChart /> : <UserTicketStats />}
+        <ViewSupportStatus status={supportStatus} />
+        {isStaff ? (
+          <HardwareChart />
+        ) : (
+          <UserTicketStats
+            stats={userMonthlyStats}
+            periodLabel={userMonthlyStatsPeriodLabel}
+            isLoading={isUserMonthlyStatsLoading}
+          />
+        )}
       </div>
     </div>
   );

@@ -1,14 +1,12 @@
 import React from 'react';
-import { useSearchParams } from 'react-router-dom';
-import type { TabType } from '@/types';
-import { DashboardTabContent } from '@/features/dashboard/components/DashboardTabContent';
+import { TabPageLayout } from '@/shared/components/layout/TabPageLayout';
 
 const DashboardPage: React.FC = () => {
-  const [searchParams] = useSearchParams();
-
-  const currentTab: TabType = (searchParams.get('tab') as TabType) || 'dashboard';
-
-  return <DashboardTabContent currentTab={currentTab} />;
+  return (
+    <TabPageLayout title="Dashboard" subtitle="Dashboard routing is handled by the app layer.">
+      <div />
+    </TabPageLayout>
+  );
 };
 
 export default DashboardPage;

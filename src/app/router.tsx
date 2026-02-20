@@ -2,15 +2,14 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import { paths } from '@/config/paths';
-import LoginPage from '@/features/auth/pages/LoginPage';
-import RegisterPage from '@/features/auth/pages/RegisterPage';
+import { LoginPage, RegisterPage } from '@/features/auth';
+import { TicketDetailPage } from '@/features/tickets';
+import { UserProfile } from '@/features/users';
 import AppLayout from '@/shared/components/layout/AppLayout';
 import ProtectedRoute from '@/shared/components/auth/ProtectedRoute';
 
 // Lazy load heavy pages for code splitting
-const DashboardPage = lazy(() => import('@/features/dashboard/pages/DashboardPage'));
-const TicketDetailPage = lazy(() => import('@/features/tickets/pages/TicketDetailPage'));
-const UserProfile = lazy(() => import('@/features/users/pages/UserProfile'));
+const DashboardPage = lazy(() => import('@/app/pages/DashboardPage'));
 
 // Loading fallback component
 const PageLoader = () => (

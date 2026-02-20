@@ -1,9 +1,5 @@
-﻿import { useMemo } from 'react';
-import { getAllTickets, type TicketListResponse } from '@/features/tickets/api';
-import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { Pie, PieChart } from 'recharts';
-import { ticketKeys } from '@/features/tickets/hooks/useTickets';
-import type { Ticket } from '@/types';
 
 import {
   type ChartConfig,
@@ -11,37 +7,21 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/shared/components/ui/chart';
+import type { DashboardTicketSummary } from '../../types/dashboard';
 
 type TicketStatusVariant = 'total' | 'open' | 'inProgress' | 'resolved';
 
 interface TicketStatusChartProps {
   variant: TicketStatusVariant;
+  summary: DashboardTicketSummary;
   showLabel?: boolean;
 }
 
-export function TicketStatusChart({ variant, showLabel }: TicketStatusChartProps) {
-  const { data: ticketsSummary } = useQuery({
-    queryKey: ticketKeys.list({ scope: 'all', mode: 'summary' }),
-    queryFn: () => getAllTickets(),
-    select: (ticketPage: TicketListResponse) => {
-      const tickets = ticketPage?.items ?? [];
-      return {
-        totalTickets: tickets.length ?? 0,
-        openTickets: tickets.filter((ticket: Ticket) => ticket.status === 'open').length ?? 0,
-        inProgressTickets:
-          tickets.filter((ticket: Ticket) => ticket.status === 'in-progress').length ?? 0,
-        resolvedTickets:
-          tickets.filter(
-            (ticket: Ticket) => ticket.status === 'resolved' || ticket.status === 'closed',
-          ).length ?? 0,
-      };
-    },
-  });
-
-  const totalTickets = ticketsSummary?.totalTickets ?? 0;
-  const openTickets = ticketsSummary?.openTickets ?? 0;
-  const inProgressTickets = ticketsSummary?.inProgressTickets ?? 0;
-  const resolvedTickets = ticketsSummary?.resolvedTickets ?? 0;
+export function TicketStatusChart({ variant, summary, showLabel }: TicketStatusChartProps) {
+  const totalTickets = summary.totalTickets;
+  const openTickets = summary.openTickets;
+  const inProgressTickets = summary.inProgressTickets;
+  const resolvedTickets = summary.resolvedTickets;
 
   const { chartData, chartConfig } = useMemo<{
     chartData: Array<{ status: string; label: string; count: number; fill: string }>;
@@ -174,18 +154,18 @@ export function TicketStatusChart({ variant, showLabel }: TicketStatusChartProps
   );
 }
 
-export function TotalTicketsChart() {
-  return <TicketStatusChart variant="total" showLabel />;
+export function TotalTicketsChart({ summary }: { summary: DashboardTicketSummary }) {
+  return <TicketStatusChart variant="total" summary={summary} showLabel />;
 }
 
-export function OpenTicketsChart() {
-  return <TicketStatusChart variant="open" showLabel />;
+export function OpenTicketsChart({ summary }: { summary: DashboardTicketSummary }) {
+  return <TicketStatusChart variant="open" summary={summary} showLabel />;
 }
 
-export function InProgressChart() {
-  return <TicketStatusChart variant="inProgress" showLabel />;
+export function InProgressChart({ summary }: { summary: DashboardTicketSummary }) {
+  return <TicketStatusChart variant="inProgress" summary={summary} showLabel />;
 }
 
-export function ResolvedChart() {
-  return <TicketStatusChart variant="resolved" showLabel />;
+export function ResolvedChart({ summary }: { summary: DashboardTicketSummary }) {
+  return <TicketStatusChart variant="resolved" summary={summary} showLabel />;
 }

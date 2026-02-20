@@ -1,20 +1,15 @@
 import { memo, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getTickets, type TicketListResponse } from '@/features/tickets/api';
-import { MetricCard } from '@/shared/components/ui/metric-card';
 import { IconTicket, IconUsers, IconCircleCheck, IconClock } from '@tabler/icons-react';
-import { ticketKeys } from '@/features/tickets/hooks/useTickets';
-import type { Ticket } from '@/types';
+import { MetricCard } from '@/shared/components/ui/metric-card';
+import type { DashboardTicketSummary } from '../types/dashboard';
 
-// ============ Types ============
 interface MetricConfig {
   title: string;
-  key: 'totalTickets' | 'openTickets' | 'inProgressTickets' | 'resolvedTickets';
+  key: keyof DashboardTicketSummary;
   icon: typeof IconTicket;
   description: string;
 }
 
-// ============ Configuration ============
 const METRICS_CONFIG: MetricConfig[] = [
   {
     title: 'Total Tickets',
@@ -42,47 +37,18 @@ const METRICS_CONFIG: MetricConfig[] = [
   },
 ];
 
-// ============ Custom Hook for User Ticket Stats ============
-function useUserTicketStats() {
-  return useQuery({
-    queryKey: ticketKeys.list({ scope: 'mine', view: 'summary' }),
-    queryFn: () => getTickets({ scope: 'mine' }),
-    select: (ticketPage: TicketListResponse) => {
-      const tickets = ticketPage?.items ?? [];
-
-      return {
-        totalTickets: tickets.length,
-        openTickets: tickets.filter((ticket: Ticket) => ticket.status === 'open').length,
-        inProgressTickets: tickets.filter((ticket: Ticket) => ticket.status === 'in-progress')
-          .length,
-        resolvedTickets: tickets.filter(
-          (ticket: Ticket) => ticket.status === 'resolved' || ticket.status === 'closed',
-        ).length,
-      };
-    },
-  });
+interface UserTicketCardProps {
+  summary: DashboardTicketSummary;
 }
 
-// ============ Main Component ============
-/**
- * User ticket metrics cards component.
- *
- * Follows bulletproof-react patterns:
- * - Configuration-driven metrics definition
- * - Custom hook for data fetching
- * - Memoized to prevent unnecessary re-renders
- * - Uses shared MetricCard component for consistency
- */
-const UserTicketCard = memo(function UserTicketCard() {
-  const { data: ticketStats } = useUserTicketStats();
-
+const UserTicketCard = memo(function UserTicketCard({ summary }: UserTicketCardProps) {
   const metricsData = useMemo(
     () =>
       METRICS_CONFIG.map((config) => ({
         ...config,
-        value: ticketStats?.[config.key] ?? 0,
+        value: summary[config.key] ?? 0,
       })),
-    [ticketStats],
+    [summary],
   );
 
   return (

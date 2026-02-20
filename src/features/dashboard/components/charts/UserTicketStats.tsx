@@ -1,5 +1,6 @@
 import { TrendingUp } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts';
+import { useCallback, useMemo } from 'react';
 
 import {
   Card,
@@ -15,40 +16,17 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/shared/components/ui/chart';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { getUserTicketStats, type UserTicketStats } from '@/features/tickets/api';
+import type { DashboardMonthlyStat } from '../../types/dashboard';
 
 export const description = 'User ticket stats chart';
 
-export function UserTicketStats() {
-  const [data, setData] = useState<UserTicketStats | null>(null);
-  const [loading, setLoading] = useState(true);
+interface UserTicketStatsProps {
+  stats: DashboardMonthlyStat[];
+  periodLabel: string;
+  isLoading: boolean;
+}
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const stats = await getUserTicketStats();
-        setData(stats);
-      } catch {
-        // Error handled silently - data will remain null
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStats();
-  }, []);
-
-  const chartData = useMemo(
-    () =>
-      data?.stats && Array.isArray(data.stats)
-        ? data.stats.map((stat) => ({
-            month: stat.month,
-            count: stat.count || 0,
-          }))
-        : [],
-    [data?.stats],
-  );
-
+export function UserTicketStats({ stats, periodLabel, isLoading }: UserTicketStatsProps) {
   const chartConfig = useMemo(
     () =>
       ({
@@ -68,16 +46,16 @@ export function UserTicketStats() {
     <Card>
       <CardHeader>
         <CardTitle>Your Ticket Stats</CardTitle>
-        <CardDescription>{loading ? 'Loading...' : data?.period}</CardDescription>
+        <CardDescription>{isLoading ? 'Loading...' : periodLabel}</CardDescription>
       </CardHeader>
       <CardContent className="flex items-center justify-center">
-        {loading ? (
+        {isLoading ? (
           <div className="flex h-[180px] w-[450px] items-center justify-center">
             <p>Loading stats...</p>
           </div>
-        ) : chartData.length > 0 ? (
+        ) : stats.length > 0 ? (
           <ChartContainer config={chartConfig} className="h-[180px] w-[450px]">
-            <BarChart accessibilityLayer data={chartData}>
+            <BarChart accessibilityLayer data={stats}>
               <CartesianGrid vertical={false} />
               <XAxis
                 dataKey="month"
