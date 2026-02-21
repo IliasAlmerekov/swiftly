@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { createStrictContext } from '@/shared/lib/createStrictContext';
 
 type Theme = 'dark' | 'light' | 'system';
 
@@ -13,18 +14,15 @@ type ThemeProviderState = {
   setTheme: (theme: Theme) => void;
 };
 
-const initialState: ThemeProviderState = {
-  theme: 'system',
-  setTheme: () => null,
-};
-
-const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
+const [ThemeProviderContext, useThemeContext] = createStrictContext<ThemeProviderState>({
+  contextName: 'ThemeProviderContext',
+  errorMessage: 'useTheme must be used within a ThemeProvider',
+});
 
 export function ThemeProvider({
   children,
   defaultTheme = 'system',
   storageKey = 'vite-ui-theme',
-  ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(
     () => (localStorage.getItem(storageKey) as Theme) || defaultTheme,
@@ -47,26 +45,26 @@ export function ThemeProvider({
     root.classList.add(theme);
   }, [theme]);
 
-  const value = {
-    theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
-      setTheme(theme);
+  const handleThemeChange = useCallback(
+    (nextTheme: Theme) => {
+      localStorage.setItem(storageKey, nextTheme);
+      setTheme(nextTheme);
     },
-  };
-
-  return (
-    <ThemeProviderContext.Provider {...props} value={value}>
-      {children}
-    </ThemeProviderContext.Provider>
+    [storageKey],
   );
+
+  const value = useMemo(
+    () => ({
+      theme,
+      setTheme: handleThemeChange,
+    }),
+    [theme, handleThemeChange],
+  );
+
+  return <ThemeProviderContext.Provider value={value}>{children}</ThemeProviderContext.Provider>;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useTheme = () => {
-  const context = useContext(ThemeProviderContext);
-
-  if (context === undefined) throw new Error('useTheme must be used within a ThemeProvider');
-
-  return context;
+  return useThemeContext();
 };
