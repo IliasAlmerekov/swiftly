@@ -14,6 +14,7 @@ import {
 } from 'react-hook-form';
 
 import { cn } from '@/shared/lib/utils';
+import { createStrictContext } from '@/shared/lib/createStrictContext';
 import { Label } from '@/shared/components/ui/label';
 
 const Form = FormProvider;
@@ -25,7 +26,10 @@ type FormFieldContextValue<
   name: TName;
 };
 
-const FormFieldContext = React.createContext<FormFieldContextValue>({} as FormFieldContextValue);
+const [FormFieldContext, useFormFieldContext] = createStrictContext<FormFieldContextValue>({
+  contextName: 'FormFieldContext',
+  errorMessage: 'useFormField should be used within <FormField>',
+});
 
 const FormField = <
   TFieldValues extends FieldValues = FieldValues,
@@ -33,23 +37,24 @@ const FormField = <
 >({
   ...props
 }: ControllerProps<TFieldValues, TName>) => {
+  const fieldContextValue = React.useMemo<FormFieldContextValue>(
+    () => ({ name: props.name }),
+    [props.name],
+  );
+
   return (
-    <FormFieldContext.Provider value={{ name: props.name }}>
+    <FormFieldContext.Provider value={fieldContextValue}>
       <Controller {...props} />
     </FormFieldContext.Provider>
   );
 };
 
 const useFormField = () => {
-  const fieldContext = React.useContext(FormFieldContext);
-  const itemContext = React.useContext(FormItemContext);
+  const fieldContext = useFormFieldContext();
+  const itemContext = useFormItemContext();
   const { getFieldState } = useFormContext();
   const formState = useFormState({ name: fieldContext.name });
   const fieldState = getFieldState(fieldContext.name, formState);
-
-  if (!fieldContext) {
-    throw new Error('useFormField should be used within <FormField>');
-  }
 
   const { id } = itemContext;
 
@@ -67,13 +72,17 @@ type FormItemContextValue = {
   id: string;
 };
 
-const FormItemContext = React.createContext<FormItemContextValue>({} as FormItemContextValue);
+const [FormItemContext, useFormItemContext] = createStrictContext<FormItemContextValue>({
+  contextName: 'FormItemContext',
+  errorMessage: 'useFormField should be used within <FormItem>',
+});
 
 function FormItem({ className, ...props }: React.ComponentProps<'div'>) {
   const id = React.useId();
+  const itemContextValue = React.useMemo<FormItemContextValue>(() => ({ id }), [id]);
 
   return (
-    <FormItemContext.Provider value={{ id }}>
+    <FormItemContext.Provider value={itemContextValue}>
       <div data-slot="form-item" className={cn('grid gap-2', className)} {...props} />
     </FormItemContext.Provider>
   );

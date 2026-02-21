@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import type { UserRole } from '@/types';
+import { createStrictContext } from '@/shared/lib/createStrictContext';
 import {
   getStoredToken,
   setStoredToken,
@@ -28,7 +29,10 @@ interface AuthContextState {
 
 // ============ Context ============
 
-const AuthContext = createContext<AuthContextState | undefined>(undefined);
+const [AuthContext, useStrictAuthContext] = createStrictContext<AuthContextState>({
+  contextName: 'AuthContext',
+  errorMessage: 'useAuthContext must be used within an AuthProvider',
+});
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -89,14 +93,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return getStoredToken();
   }, []);
 
-  const value: AuthContextState = {
-    user,
-    isAuthenticated: !!user,
-    isLoading,
-    login,
-    logout,
-    getToken,
-  };
+  const value = useMemo<AuthContextState>(
+    () => ({
+      user,
+      isAuthenticated: !!user,
+      isLoading,
+      login,
+      logout,
+      getToken,
+    }),
+    [user, isLoading, login, logout, getToken],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
@@ -107,13 +114,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
  */
 // eslint-disable-next-line react-refresh/only-export-components
 export const useAuthContext = (): AuthContextState => {
-  const context = useContext(AuthContext);
-
-  if (context === undefined) {
-    throw new Error('useAuthContext must be used within an AuthProvider');
-  }
-
-  return context;
+  return useStrictAuthContext();
 };
 
 export default AuthContext;

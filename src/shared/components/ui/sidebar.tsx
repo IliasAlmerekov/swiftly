@@ -7,6 +7,7 @@ import { PanelLeftIcon } from 'lucide-react';
 
 import { useIsMobile } from '@/shared/hooks/use-mobile';
 import { cn } from '@/shared/lib/utils';
+import { createStrictContext } from '@/shared/lib/createStrictContext';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Separator } from '@/shared/components/ui/separator';
@@ -42,16 +43,10 @@ type SidebarContextProps = {
   toggleSidebar: () => void;
 };
 
-const SidebarContext = React.createContext<SidebarContextProps | null>(null);
-
-function useSidebar() {
-  const context = React.useContext(SidebarContext);
-  if (!context) {
-    throw new Error('useSidebar must be used within a SidebarProvider.');
-  }
-
-  return context;
-}
+const [SidebarContext, useSidebar] = createStrictContext<SidebarContextProps>({
+  contextName: 'SidebarContext',
+  errorMessage: 'useSidebar must be used within a SidebarProvider.',
+});
 
 function SidebarProvider({
   defaultOpen = true,

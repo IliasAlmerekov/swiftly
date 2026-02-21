@@ -1,5 +1,4 @@
 import React, { useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
 import type { TabType } from '@/types';
 import { paths } from '@/config/paths';
 import {
@@ -7,18 +6,26 @@ import {
   DashboardContent,
   DashboardTabContent,
   type DashboardTabComponents,
-  useGreeting,
 } from '@/features/dashboard';
 import { CreateTicket, TicketRow, Tickets, TICKET_COLUMNS } from '@/features/tickets';
-import { useAuth } from '@/shared/hooks/useAuth';
-import { useDashboardData } from '../hooks/useDashboardData';
+import {
+  DashboardPageContractProvider,
+  useDashboardPageContract,
+} from '@/app/pages/dashboard-page-contract';
 
-const DashboardPage: React.FC = () => {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const { role, userName } = useAuth();
-  const { greeting } = useGreeting();
-  const dashboardData = useDashboardData();
+const DashboardPageContent: React.FC = () => {
+  const {
+    useSearchParams: useSearchParamsHook,
+    useNavigate: useNavigateHook,
+    useAuth: useAuthHook,
+    useGreeting: useGreetingHook,
+    useDashboardData: useDashboardDataHook,
+  } = useDashboardPageContract();
+  const [searchParams] = useSearchParamsHook();
+  const navigate = useNavigateHook();
+  const { role, userName } = useAuthHook();
+  const { greeting } = useGreetingHook();
+  const dashboardData = useDashboardDataHook();
 
   const currentTab: TabType = (searchParams.get('tab') as TabType) || 'dashboard';
   const isStaff = role === 'admin' || role === 'support1';
@@ -87,6 +94,14 @@ const DashboardPage: React.FC = () => {
       userName={userName ?? ''}
       greeting={greeting}
     />
+  );
+};
+
+const DashboardPage: React.FC = () => {
+  return (
+    <DashboardPageContractProvider>
+      <DashboardPageContent />
+    </DashboardPageContractProvider>
   );
 };
 
