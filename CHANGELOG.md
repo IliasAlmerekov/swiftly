@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2026-02-20
+
+### Added
+
+- ADR for frontend dependency baseline: `docs/adr/0002-frontend-dependency-rules.md`.
+- Explicit feature contracts for dashboard presentation layer via typed props in `src/features/dashboard/types/dashboard.ts`.
+- App-level dashboard orchestration:
+  - `src/app/hooks/useDashboardData.ts`
+  - `src/app/pages/DashboardPage.tsx`
+- Regression tests for dashboard role rendering and access control: `src/app/pages/DashboardPage.test.tsx`.
+
+### Changed
+
+- Enforced architecture import boundaries in ESLint:
+  - Added `import/no-restricted-paths` zones for `auth`, `tickets`, `users`, `dashboard`.
+  - Strengthened `no-restricted-imports` for `shared -> features/app` and `features -> app`.
+  - All architecture restrictions are configured as `error`.
+- Updated CI lint gates to block merges on lint issues:
+  - `.gitlab-ci.yml`: `npm run lint -- --max-warnings 0`
+  - `.github/workflows/ci.yml`: `npm run lint -- --max-warnings 0`
+- Extended architecture documentation with frontend import rules and allowed/forbidden examples in `docs/ARCHITECTURE.md`.
+- Refactored dashboard feature to remove direct dependencies on `tickets/users`:
+  - Moved data fetching and cross-feature composition to `app` layer.
+  - Converted dashboard components/charts to receive data and callbacks via props only.
+  - Updated router to use app-owned dashboard page (`src/app/router.tsx`).
+
+### Fixed
+
+- Removed all direct imports `src/features/dashboard/** -> src/features/tickets/**` and `src/features/dashboard/** -> src/features/users/**`.
+- Resolved architecture lint violations reported by `import/no-restricted-paths` for dashboard.
+
 ## [1.0.5] - 2025-09-27
 
 - Started rewriting the project to use React Query for data fetching and caching
