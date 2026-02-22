@@ -1,4 +1,4 @@
-import { memo, useCallback } from 'react';
+import { memo } from 'react';
 import { Card, CardContent } from '@/shared/components/ui/card';
 import { Separator } from '@/shared/components/ui/separator';
 import { useAiChat } from './useAiChat';
@@ -28,10 +28,6 @@ export const AiOverlay = memo(function AiOverlay({
 }: AiOverlayProps) {
   const { messages, isLoading, messagesEndRef, sendMessage } = useAiChat({ isOpen });
 
-  const handleCreateTicket = useCallback(() => {
-    onAllowCreateTicket();
-  }, [onAllowCreateTicket]);
-
   if (!isOpen) return null;
 
   return (
@@ -49,7 +45,7 @@ export const AiOverlay = memo(function AiOverlay({
         <Separator />
         <AiOverlayFooter
           onSendMessage={sendMessage}
-          onCreateTicket={handleCreateTicket}
+          onCreateTicket={onAllowCreateTicket}
           isLoading={isLoading}
         />
       </Card>

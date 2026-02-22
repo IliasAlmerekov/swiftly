@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { Profiler } from 'react';
 import type { Ticket, User } from '@/types';
 import { render, screen } from '@/test/test-utils';
 import { useAuth } from '@/shared/hooks/useAuth';
@@ -151,5 +152,29 @@ describe('DashboardPage role rendering', () => {
 
     expect(screen.getByText('Access Restricted')).toBeInTheDocument();
     expect(screen.queryByText('Analytics content')).not.toBeInTheDocument();
+  });
+
+  it('captures React Profiler metrics for dashboard tab', () => {
+    const durations: number[] = [];
+
+    render(
+      <Profiler
+        id="dashboard-page"
+        onRender={(_, __, actualDuration) => {
+          durations.push(actualDuration);
+        }}
+      >
+        <DashboardPage />
+      </Profiler>,
+    );
+
+    expect(durations.length).toBeGreaterThan(0);
+
+    const totalDuration = durations.reduce((total, value) => total + value, 0);
+    const averageDuration = totalDuration / durations.length;
+
+    console.info(
+      `[profiler] dashboard commits=${durations.length} total=${totalDuration.toFixed(2)}ms avg=${averageDuration.toFixed(2)}ms`,
+    );
   });
 });

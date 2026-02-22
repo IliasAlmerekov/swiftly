@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 interface UsePaginationOptions {
   /** Initial page size */
@@ -43,7 +43,7 @@ export function usePagination({
   const [pageIndex, setPageIndex] = useState(0);
   const [pageCursors, setPageCursors] = useState<Array<string | null>>([null]);
 
-  const cursor = useMemo(() => pageCursors[pageIndex] ?? null, [pageCursors, pageIndex]);
+  const cursor = pageCursors[pageIndex] ?? null;
   const hasPreviousPage = pageIndex > 0;
 
   // Reset pagination when resetKey or pageSize changes
@@ -77,9 +77,9 @@ export function usePagination({
     setPageCursors([null]);
   }, []);
 
-  const handleSetPageSize = useCallback((size: number) => {
+  const handleSetPageSize = (size: number) => {
     setPageSize(size);
-  }, []);
+  };
 
   return {
     pageIndex,

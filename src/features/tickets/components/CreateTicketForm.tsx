@@ -91,7 +91,7 @@ export const CreateTicketForm = memo(function CreateTicketForm({
     }
   }, [success, reset]);
 
-  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     if (!file) {
       setAttachment(null);
@@ -110,7 +110,7 @@ export const CreateTicketForm = memo(function CreateTicketForm({
 
     setAttachmentError(null);
     setAttachment(file);
-  }, []);
+  };
 
   const handleFormSubmit = useCallback(
     async (data: CreateTicketFormData) => {

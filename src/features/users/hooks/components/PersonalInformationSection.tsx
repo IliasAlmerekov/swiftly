@@ -115,9 +115,9 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
     handleUserClick(selectedManagerId);
   };
 
-  const handleEdit = useCallback(() => {
+  const handleEdit = () => {
     setEditMode(true);
-  }, []);
+  };
 
   const handleCancel = useCallback(() => {
     setEditMode(false);

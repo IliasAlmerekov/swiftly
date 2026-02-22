@@ -34,9 +34,9 @@ export const ChatInput = memo(function ChatInput({ onSendMessage, isLoading }: C
     [handleSend],
   );
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputValue(e.target.value);
-  }, []);
+  };
 
   return (
     <div className="flex w-full gap-3">

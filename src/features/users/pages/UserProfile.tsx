@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { getAllUsers, getUserProfile, getUserProfileById } from '@/features/users/api';
 import type { User } from '@/types';
 import { useParams } from 'react-router-dom';
@@ -101,7 +101,7 @@ export default function UserProfile({ isViewingOtherUser = false }: UserProfileP
     fetchAllUsers();
   }, [currentUser]);
 
-  const handleErrorClose = useCallback(() => setError(null), []);
+  const handleErrorClose = () => setError(null);
 
   if (loading) {
     return <LoadingState />;
