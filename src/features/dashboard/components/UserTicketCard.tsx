@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo } from 'react';
 import { IconTicket, IconUsers, IconCircleCheck, IconClock } from '@tabler/icons-react';
 import { MetricCard } from '@/shared/components/ui/metric-card';
 import type { DashboardTicketSummary } from '../types/dashboard';
@@ -42,14 +42,10 @@ interface UserTicketCardProps {
 }
 
 const UserTicketCard = memo(function UserTicketCard({ summary }: UserTicketCardProps) {
-  const metricsData = useMemo(
-    () =>
-      METRICS_CONFIG.map((config) => ({
-        ...config,
-        value: summary[config.key] ?? 0,
-      })),
-    [summary],
-  );
+  const metricsData = METRICS_CONFIG.map((config) => ({
+    ...config,
+    value: summary[config.key] ?? 0,
+  }));
 
   return (
     <>

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, memo } from 'react';
+import { useCallback, useState, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 
@@ -122,10 +122,9 @@ export function Tickets() {
   // Search state - debounced value from TicketSearchBar
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Memoized search handler to prevent TicketSearchBar re-renders
-  const handleSearch = useCallback((query: string) => {
+  const handleSearch = (query: string) => {
     setSearchQuery(query);
-  }, []);
+  };
 
   // Filter state from custom hook
   const { activeFilterValue, activeStaffTab, queryFilters, filterKey, onFilterChange } =
@@ -198,10 +197,8 @@ export function Tickets() {
   );
 
   // ============ Computed Values ============
-  const description = useMemo(() => {
-    const suffix = searchQuery ? ` for "${searchQuery}"` : '';
-    return `${filteredTickets.length} ticket(s) found${suffix}`;
-  }, [filteredTickets.length, searchQuery]);
+  const suffix = searchQuery ? ` for "${searchQuery}"` : '';
+  const description = `${filteredTickets.length} ticket(s) found${suffix}`;
 
   const showStats = isStaff && activeStaffTab.value === 'all';
 

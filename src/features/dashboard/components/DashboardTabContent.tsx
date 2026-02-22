@@ -50,10 +50,7 @@ const TabContentRenderer = memo(function TabContentRenderer({
 }: TabContentRendererProps) {
   const { title, subtitle, component: Component, contentClassName } = config;
 
-  const resolvedTitle = useMemo(
-    () => (typeof title === 'function' ? title(userName, greeting) : title),
-    [title, userName, greeting],
-  );
+  const resolvedTitle = typeof title === 'function' ? title(userName, greeting) : title;
 
   return (
     <TabPageLayout title={resolvedTitle} subtitle={subtitle} contentClassName={contentClassName}>
@@ -111,12 +108,7 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = memo(
       [components],
     );
 
-    const hasAccess = useMemo(() => {
-      if (STAFF_ONLY_TABS.includes(currentTab) && !isStaff) {
-        return false;
-      }
-      return true;
-    }, [currentTab, isStaff]);
+    const hasAccess = !STAFF_ONLY_TABS.includes(currentTab) || isStaff;
 
     if (!hasAccess) {
       return <AccessRestricted />;

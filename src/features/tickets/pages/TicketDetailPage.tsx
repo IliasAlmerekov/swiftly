@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import { useAuthContext } from '@/shared/context/AuthContext';
@@ -43,19 +43,14 @@ const TicketDetailPage = () => {
   // UI State
   const [isEditing, setIsEditing] = useState(false);
 
-  // Memoize current user to prevent unnecessary re-renders
-  const currentUser = useMemo(
-    () =>
-      user
-        ? {
-            _id: user.id,
-            email: user.email,
-            role: user.role,
-            name: user.name,
-          }
-        : null,
-    [user],
-  );
+  const currentUser = user
+    ? {
+        _id: user.id,
+        email: user.email,
+        role: user.role,
+        name: user.name,
+      }
+    : null;
 
   const isStaff = currentUser?.role === 'admin' || currentUser?.role === 'support1';
 

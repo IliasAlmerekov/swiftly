@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { LayoutDashboard, Ticket, HelpCircle, BarChart3 } from 'lucide-react';
 
 import {
@@ -68,9 +68,7 @@ const AppSidebar: React.FC<SidebarProps> = ({ role, email, currentTab, onTabChan
     return MENU_CONFIG.user;
   };
 
-  const menuItems: MenuItem[] = useMemo(() => {
-    return getMenuForRole(role);
-  }, [role]);
+  const menuItems = getMenuForRole(role);
 
   const handleTabChange = (tabId: TabType) => {
     if (tabId === currentTab) return; // No action if the same tab is selected

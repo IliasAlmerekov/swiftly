@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { memo, useState, useEffect, type ReactNode } from 'react';
 
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
@@ -53,9 +53,9 @@ export const TicketSearchBar = memo(function TicketSearchBar({
     setLocalQuery(initialValue);
   }, [initialValue]);
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalQuery(e.target.value);
-  }, []);
+  };
 
   return (
     <div className="flex flex-col gap-3 lg:flex-row lg:items-center">

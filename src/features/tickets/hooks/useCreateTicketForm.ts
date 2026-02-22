@@ -93,14 +93,14 @@ export function useCreateTicketForm({
     }
   }, []);
 
-  const handleOverlayClose = useCallback(() => {
+  const handleOverlayClose = () => {
     setShowOverlay(false);
-  }, []);
+  };
 
-  const handleAllowCreateTicket = useCallback(() => {
+  const handleAllowCreateTicket = () => {
     setCanCreateTicket(true);
     setShowAIAssistant(false);
-  }, []);
+  };
 
   const handleNavigateToDashboard = useCallback(() => {
     navigate(paths.app.dashboard.getHref(paths.tabs.dashboard));
