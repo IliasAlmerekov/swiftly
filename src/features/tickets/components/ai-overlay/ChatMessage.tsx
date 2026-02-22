@@ -1,40 +1,9 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { Bot } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
 import { cn } from '@/shared/lib/utils';
+import { sanitizeUserGeneratedRichText } from '@/shared/lib/security/sanitizeRichText';
 import type { ChatRequest } from '@/types';
-
-// ============ Message Formatter ============
-const formatAIMessage = (content: string) => {
-  if (!content.includes('1.') && !content.includes('2.')) {
-    return <span>{content}</span>;
-  }
-
-  const beforeList = content.split(/\d+\./)[0].trim();
-  const listMatches = content.match(/\d+\.\s+[^.]+\./g) || [];
-  const listItems = listMatches.map((item) =>
-    item
-      .replace(/^\d+\.\s+/, '')
-      .replace(/\.$/, '')
-      .trim(),
-  );
-  const lastMatch = listMatches[listMatches.length - 1];
-  const afterList = lastMatch ? content.split(lastMatch)[1]?.trim() : '';
-
-  return (
-    <div>
-      {beforeList && <span>{beforeList} </span>}
-      {listItems.length > 0 && (
-        <ol className="my-2 list-inside list-decimal space-y-1">
-          {listItems.map((item, i) => (
-            <li key={i}>{item}</li>
-          ))}
-        </ol>
-      )}
-      {afterList && <span>{afterList}</span>}
-    </div>
-  );
-};
 
 // ============ Types ============
 interface ChatMessageProps {
@@ -48,6 +17,11 @@ interface ChatMessageProps {
  */
 export const ChatMessage = memo(function ChatMessage({ message }: ChatMessageProps) {
   const isUser = message.role === 'user';
+  const messageContent = message.content || '';
+  const richTextHtml = useMemo(
+    () => sanitizeUserGeneratedRichText(messageContent, isUser ? 'plain' : 'markdown'),
+    [isUser, messageContent],
+  );
   const timeLabel = new Date(message.timestamp).toLocaleTimeString('de-DE', {
     hour: '2-digit',
     minute: '2-digit',
@@ -71,7 +45,7 @@ export const ChatMessage = memo(function ChatMessage({ message }: ChatMessagePro
         )}
       >
         <div className="text-sm leading-relaxed">
-          {message.role === 'assistant' ? formatAIMessage(message.content || '') : message.content}
+          <div dangerouslySetInnerHTML={{ __html: richTextHtml }} />
         </div>
         <div
           className={cn(

@@ -101,7 +101,6 @@ export const useProfileEditor = ({
 
         onUserUpdate(updatedUser);
       } catch (err) {
-        console.error('Profile update error:', err);
         onError(getApiErrorMessage(err, 'Error saving profile'));
       }
     },

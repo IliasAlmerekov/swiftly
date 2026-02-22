@@ -69,8 +69,7 @@ describe('Tickets', () => {
     const totalDuration = durations.reduce((total, value) => total + value, 0);
     const averageDuration = totalDuration / durations.length;
 
-    console.info(
-      `[profiler] tickets commits=${durations.length} total=${totalDuration.toFixed(2)}ms avg=${averageDuration.toFixed(2)}ms`,
-    );
+    expect(totalDuration).toBeGreaterThan(0);
+    expect(averageDuration).toBeGreaterThan(0);
   });
 });

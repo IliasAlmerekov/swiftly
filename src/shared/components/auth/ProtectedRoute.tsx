@@ -1,22 +1,25 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useParams } from 'react-router-dom';
 import type { ReactNode } from 'react';
-import type { UserRole } from '@/types';
+
+import { paths } from '@/config/paths';
 import { useAuthContext } from '@/shared/context/AuthContext';
+import { canAccess, type AccessKey } from '@/shared/security/access-matrix';
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  allowedRoles?: UserRole[];
+  access: AccessKey;
 }
 
 /**
- * Component for protecting routes based on authentication and user roles.
+ * Component for protecting routes based on authentication and access matrix rules.
  *
  * @param children - The component(s) to render if access is granted
- * @param allowedRoles - Optional array of roles that are allowed to access the route
+ * @param access - Access key from centralized RBAC/PBAC matrix
  */
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, access }) => {
   const { isAuthenticated, isLoading, user } = useAuthContext();
   const location = useLocation();
+  const { userId: targetUserId } = useParams<{ userId?: string }>();
 
   // Show loading indicator while checking authentication
   if (isLoading) {
@@ -32,11 +35,15 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowe
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to={paths.auth.login.getHref()} state={{ from: location }} replace />;
   }
 
-  // Role check if roles are specified
-  if (allowedRoles && (!user?.role || !allowedRoles.includes(user.role))) {
+  const isAllowed = canAccess(access, user?.role, {
+    actorUserId: user?.id,
+    targetUserId: targetUserId ?? null,
+  });
+
+  if (!isAllowed) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="text-center">
@@ -44,7 +51,6 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowe
           <p className="text-muted-foreground mt-2">
             You don&apos;t have permission to access this page.
           </p>
-          <Navigate to="/dashboard" replace />
         </div>
       </div>
     );

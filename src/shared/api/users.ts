@@ -48,7 +48,7 @@ export const getUserProfile = async (): Promise<User> => {
 export const setUserStatusOffline = async (): Promise<void> => {
   try {
     await apiClient.put('/users/status/offline');
-  } catch (error) {
-    console.error('Failed to set user status to offline:', error);
+  } catch {
+    // Do not block logout flow when status endpoint is unavailable.
   }
 };

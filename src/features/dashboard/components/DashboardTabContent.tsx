@@ -1,6 +1,8 @@
 import React, { memo, useMemo } from 'react';
 import type { TabType } from '@/types';
 import { TabPageLayout } from '@/shared/components/layout/TabPageLayout';
+import AccessGuard from '@/shared/components/auth/AccessGuard';
+import type { AccessKey } from '@/shared/security/access-matrix';
 import type { DashboardTabComponents, DashboardTabRuntime } from '../types/dashboard';
 
 interface DashboardTabContentProps extends DashboardTabRuntime {
@@ -35,7 +37,10 @@ const WelcomePage = memo(function WelcomePage() {
   );
 });
 
-const STAFF_ONLY_TABS: TabType[] = ['admin-dashboard', 'analytics'];
+const TAB_ACCESS: Partial<Record<TabType, AccessKey>> = {
+  'admin-dashboard': 'component.dashboard.adminTab',
+  analytics: 'component.dashboard.analyticsTab',
+};
 
 interface TabContentRendererProps {
   config: TabConfig;
@@ -60,9 +65,7 @@ const TabContentRenderer = memo(function TabContentRenderer({
 });
 
 export const DashboardTabContent: React.FC<DashboardTabContentProps> = memo(
-  function DashboardTabContent({ currentTab, components, role, userName, greeting }) {
-    const isStaff = role === 'admin' || role === 'support1';
-
+  function DashboardTabContent({ currentTab, components, userName, greeting }) {
     const tabConfig = useMemo<Partial<Record<TabType, TabConfig>>>(
       () => ({
         dashboard: {
@@ -108,14 +111,22 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = memo(
       [components],
     );
 
-    const hasAccess = !STAFF_ONLY_TABS.includes(currentTab) || isStaff;
-
-    if (!hasAccess) {
-      return <AccessRestricted />;
-    }
-
     if (!tabConfig[currentTab]) {
       return <WelcomePage />;
+    }
+
+    const requiredAccess = TAB_ACCESS[currentTab];
+
+    if (requiredAccess) {
+      return (
+        <AccessGuard access={requiredAccess} fallback={<AccessRestricted />}>
+          <TabContentRenderer
+            config={tabConfig[currentTab] as TabConfig}
+            userName={userName}
+            greeting={greeting}
+          />
+        </AccessGuard>
+      );
     }
 
     return (

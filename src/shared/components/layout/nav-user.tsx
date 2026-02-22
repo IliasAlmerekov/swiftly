@@ -49,8 +49,8 @@ export function NavUser({
       try {
         const userData = await getUserProfile();
         setAvatarUrl(userData?.avatar || { public_id: '', url: 'default.png' });
-      } catch (err) {
-        console.error('Failed to fetch user profile:', err);
+      } catch {
+        // Keep default avatar on profile fetch failures.
       }
     };
 

@@ -31,7 +31,7 @@ export interface ErrorHandlerOptions {
 }
 
 export function handleError(error: unknown, options: ErrorHandlerOptions = {}): void {
-  const { message, showToast = true, onUnauthorized, context } = options;
+  const { message, showToast = true, onUnauthorized } = options;
 
   let errorMessage = message || 'An unexpected error occurred';
   let statusCode = 500;
@@ -46,15 +46,6 @@ export function handleError(error: unknown, options: ErrorHandlerOptions = {}): 
     }
   } else if (error instanceof Error) {
     errorMessage = message || error.message;
-  }
-
-  // Log error for debugging
-  if (import.meta.env.DEV) {
-    console.error(`[Error${context ? ` - ${context}` : ''}]:`, {
-      message: errorMessage,
-      statusCode,
-      error,
-    });
   }
 
   // Show toast notification

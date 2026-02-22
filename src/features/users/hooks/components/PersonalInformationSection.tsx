@@ -11,6 +11,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { paths } from '@/config/paths';
+import AccessGuard from '@/shared/components/auth/AccessGuard';
 
 /**
  * Schema for profile form validation
@@ -52,7 +53,6 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
   const [editMode, setEditMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const isAdmin = currentUser?.role === 'admin';
   const isStaff = currentUser?.role === 'admin' || currentUser?.role === 'support1';
 
   const {
@@ -153,7 +153,7 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
         <CardTitle className="text-foreground text-lg font-semibold">
           Personal Information
         </CardTitle>
-        {isAdmin && (
+        <AccessGuard access="component.users.profileEdit">
           <div className="flex gap-2">
             {editMode ? (
               <>
@@ -170,7 +170,7 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
               </Button>
             )}
           </div>
-        )}
+        </AccessGuard>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
