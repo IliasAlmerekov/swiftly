@@ -10,6 +10,7 @@ import {
 } from '../hooks/components';
 import { useAvatarHandlers, useProfileEditor } from '../hooks';
 import { getApiErrorMessage } from '@/shared/lib/apiErrors';
+import { canAccess } from '@/shared/security/access-matrix';
 
 interface UserProfileProps {
   isViewingOtherUser?: boolean;
@@ -54,20 +55,21 @@ export default function UserProfile({ isViewingOtherUser = false }: UserProfileP
 
         let userData: User;
 
-        const isStaff = currentUserData.role === 'admin' || currentUserData.role === 'support1';
-
         // If viewing another user and we have a userId param, check permissions
         if (isViewingOtherUser && userId) {
-          if (userId === currentUserData._id) {
-            userData = currentUserData;
-          } else {
-            if (!isStaff) {
-              setError('Access restricted: you cannot view other user profiles.');
-              setLoading(false);
-              return;
-            }
-            userData = await getUserProfileById(userId);
+          const canViewRequestedProfile = canAccess('route.userById', currentUserData.role, {
+            actorUserId: currentUserData._id,
+            targetUserId: userId,
+          });
+
+          if (!canViewRequestedProfile) {
+            setError('Access restricted: you cannot view other user profiles.');
+            setLoading(false);
+            return;
           }
+
+          userData =
+            userId === currentUserData._id ? currentUserData : await getUserProfileById(userId);
         } else {
           // Otherwise, get current user's profile
           userData = currentUserData;

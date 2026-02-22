@@ -20,24 +20,24 @@ export const getSupportUsers = async (): Promise<AdminUsersResponse> => {
 export const setUserStatusOnline = async () => {
   try {
     await apiClient.put('/users/status/online');
-  } catch (error) {
-    console.error('Failed to set user status to online:', error);
+  } catch {
+    // Status ping failures should not block the main UI flow.
   }
 };
 
 export const setUserStatusOffline = async () => {
   try {
     await apiClient.put('/users/status/offline');
-  } catch (error) {
-    console.error('Failed to set user status to offline:', error);
+  } catch {
+    // Status ping failures should not block logout flow.
   }
 };
 
 export const activityInterval = async () => {
   try {
     await apiClient.put('/users/status/activity');
-  } catch (error) {
-    console.error('Failed to update user activity status:', error);
+  } catch {
+    // Ignore background heartbeat failures.
   }
 };
 

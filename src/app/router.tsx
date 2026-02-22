@@ -43,7 +43,7 @@ export const AppRouter = () => {
           <Route
             path={paths.app.dashboard.path}
             element={
-              <ProtectedRoute>
+              <ProtectedRoute access="route.dashboard">
                 <AppLayout>
                   <DashboardPage />
                 </AppLayout>
@@ -54,7 +54,7 @@ export const AppRouter = () => {
           <Route
             path={paths.app.ticket.path}
             element={
-              <ProtectedRoute>
+              <ProtectedRoute access="route.ticketDetail">
                 <AppLayout title="Swiftly HelpDesk - Ticket Details" currentTab="tickets">
                   <TicketDetailPage />
                 </AppLayout>
@@ -65,7 +65,7 @@ export const AppRouter = () => {
           <Route
             path={paths.app.user.path}
             element={
-              <ProtectedRoute>
+              <ProtectedRoute access="route.userById">
                 <AppLayout title="User Profile" currentTab="user-profile">
                   <UserProfile isViewingOtherUser={true} />
                 </AppLayout>
@@ -76,7 +76,7 @@ export const AppRouter = () => {
           <Route
             path={paths.app.profile.path}
             element={
-              <ProtectedRoute>
+              <ProtectedRoute access="route.userProfile">
                 <AppLayout title="Profile" currentTab="user-profile">
                   <UserProfile />
                 </AppLayout>

@@ -1,6 +1,7 @@
 import type { AuthToken, AdminUsersResponse } from '@/types';
 import { ApiError } from '@/types';
 import { apiClient } from '@/shared/api';
+import { clearStoredToken, getStoredToken, setStoredToken } from '@/shared/utils/token';
 
 // ============ Authentication Functions ============
 
@@ -54,20 +55,13 @@ export const getAdminUsers = async (): Promise<AdminUsersResponse> => {
 // ============ Utility Functions ============
 
 export const isAuthenticated = (): boolean => {
-  return !!(localStorage.getItem('token') || sessionStorage.getItem('token'));
+  return Boolean(getStoredToken());
 };
 
 export const clearAuthToken = (): void => {
-  localStorage.removeItem('token');
-  sessionStorage.removeItem('token');
+  clearStoredToken();
 };
 
 export const setAuthToken = (token: string, persistent = false): void => {
-  if (persistent) {
-    localStorage.setItem('token', token);
-    sessionStorage.removeItem('token');
-  } else {
-    sessionStorage.setItem('token', token);
-    localStorage.removeItem('token');
-  }
+  setStoredToken(token, persistent);
 };

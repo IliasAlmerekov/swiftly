@@ -14,6 +14,10 @@ const envSchema = z.object({
   BASE_URL: z.string().default('/'),
 });
 
+const productionCriticalEnvSchema = z.object({
+  VITE_API_URL: z.string().url(),
+});
+
 // ============ Type Export ============
 
 export type Env = z.infer<typeof envSchema>;
@@ -33,18 +37,22 @@ function parseEnv(): Env {
   const result = envSchema.safeParse(rawEnv);
 
   if (!result.success) {
-    console.error('❌ Invalid environment variables:', result.error.flatten().fieldErrors);
+    throw new Error(
+      `Invalid environment variables:\n${JSON.stringify(result.error.flatten().fieldErrors, null, 2)}`,
+    );
+  }
 
-    // In development, show detailed errors
-    if (import.meta.env.DEV) {
+  if (result.data.PROD) {
+    const criticalCheck = productionCriticalEnvSchema.safeParse(result.data);
+    if (!criticalCheck.success) {
       throw new Error(
-        `Invalid environment variables:\n${JSON.stringify(result.error.flatten().fieldErrors, null, 2)}`,
+        `Missing critical production environment variables:\n${JSON.stringify(
+          criticalCheck.error.flatten().fieldErrors,
+          null,
+          2,
+        )}`,
       );
     }
-
-    // In production, fail silently but log
-    console.error('Environment validation failed, using defaults');
-    return envSchema.parse({});
   }
 
   return result.data;

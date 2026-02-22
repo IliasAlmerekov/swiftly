@@ -114,8 +114,7 @@ export function useAiChat({ isOpen }: UseAiChatOptions): UseAiChatResult {
             },
           ]);
         }
-      } catch (error) {
-        console.error('API Error:', error);
+      } catch {
         setMessages((prev) => [
           ...prev,
           {
