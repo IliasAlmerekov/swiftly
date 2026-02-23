@@ -51,8 +51,7 @@ const json = (route: Route, status: number, body: unknown) =>
     body: JSON.stringify(body),
   });
 
-const toBase64Url = (value: string): string =>
-  Buffer.from(value, 'utf8').toString('base64url');
+const toBase64Url = (value: string): string => Buffer.from(value, 'utf8').toString('base64url');
 
 const createJwt = (user: MockUser): string => {
   const header = toBase64Url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
@@ -248,7 +247,11 @@ export const setupMockApi = async (page: Page) => {
 
     if (pathname === '/api/tickets' && method === 'GET') {
       const status = searchParams.get('status');
-      const statuses = status?.split(',').map((value) => value.trim()).filter(Boolean) ?? [];
+      const statuses =
+        status
+          ?.split(',')
+          .map((value) => value.trim())
+          .filter(Boolean) ?? [];
       const filtered =
         statuses.length > 0
           ? state.tickets.filter((ticket) => statuses.includes(ticket.status))
@@ -327,10 +330,7 @@ export const setupMockApi = async (page: Page) => {
   });
 };
 
-export const loginAs = async (
-  page: Page,
-  credentials: { email: string; password: string },
-) => {
+export const loginAs = async (page: Page, credentials: { email: string; password: string }) => {
   await page.goto('/login');
   await page.getByRole('textbox', { name: 'Email' }).fill(credentials.email);
   await page.getByRole('textbox', { name: 'Password' }).fill(credentials.password);

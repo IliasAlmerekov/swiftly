@@ -60,7 +60,9 @@ const findCoverageFile = (relativeFile) => {
 
   return coverageFiles.find((coverageFile) => {
     const normalizedCoverage = normalizePath(coverageFile);
-    return normalizedCoverage === normalizedRelative || normalizedCoverage.endsWith(`/${relativeFile}`);
+    return (
+      normalizedCoverage === normalizedRelative || normalizedCoverage.endsWith(`/${relativeFile}`)
+    );
   });
 };
 
