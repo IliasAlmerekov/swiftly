@@ -162,6 +162,7 @@ export function createApiClient(config: ApiClientConfig = {}) {
       headers: customHeaders,
       ...fetchOptions
     } = options;
+    const method = (fetchOptions.method ?? 'GET').toUpperCase();
 
     // Prepare headers
     const headers: HeadersInit = {
@@ -178,6 +179,7 @@ export function createApiClient(config: ApiClientConfig = {}) {
     try {
       const response = await fetch(`${baseUrl}${endpoint}`, {
         ...fetchOptions,
+        cache: fetchOptions.cache ?? (method === 'GET' ? 'no-store' : undefined),
         headers,
         signal: controller.signal,
         body: body ? JSON.stringify(body) : undefined,

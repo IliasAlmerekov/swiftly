@@ -4,6 +4,23 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+png" href="/head.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark light" />
+    <script>
+      (() => {
+        const storageKey = 'vite-ui-theme';
+        const root = document.documentElement;
+
+        try {
+          const storedTheme = localStorage.getItem(storageKey);
+          const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const resolvedTheme =
+            storedTheme === 'dark' || (storedTheme !== 'light' && systemDark) ? 'dark' : 'light';
+          root.classList.add(resolvedTheme);
+        } catch {
+          root.classList.add('dark');
+        }
+      })();
+    </script>
     <title>Swiftly</title>
   </head>
   <body>

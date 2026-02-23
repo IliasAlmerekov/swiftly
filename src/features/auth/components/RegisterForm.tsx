@@ -87,6 +87,12 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
               <Button type="submit" className="text-md mt-8 w-full">
                 Registration
               </Button>
+              <div className="py-2 text-center text-sm">
+                Already have an account?{' '}
+                <a href="/login" className="underline underline-offset-4">
+                  Sign In
+                </a>
+              </div>
             </div>
           </form>
         </CardContent>

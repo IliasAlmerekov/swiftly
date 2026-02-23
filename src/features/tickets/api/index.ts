@@ -12,6 +12,8 @@ import {
   parseApiPayload,
   parseEntityOrApiResponse,
   ticketAttachmentUploadResponseSchema,
+  ticketEntitySchema,
+  ticketListItemSchema,
   ticketSchema,
   ticketStatsOfMonthSchema,
   userTicketStatsSchema,
@@ -90,7 +92,7 @@ export const getUserTickets = async (
     const response = await apiClient.get<unknown>(endpoint);
     return normalizeCursorPageContract(
       response,
-      ticketSchema,
+      ticketListItemSchema,
       params.limit ?? DEFAULT_TICKET_PAGE_SIZE,
       endpoint,
     );
@@ -127,7 +129,7 @@ export const getAllTickets = async (params: TicketListParams = {}): Promise<Tick
     const response = await apiClient.get<unknown>(endpoint);
     return normalizeCursorPageContract(
       response,
-      ticketSchema,
+      ticketListItemSchema,
       params.limit ?? DEFAULT_TICKET_PAGE_SIZE,
       endpoint,
     );
@@ -145,7 +147,7 @@ export const getTickets = async (params: TicketListParams = {}): Promise<TicketL
     const response = await apiClient.get<unknown>(endpoint);
     return normalizeCursorPageContract(
       response,
-      ticketSchema,
+      ticketListItemSchema,
       params.limit ?? DEFAULT_TICKET_PAGE_SIZE,
       endpoint,
     );
@@ -158,7 +160,7 @@ export const getTicketById = async (ticketId: string): Promise<Ticket> => {
   try {
     const endpoint = `/tickets/${ticketId}`;
     const response = await apiClient.get<unknown>(endpoint);
-    return parseApiPayload(ticketSchema, response, { endpoint });
+    return parseEntityOrApiResponse(response, ticketEntitySchema, { endpoint });
   } catch (error) {
     throw normalizeApiModuleError(error, 'Failed to fetch ticket details');
   }

@@ -29,7 +29,7 @@ export const AiOverlayFooter = memo(function AiOverlayFooter({
         <Button
           onClick={onCreateTicket}
           variant="secondary"
-          className="w-full sm:w-auto sm:min-w-[200px]"
+          className="w-full bg-blue-700 hover:bg-blue-800 sm:w-auto sm:min-w-[200px]"
         >
           Ticket erstellen
         </Button>

@@ -1,23 +1,24 @@
 import { apiClient } from '@/shared/api';
 import {
   adminUsersFlexibleSchema,
-  authTokenSchema,
+  authSessionSchema,
   normalizeApiModuleError,
+  parseEntityOrApiResponse,
   parseApiPayload,
 } from '@/shared/api/contracts';
 import { clearStoredToken, getStoredToken, setStoredToken } from '@/shared/utils/token';
-import type { AdminUsersResponse, AuthToken } from '@/types';
+import type { AdminUsersResponse, AuthSession } from '@/types';
 
 // ============ Authentication Functions ============
 
-export const loginUser = async (email: string, password: string): Promise<AuthToken> => {
+export const loginUser = async (email: string, password: string): Promise<AuthSession> => {
   try {
     const response = await apiClient.post<unknown>(
       '/auth/login',
       { email, password },
       { skipAuth: true },
     );
-    return parseApiPayload(authTokenSchema, response, { endpoint: '/auth/login' });
+    return parseEntityOrApiResponse(response, authSessionSchema, { endpoint: '/auth/login' });
   } catch (error) {
     throw normalizeApiModuleError(error, 'Failed to login');
   }
@@ -27,14 +28,14 @@ export const registerUser = async (
   email: string,
   password: string,
   name: string,
-): Promise<AuthToken> => {
+): Promise<AuthSession> => {
   try {
     const response = await apiClient.post<unknown>(
       '/auth/register',
       { email, password, name },
       { skipAuth: true },
     );
-    return parseApiPayload(authTokenSchema, response, { endpoint: '/auth/register' });
+    return parseEntityOrApiResponse(response, authSessionSchema, { endpoint: '/auth/register' });
   } catch (error) {
     throw normalizeApiModuleError(error, 'Failed to register');
   }
