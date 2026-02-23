@@ -15,18 +15,14 @@ export interface CursorPage<T> {
   items: T[];
   pageInfo: CursorPageInfo;
 }
-
-export class ApiError extends Error {
-  public status: number;
-  public details?: unknown;
-
-  constructor(message: string, status: number = 500, details?: unknown) {
-    super(message);
-    this.name = 'ApiError';
-    this.status = status;
-    this.details = details;
-  }
-}
+export {
+  ApiError,
+  getApiErrorCodeByStatus,
+  mapApiErrorToUserMessage,
+  toApiError,
+  type ApiErrorCode,
+  type ApiErrorLike,
+} from './api-error';
 
 export type UserRole = 'user' | 'support1' | 'admin';
 

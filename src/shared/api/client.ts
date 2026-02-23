@@ -1,4 +1,4 @@
-import { ApiError } from '@/types';
+import { ApiError, getApiErrorCodeByStatus, type ApiErrorCode } from '@/types';
 import { getStoredToken, clearStoredToken } from '@/shared/utils/token';
 import { API_BASE_URL } from '@/config/env';
 
@@ -25,40 +25,19 @@ interface ApiClientConfig {
   onUnauthorized?: () => void;
 }
 
+interface ErrorPayload {
+  message?: string;
+  details?: unknown;
+  code?: ApiErrorCode;
+  userMessage?: string;
+}
+
 // ============ Response Handler ============
 
 /**
  * Handle API response
  */
-async function handleResponse<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    let message = `HTTP error! status: ${response.status}`;
-    let details: unknown;
-
-    try {
-      const errorData = await response.json();
-      if (errorData && typeof errorData === 'object') {
-        if ('message' in errorData) {
-          message = String(errorData.message) || message;
-        }
-        if ('details' in errorData) {
-          details = errorData.details;
-        }
-      }
-    } catch {
-      try {
-        const text = await response.text();
-        if (text) {
-          message = text;
-        }
-      } catch {
-        // ignore parsing errors
-      }
-    }
-
-    throw new ApiError(message, response.status, details);
-  }
-
+async function parseSuccessResponse<T>(response: Response): Promise<T> {
   // Handle empty responses
   const contentType = response.headers.get('content-type');
   if (!contentType || !contentType.includes('application/json')) {
@@ -68,13 +47,109 @@ async function handleResponse<T>(response: Response): Promise<T> {
   return response.json();
 }
 
+const API_ERROR_CODES: ReadonlySet<ApiErrorCode> = new Set([
+  'BAD_REQUEST',
+  'UNAUTHORIZED',
+  'FORBIDDEN',
+  'NOT_FOUND',
+  'CONFLICT',
+  'VALIDATION_ERROR',
+  'RATE_LIMITED',
+  'TIMEOUT',
+  'SERVER_ERROR',
+  'NETWORK_ERROR',
+  'BAD_RESPONSE',
+  'UNKNOWN_ERROR',
+]);
+
+const isApiErrorCode = (value: unknown): value is ApiErrorCode =>
+  typeof value === 'string' && API_ERROR_CODES.has(value as ApiErrorCode);
+
+const parseErrorPayload = async (response: Response): Promise<ErrorPayload | null> => {
+  try {
+    const payload = await response.clone().json();
+    if (payload && typeof payload === 'object') {
+      const typedPayload = payload as Record<string, unknown>;
+      return {
+        message: typeof typedPayload.message === 'string' ? typedPayload.message : undefined,
+        details: typedPayload.details,
+        code: isApiErrorCode(typedPayload.code) ? typedPayload.code : undefined,
+        userMessage:
+          typeof typedPayload.userMessage === 'string' ? typedPayload.userMessage : undefined,
+      };
+    }
+  } catch {
+    // ignore JSON parse errors and fallback to text
+  }
+
+  try {
+    const text = (await response.text()).trim();
+    if (text) {
+      return { message: text };
+    }
+  } catch {
+    // ignore text parse errors
+  }
+
+  return null;
+};
+
+const createHttpError = async (response: Response): Promise<ApiError> => {
+  const payload = await parseErrorPayload(response);
+  const status = response.status;
+  const code = payload?.code ?? getApiErrorCodeByStatus(status);
+  const message = payload?.message?.trim() || `HTTP error! status: ${status}`;
+
+  return new ApiError(message, status, payload?.details, {
+    code,
+    userMessage: payload?.userMessage,
+  });
+};
+
+const normalizeRequestError = (error: unknown, fallbackMessage: string): ApiError => {
+  const isAbortLikeError =
+    (error instanceof Error && error.name === 'AbortError') ||
+    (typeof error === 'object' &&
+      error !== null &&
+      'name' in error &&
+      (error as { name?: unknown }).name === 'AbortError');
+
+  if (error instanceof ApiError) {
+    return error;
+  }
+
+  if (isAbortLikeError) {
+    return new ApiError(fallbackMessage, 408, undefined, { code: 'TIMEOUT', cause: error });
+  }
+
+  if (error instanceof TypeError) {
+    return new ApiError(fallbackMessage, 503, undefined, {
+      code: 'NETWORK_ERROR',
+      cause: error,
+    });
+  }
+
+  return new ApiError(fallbackMessage, 500, undefined, { code: 'SERVER_ERROR', cause: error });
+};
+
 // ============ API Client Factory ============
 
 /**
  * Creates an API client instance with the given configuration
  */
-function createApiClient(config: ApiClientConfig = {}) {
+export function createApiClient(config: ApiClientConfig = {}) {
   const { baseUrl = API_BASE_URL, timeout = DEFAULT_TIMEOUT, onUnauthorized } = config;
+
+  const attachAuthHeader = (headers: HeadersInit, skipAuth: boolean) => {
+    if (skipAuth) {
+      return;
+    }
+
+    const token = getStoredToken();
+    if (token) {
+      (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+    }
+  };
 
   /**
    * Base method for making requests
@@ -94,13 +169,7 @@ function createApiClient(config: ApiClientConfig = {}) {
       ...customHeaders,
     };
 
-    // Add Authorization header if not skipAuth
-    if (!skipAuth) {
-      const token = getStoredToken();
-      if (token) {
-        (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
-      }
-    }
+    attachAuthHeader(headers, skipAuth);
 
     // AbortController for timeout
     const controller = new AbortController();
@@ -116,31 +185,19 @@ function createApiClient(config: ApiClientConfig = {}) {
 
       clearTimeout(timeoutId);
 
-      // Handle 401 Unauthorized
       if (response.status === 401) {
         clearStoredToken();
-        if (onUnauthorized) {
-          onUnauthorized();
-        }
-        throw new ApiError('Unauthorized', 401);
+        onUnauthorized?.();
       }
 
-      return handleResponse<T>(response);
+      if (!response.ok) {
+        throw await createHttpError(response);
+      }
+
+      return parseSuccessResponse<T>(response);
     } catch (error) {
       clearTimeout(timeoutId);
-
-      if (error instanceof ApiError) {
-        throw error;
-      }
-
-      if (error instanceof Error) {
-        if (error.name === 'AbortError') {
-          throw new ApiError('Request timeout', 408);
-        }
-        throw new ApiError(error.message, 500);
-      }
-
-      throw new ApiError('Unknown error occurred', 500);
+      throw normalizeRequestError(error, 'Failed to execute request');
     }
   }
 
@@ -186,34 +243,46 @@ function createApiClient(config: ApiClientConfig = {}) {
       formData: FormData,
       options?: Omit<RequestConfig, 'method' | 'body'>,
     ): Promise<T> => {
-      const { skipAuth = false, headers: customHeaders, ...fetchOptions } = options || {};
+      const {
+        timeout: requestTimeout = timeout,
+        skipAuth = false,
+        headers: customHeaders,
+        ...fetchOptions
+      } = options || {};
 
       const headers: HeadersInit = { ...customHeaders };
       // Do not set Content-Type - the browser will set it with boundary
 
-      if (!skipAuth) {
-        const token = getStoredToken();
-        if (token) {
-          (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+      attachAuthHeader(headers, skipAuth);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), requestTimeout);
+
+      try {
+        const response = await fetch(`${baseUrl}${endpoint}`, {
+          ...fetchOptions,
+          method: 'POST',
+          headers,
+          body: formData,
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (response.status === 401) {
+          clearStoredToken();
+          onUnauthorized?.();
         }
-      }
 
-      const response = await fetch(`${baseUrl}${endpoint}`, {
-        ...fetchOptions,
-        method: 'POST',
-        headers,
-        body: formData,
-      });
-
-      if (response.status === 401) {
-        clearStoredToken();
-        if (onUnauthorized) {
-          onUnauthorized();
+        if (!response.ok) {
+          throw await createHttpError(response);
         }
-        throw new ApiError('Unauthorized', 401);
-      }
 
-      return handleResponse<T>(response);
+        return parseSuccessResponse<T>(response);
+      } catch (error) {
+        clearTimeout(timeoutId);
+        throw normalizeRequestError(error, 'Failed to upload file');
+      }
     },
   };
 }

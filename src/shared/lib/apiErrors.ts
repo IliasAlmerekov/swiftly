@@ -1,4 +1,4 @@
-import { ApiError } from '@/types';
+import { ApiError, mapApiErrorToUserMessage } from '@/types';
 
 const formatDetails = (details: unknown): string | null => {
   if (!details) return null;
@@ -25,13 +25,22 @@ const formatDetails = (details: unknown): string | null => {
     return message || null;
   }
 
+  if (details && typeof details === 'object' && 'issues' in details) {
+    const issues = (details as { issues?: Array<{ message?: string }> }).issues;
+    if (Array.isArray(issues)) {
+      const messages = issues.map((issue) => String(issue?.message ?? '').trim()).filter(Boolean);
+      return messages.length ? messages.join(', ') : null;
+    }
+  }
+
   return null;
 };
 
 export const getApiErrorMessage = (error: unknown, fallback: string): string => {
   if (error instanceof ApiError) {
+    const baseMessage = mapApiErrorToUserMessage(error, fallback);
     const detailsMessage = formatDetails(error.details);
-    return detailsMessage ? `${error.message}: ${detailsMessage}` : error.message;
+    return detailsMessage ? `${baseMessage}: ${detailsMessage}` : baseMessage;
   }
 
   if (error instanceof Error) {

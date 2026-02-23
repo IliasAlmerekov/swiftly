@@ -1,18 +1,25 @@
-import type { AuthToken, AdminUsersResponse } from '@/types';
-import { ApiError } from '@/types';
 import { apiClient } from '@/shared/api';
+import {
+  adminUsersFlexibleSchema,
+  authTokenSchema,
+  normalizeApiModuleError,
+  parseApiPayload,
+} from '@/shared/api/contracts';
 import { clearStoredToken, getStoredToken, setStoredToken } from '@/shared/utils/token';
+import type { AdminUsersResponse, AuthToken } from '@/types';
 
 // ============ Authentication Functions ============
 
 export const loginUser = async (email: string, password: string): Promise<AuthToken> => {
   try {
-    return await apiClient.post<AuthToken>('/auth/login', { email, password }, { skipAuth: true });
+    const response = await apiClient.post<unknown>(
+      '/auth/login',
+      { email, password },
+      { skipAuth: true },
+    );
+    return parseApiPayload(authTokenSchema, response, { endpoint: '/auth/login' });
   } catch (error) {
-    if (error instanceof ApiError) {
-      throw error;
-    }
-    throw new ApiError('Failed to login', 500);
+    throw normalizeApiModuleError(error, 'Failed to login');
   }
 };
 
@@ -22,33 +29,23 @@ export const registerUser = async (
   name: string,
 ): Promise<AuthToken> => {
   try {
-    return await apiClient.post<AuthToken>(
+    const response = await apiClient.post<unknown>(
       '/auth/register',
       { email, password, name },
       { skipAuth: true },
     );
+    return parseApiPayload(authTokenSchema, response, { endpoint: '/auth/register' });
   } catch (error) {
-    if (error instanceof ApiError) {
-      throw error;
-    }
-    throw new ApiError('Failed to register', 500);
+    throw normalizeApiModuleError(error, 'Failed to register');
   }
 };
 
 export const getAdminUsers = async (): Promise<AdminUsersResponse> => {
   try {
-    const data = await apiClient.get<AdminUsersResponse | AdminUsersResponse['users']>(
-      '/auth/admins',
-    );
-    if (Array.isArray(data)) {
-      return { users: data, onlineCount: 0, totalCount: data.length };
-    }
-    return data;
+    const response = await apiClient.get<unknown>('/auth/admins');
+    return parseApiPayload(adminUsersFlexibleSchema, response, { endpoint: '/auth/admins' });
   } catch (error) {
-    if (error instanceof ApiError) {
-      throw error;
-    }
-    throw new ApiError('Failed to fetch admin users', 500);
+    throw normalizeApiModuleError(error, 'Failed to fetch admin users');
   }
 };
 

@@ -1,11 +1,24 @@
 import type { ApiResponse, AIResponse, ChatRequest, SolutionSearchResult } from '@/types';
-import { ApiError } from '@/types';
 import { apiClient } from '@/shared/api';
+import {
+  aiResponseSchema,
+  aiStatsResponseSchema,
+  apiResponseSchema,
+  normalizeApiModuleError,
+  parseApiPayload,
+  solutionSearchResultSchema,
+} from '@/shared/api/contracts';
+import { z } from 'zod';
 
 // ============ Chat ============
 
 export const sendChatMessage = async (data: ChatRequest): Promise<ApiResponse<AIResponse>> => {
-  return apiClient.post<ApiResponse<AIResponse>>('/ai/chat', data);
+  try {
+    const response = await apiClient.post<unknown>('/ai/chat', data);
+    return parseApiPayload(apiResponseSchema(aiResponseSchema), response, { endpoint: '/ai/chat' });
+  } catch (error) {
+    throw normalizeApiModuleError(error, 'Failed to send chat message');
+  }
 };
 
 // ============ Solutions ============
@@ -13,17 +26,35 @@ export const sendChatMessage = async (data: ChatRequest): Promise<ApiResponse<AI
 export const searchSolutions = async (
   query: string,
 ): Promise<ApiResponse<SolutionSearchResult[]>> => {
-  return apiClient.get<ApiResponse<SolutionSearchResult[]>>(
-    `/ai/solutions/search?query=${encodeURIComponent(query)}`,
-  );
+  const endpoint = `/ai/solutions/search?query=${encodeURIComponent(query)}`;
+  try {
+    const response = await apiClient.get<unknown>(endpoint);
+    return parseApiPayload(apiResponseSchema(z.array(solutionSearchResultSchema)), response, {
+      endpoint,
+    });
+  } catch (error) {
+    throw normalizeApiModuleError(error, 'Failed to search solutions');
+  }
 };
 
 export const getTicketSuggestions = async (ticketId: string): Promise<ApiResponse<AIResponse>> => {
-  return apiClient.get<ApiResponse<AIResponse>>(`/ai/tickets/${ticketId}/suggestions`);
+  const endpoint = `/ai/tickets/${ticketId}/suggestions`;
+  try {
+    const response = await apiClient.get<unknown>(endpoint);
+    return parseApiPayload(apiResponseSchema(aiResponseSchema), response, { endpoint });
+  } catch (error) {
+    throw normalizeApiModuleError(error, 'Failed to fetch ticket suggestions');
+  }
 };
 
 export const generateSolution = async (ticketId: string): Promise<ApiResponse<AIResponse>> => {
-  return apiClient.post<ApiResponse<AIResponse>>(`/ai/tickets/${ticketId}/solution`);
+  const endpoint = `/ai/tickets/${ticketId}/solution`;
+  try {
+    const response = await apiClient.post<unknown>(endpoint);
+    return parseApiPayload(apiResponseSchema(aiResponseSchema), response, { endpoint });
+  } catch (error) {
+    throw normalizeApiModuleError(error, 'Failed to generate AI solution');
+  }
 };
 
 // ============ Feedback ============
@@ -33,22 +64,35 @@ export const submitAIFeedback = async (
   isHelpful: boolean,
   feedback?: string,
 ): Promise<ApiResponse<{ message: string }>> => {
-  return apiClient.post<ApiResponse<{ message: string }>>('/ai/feedback', {
-    sessionId,
-    isHelpful,
-    feedback,
-  });
+  try {
+    const response = await apiClient.post<unknown>('/ai/feedback', {
+      sessionId,
+      isHelpful,
+      feedback,
+    });
+    return parseApiPayload(
+      apiResponseSchema(
+        z
+          .object({
+            message: z.string(),
+          })
+          .passthrough(),
+      ),
+      response,
+      { endpoint: '/ai/feedback' },
+    );
+  } catch (error) {
+    throw normalizeApiModuleError(error, 'Failed to submit AI feedback');
+  }
 };
 
 // ============ Stats ============
 
 export const getAIStats = async () => {
   try {
-    return await apiClient.get('/ai/stats', { cache: 'no-store' });
+    const response = await apiClient.get<unknown>('/ai/stats', { cache: 'no-store' });
+    return parseApiPayload(aiStatsResponseSchema, response, { endpoint: '/ai/stats' });
   } catch (error) {
-    if (error instanceof ApiError) {
-      throw error;
-    }
-    throw new ApiError('Failed to fetch AI stats', 500);
+    throw normalizeApiModuleError(error, 'Failed to fetch AI stats');
   }
 };
