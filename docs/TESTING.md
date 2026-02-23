@@ -18,3 +18,17 @@
 - Tests must assert behavior, not implementation
 - Avoid brittle snapshots
 - Clear test names describing behavior
+
+## Critical Flow Coverage
+
+- See `docs/critical-flows-test-matrix.md` for required flow coverage:
+  auth, create ticket, status change, role access.
+
+## Coverage Gate (Changed Files)
+
+- Minimum per changed source file: `80%` lines by default.
+- Run full gate:
+  - `npm run test:coverage:gate`
+- `COVERAGE_BASE_REF` is required for changed-file comparison in CI (for local runs, the script skips if not set).
+- Override threshold/base ref when needed:
+  - `MIN_CHANGED_FILE_COVERAGE=85 COVERAGE_BASE_REF=origin/main npm run test:coverage:gate`
