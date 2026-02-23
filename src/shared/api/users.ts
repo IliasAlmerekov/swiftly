@@ -1,6 +1,11 @@
 import type { AdminUsersResponse, User } from '@/types';
-import { ApiError } from '@/types';
 import { apiClient } from './client';
+import {
+  adminUsersFlexibleSchema,
+  normalizeApiModuleError,
+  parseApiPayload,
+  userSchema,
+} from './contracts';
 
 // ============ Admin/Support Users ============
 
@@ -9,18 +14,10 @@ import { apiClient } from './client';
  */
 export const getAdminUsers = async (): Promise<AdminUsersResponse> => {
   try {
-    const data = await apiClient.get<AdminUsersResponse | AdminUsersResponse['users']>(
-      '/auth/admins',
-    );
-    if (Array.isArray(data)) {
-      return { users: data, onlineCount: 0, totalCount: data.length };
-    }
-    return data;
+    const response = await apiClient.get<unknown>('/auth/admins');
+    return parseApiPayload(adminUsersFlexibleSchema, response, { endpoint: '/auth/admins' });
   } catch (error) {
-    if (error instanceof ApiError) {
-      throw error;
-    }
-    throw new ApiError('Failed to fetch admin users', 500);
+    throw normalizeApiModuleError(error, 'Failed to fetch admin users');
   }
 };
 
@@ -31,12 +28,10 @@ export const getAdminUsers = async (): Promise<AdminUsersResponse> => {
  */
 export const getUserProfile = async (): Promise<User> => {
   try {
-    return await apiClient.get<User>('/users/profile');
+    const response = await apiClient.get<unknown>('/users/profile');
+    return parseApiPayload(userSchema, response, { endpoint: '/users/profile' });
   } catch (error) {
-    if (error instanceof ApiError) {
-      throw error;
-    }
-    throw new ApiError('Failed to fetch user profile', 500);
+    throw normalizeApiModuleError(error, 'Failed to fetch user profile');
   }
 };
 

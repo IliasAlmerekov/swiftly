@@ -1,21 +1,6 @@
 import { toast } from 'sonner';
 
-import { ApiError } from '@/types';
-
-// ============ Error Messages ============
-
-const DEFAULT_ERROR_MESSAGES: Record<number, string> = {
-  400: 'Invalid request. Please check your input.',
-  401: 'Session expired. Please log in again.',
-  403: 'You do not have permission to perform this action.',
-  404: 'The requested resource was not found.',
-  409: 'This resource already exists.',
-  422: 'Validation error. Please check your input.',
-  429: 'Too many requests. Please try again later.',
-  500: 'Server error. Please try again later.',
-  502: 'Server is temporarily unavailable.',
-  503: 'Service unavailable. Please try again later.',
-};
+import { ApiError, mapApiErrorToUserMessage } from '@/types';
 
 // ============ Error Handler ============
 
@@ -38,7 +23,7 @@ export function handleError(error: unknown, options: ErrorHandlerOptions = {}): 
 
   if (error instanceof ApiError) {
     statusCode = error.status;
-    errorMessage = message || error.message || DEFAULT_ERROR_MESSAGES[statusCode] || errorMessage;
+    errorMessage = message || mapApiErrorToUserMessage(error, errorMessage);
 
     // Handle specific status codes
     if (statusCode === 401 && onUnauthorized) {

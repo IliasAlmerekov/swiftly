@@ -50,3 +50,15 @@ docker compose up -d
 docker compose exec app npm install
 docker compose exec app npm run dev
 ```
+
+If the project is already running inside the `helpdesk` container, run commands there instead of creating a new container:
+
+```bash
+docker exec helpdesk npm run dev
+docker exec helpdesk npm run lint
+docker exec helpdesk npm run type-check
+docker exec helpdesk npm run test:run
+docker exec helpdesk npm run build
+```
+
+Note: in some environments the frontend container is named `helpdesk-frontend-1`; use that name with `docker exec` if `helpdesk` is not present.

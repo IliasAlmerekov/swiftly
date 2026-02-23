@@ -1,17 +1,22 @@
 import type { AdminUsersResponse, User } from '@/types';
-import { ApiError } from '@/types';
 import { apiClient } from '@/shared/api';
+import {
+  adminUsersFlexibleSchema,
+  normalizeApiModuleError,
+  parseApiPayload,
+  uploadAvatarResponseSchema,
+  userSchema,
+} from '@/shared/api/contracts';
+import { z } from 'zod';
 
 // ============ Support Users ============
 
 export const getSupportUsers = async (): Promise<AdminUsersResponse> => {
   try {
-    return await apiClient.get<AdminUsersResponse>('/users/support');
+    const response = await apiClient.get<unknown>('/users/support');
+    return parseApiPayload(adminUsersFlexibleSchema, response, { endpoint: '/users/support' });
   } catch (error) {
-    if (error instanceof ApiError) {
-      throw error;
-    }
-    throw new ApiError('Failed to fetch support users', 500);
+    throw normalizeApiModuleError(error, 'Failed to fetch support users');
   }
 };
 
@@ -45,45 +50,37 @@ export const activityInterval = async () => {
 
 export const getAllUsers = async (): Promise<User[]> => {
   try {
-    return await apiClient.get<User[]>('/users');
+    const response = await apiClient.get<unknown>('/users');
+    return parseApiPayload(z.array(userSchema), response, { endpoint: '/users' });
   } catch (error) {
-    if (error instanceof ApiError) {
-      throw error;
-    }
-    throw new ApiError('Failed to fetch all users', 500);
+    throw normalizeApiModuleError(error, 'Failed to fetch all users');
   }
 };
 
 export const getUserProfile = async (): Promise<User> => {
   try {
-    return await apiClient.get<User>('/users/profile');
+    const response = await apiClient.get<unknown>('/users/profile');
+    return parseApiPayload(userSchema, response, { endpoint: '/users/profile' });
   } catch (error) {
-    if (error instanceof ApiError) {
-      throw error;
-    }
-    throw new ApiError('Failed to fetch user profile', 500);
+    throw normalizeApiModuleError(error, 'Failed to fetch user profile');
   }
 };
 
 export const getUserProfileById = async (userId: string): Promise<User> => {
   try {
-    return await apiClient.get<User>(`/users/${userId}`);
+    const response = await apiClient.get<unknown>(`/users/${userId}`);
+    return parseApiPayload(userSchema, response, { endpoint: `/users/${userId}` });
   } catch (error) {
-    if (error instanceof ApiError) {
-      throw error;
-    }
-    throw new ApiError('Failed to fetch user profile', 500);
+    throw normalizeApiModuleError(error, 'Failed to fetch user profile');
   }
 };
 
 export const updateUserProfile = async (userData: Partial<User>): Promise<User> => {
   try {
-    return await apiClient.put<User>('/users/profile', userData);
+    const response = await apiClient.put<unknown>('/users/profile', userData);
+    return parseApiPayload(userSchema, response, { endpoint: '/users/profile' });
   } catch (error) {
-    if (error instanceof ApiError) {
-      throw error;
-    }
-    throw new ApiError('Failed to update user profile', 500);
+    throw normalizeApiModuleError(error, 'Failed to update user profile');
   }
 };
 
@@ -92,12 +89,10 @@ export const updateUserProfileById = async (
   userData: Partial<User>,
 ): Promise<User> => {
   try {
-    return await apiClient.put<User>(`/users/${userId}`, userData);
+    const response = await apiClient.put<unknown>(`/users/${userId}`, userData);
+    return parseApiPayload(userSchema, response, { endpoint: `/users/${userId}` });
   } catch (error) {
-    if (error instanceof ApiError) {
-      throw error;
-    }
-    throw new ApiError('Failed to update user profile', 500);
+    throw normalizeApiModuleError(error, 'Failed to update user profile');
   }
 };
 
@@ -108,21 +103,12 @@ export const uploadUserAvatar = async (file: File): Promise<User> => {
     const formData = new FormData();
     formData.append('avatar', file, file.name);
 
-    const data = await apiClient.upload<{
-      success: boolean;
-      message: string;
-      user: User;
-    }>('/upload/avatar', formData);
-
-    if (!data?.user) {
-      throw new ApiError('Invalid server response while uploading avatar', 500);
-    }
-
+    const response = await apiClient.upload<unknown>('/upload/avatar', formData);
+    const data = parseApiPayload(uploadAvatarResponseSchema, response, {
+      endpoint: '/upload/avatar',
+    });
     return data.user;
   } catch (error) {
-    if (error instanceof ApiError) {
-      throw error;
-    }
-    throw new ApiError('Failed to upload avatar', 500);
+    throw normalizeApiModuleError(error, 'Failed to upload avatar');
   }
 };
