@@ -1,14 +1,10 @@
-import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { loginUser } from '@/features/auth/api';
 import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 import { useAuthContext } from '@/shared/context/AuthContext';
 
 interface UseLoginProps {
   onLoginSuccess: () => void;
-}
-
-interface LoginResponse {
-  token: string;
 }
 
 export function useLogin({ onLoginSuccess }: UseLoginProps) {
@@ -18,22 +14,28 @@ export function useLogin({ onLoginSuccess }: UseLoginProps) {
   const [error, setError] = useState<string | null>(null);
   const [keepLoggedIn, setKeepLoggedIn] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const isSubmittingRef = useRef(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
+    if (isSubmittingRef.current) {
+      return;
+    }
+
+    isSubmittingRef.current = true;
     setError(null);
     setLoading(true);
 
     try {
-      const { token } = (await loginUser(email, password)) as LoginResponse;
+      const { token } = await loginUser(email, password);
 
       // Use centralized login method from AuthContext
       login(token, keepLoggedIn);
 
       onLoginSuccess();
     } catch (error: unknown) {
+      isSubmittingRef.current = false;
       setError(getApiErrorMessage(error, 'Invalid email or password'));
-    } finally {
       setLoading(false);
     }
   };

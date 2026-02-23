@@ -67,6 +67,10 @@ export interface AuthToken {
   user: User;
 }
 
+export interface AuthSession {
+  token: string;
+}
+
 export interface AdminUsersResponse {
   users: User[];
   onlineCount: number;

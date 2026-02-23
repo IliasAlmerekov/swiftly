@@ -3,6 +3,7 @@ import { z } from 'zod';
 import type {
   AdminUsersResponse,
   AIResponse,
+  AuthSession,
   ApiResponse,
   AuthToken,
   CursorPage,
@@ -18,6 +19,13 @@ const stringOrNullSchema = z.string().nullable();
 const userRoleSchema = z.enum(['user', 'support1', 'admin']);
 const ticketPrioritySchema = z.enum(['low', 'medium', 'high']);
 const ticketStatusSchema = z.enum(['open', 'in-progress', 'resolved', 'closed']);
+const DEFAULT_USER_TIMESTAMP = '1970-01-01T00:00:00.000Z';
+const roleOrDefaultSchema = z
+  .union([userRoleSchema, z.null(), z.undefined()])
+  .transform((value) => value ?? 'user');
+const timestampOrDefaultSchema = z
+  .union([z.string(), z.null(), z.undefined()])
+  .transform((value) => value ?? DEFAULT_USER_TIMESTAMP);
 
 const avatarSchema = z
   .object({
@@ -25,39 +33,44 @@ const avatarSchema = z
     url: z.string().min(1),
   })
   .passthrough();
+const nullableAvatarSchema = z
+  .union([avatarSchema, z.null(), z.undefined()])
+  .transform((value) => value ?? undefined);
 
 const managerSchema = z
   .object({
     _id: z.string(),
     name: z.string(),
     email: z.string().email(),
-    avatar: avatarSchema.optional(),
+    avatar: nullableAvatarSchema,
     department: z.string().optional(),
     position: z.string().optional(),
   })
   .passthrough();
 
-export const userSchema: z.ZodType<User> = z
+export const userSchema: z.ZodType<User, z.ZodTypeDef, unknown> = z
   .object({
     _id: z.string(),
     email: z.string().email(),
     name: z.string(),
-    role: userRoleSchema,
-    createdAt: z.string(),
-    updatedAt: z.string(),
+    role: roleOrDefaultSchema,
+    createdAt: timestampOrDefaultSchema,
+    updatedAt: timestampOrDefaultSchema,
     onlineCount: z.number().optional(),
     users: z.number().optional(),
     company: z.string().optional(),
     department: z.string().optional(),
     position: z.string().optional(),
-    manager: managerSchema.optional(),
+    manager: z
+      .union([managerSchema, z.null(), z.undefined()])
+      .transform((value) => value ?? undefined),
     country: z.string().optional(),
     city: z.string().optional(),
     address: z.string().optional(),
-    postalCode: z.number().optional(),
+    postalCode: z.coerce.number().optional(),
     isOnline: z.boolean().optional(),
     lastSeen: z.string().optional(),
-    avatar: avatarSchema.optional(),
+    avatar: nullableAvatarSchema,
   })
   .passthrough();
 
@@ -81,7 +94,7 @@ export const ticketAttachmentSchema: z.ZodType<TicketAttachment> = z
   })
   .passthrough();
 
-export const ticketSchema: z.ZodType<Ticket> = z
+export const ticketSchema: z.ZodType<Ticket, z.ZodTypeDef, unknown> = z
   .object({
     _id: z.string(),
     owner: userSchema,
@@ -99,14 +112,79 @@ export const ticketSchema: z.ZodType<Ticket> = z
   })
   .passthrough();
 
-export const authTokenSchema: z.ZodType<AuthToken> = z
+const DEFAULT_LIST_TIMESTAMP = DEFAULT_USER_TIMESTAMP;
+const DEFAULT_LIST_USER: User = {
+  _id: 'unknown-user',
+  email: 'unknown.user@helpdesk.local',
+  name: 'Unknown User',
+  role: 'user',
+  createdAt: DEFAULT_LIST_TIMESTAMP,
+  updatedAt: DEFAULT_LIST_TIMESTAMP,
+};
+
+const listUserSchema = z.union([userSchema, z.null(), z.undefined()]).catch(undefined);
+
+// Ticket list payloads are often lighter than detail payloads; normalize them to the Ticket model.
+export const ticketListItemSchema: z.ZodType<Ticket, z.ZodTypeDef, unknown> = z
+  .object({
+    _id: z.string(),
+    owner: listUserSchema.optional(),
+    title: z.string().optional(),
+    description: z.string().optional(),
+    priority: ticketPrioritySchema.optional(),
+    status: ticketStatusSchema,
+    category: z.string().optional(),
+    createdBy: listUserSchema.optional(),
+    assignedTo: listUserSchema.optional(),
+    comments: z.array(commentSchema).optional(),
+    attachments: z.array(ticketAttachmentSchema).optional(),
+    createdAt: z.string().optional(),
+    updatedAt: z.string().optional(),
+  })
+  .passthrough()
+  .transform((ticket): Ticket => {
+    const owner = ticket.owner ?? DEFAULT_LIST_USER;
+    const createdBy = ticket.createdBy ?? owner;
+    const createdAt = ticket.createdAt ?? DEFAULT_LIST_TIMESTAMP;
+
+    return {
+      _id: ticket._id,
+      owner,
+      title: ticket.title ?? 'Untitled ticket',
+      description: ticket.description ?? '',
+      priority: ticket.priority,
+      status: ticket.status,
+      category: ticket.category,
+      createdBy,
+      assignedTo: ticket.assignedTo ?? undefined,
+      comments: ticket.comments ?? [],
+      attachments: ticket.attachments,
+      createdAt,
+      updatedAt: ticket.updatedAt ?? createdAt,
+    };
+  });
+
+export const ticketEntitySchema: z.ZodType<Ticket, z.ZodTypeDef, unknown> = z.union([
+  ticketSchema,
+  ticketListItemSchema,
+  z.object({ ticket: ticketSchema }).transform((payload) => payload.ticket),
+  z.object({ ticket: ticketListItemSchema }).transform((payload) => payload.ticket),
+]);
+
+export const authTokenSchema: z.ZodType<AuthToken, z.ZodTypeDef, unknown> = z
   .object({
     token: z.string().min(1),
     user: userSchema,
   })
   .passthrough();
 
-export const adminUsersResponseSchema: z.ZodType<AdminUsersResponse> = z
+export const authSessionSchema: z.ZodType<AuthSession> = z
+  .object({
+    token: z.string().min(1),
+  })
+  .passthrough();
+
+export const adminUsersResponseSchema: z.ZodType<AdminUsersResponse, z.ZodTypeDef, unknown> = z
   .object({
     users: z.array(userSchema),
     onlineCount: z.number().int().min(0),
