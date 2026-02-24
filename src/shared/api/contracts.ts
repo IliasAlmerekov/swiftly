@@ -255,7 +255,7 @@ export const userTicketStatsSchema = z
   })
   .passthrough();
 
-export const aiResponseSchema: z.ZodType<AIResponse> = z
+export const aiResponseSchema: z.ZodType<AIResponse, z.ZodTypeDef, unknown> = z
   .object({
     sessionId: z.string(),
     response: z.string().optional(),
