@@ -1,14 +1,21 @@
-export const useGreeting = () => {
-  const now = new Date();
-  const hour = new Intl.DateTimeFormat('de', {
+const getBerlinHour = (date: Date): number => {
+  const hourPart = new Intl.DateTimeFormat('de', {
     hour: '2-digit',
     hour12: false,
     timeZone: 'Europe/Berlin',
   })
-    .formatToParts(now)
-    .find((p) => p.type === 'hour');
-  const h = hour ? parseInt(hour.value, 10) : now.getHours();
-  const greeting = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+    .formatToParts(date)
+    .find((part) => part.type === 'hour');
 
+  return hourPart ? parseInt(hourPart.value, 10) : date.getHours();
+};
+
+export const getGreetingForDate = (date: Date): string => {
+  const hour = getBerlinHour(date);
+  return hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+};
+
+export const useGreeting = () => {
+  const greeting = getGreetingForDate(new Date());
   return { greeting };
 };

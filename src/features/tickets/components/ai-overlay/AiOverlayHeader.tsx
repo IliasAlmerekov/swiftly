@@ -23,9 +23,9 @@ export const AiOverlayHeader = memo(function AiOverlayHeader({ onClose }: AiOver
           </AvatarFallback>
         </Avatar>
         <div>
-          <CardTitle className="text-lg">AI-Helpdesk-Assistent</CardTitle>
+          <CardTitle className="text-lg">AI Helpdesk Assistant</CardTitle>
           <CardDescription>
-            Soforthilfe für häufige Probleme, bevor Sie ein Ticket erstellen.
+            Instant help for common issues before creating a ticket.
           </CardDescription>
         </div>
       </div>
@@ -36,7 +36,7 @@ export const AiOverlayHeader = memo(function AiOverlayHeader({ onClose }: AiOver
         variant="ghost"
         size="icon"
         onClick={onClose}
-        aria-label="Schließen"
+        aria-label="Close"
         className="absolute top-4 right-4"
       >
         <X className="size-4" />

@@ -22,7 +22,7 @@ export const ChatMessage = memo(function ChatMessage({ message }: ChatMessagePro
     () => sanitizeUserGeneratedRichText(messageContent, isUser ? 'plain' : 'markdown'),
     [isUser, messageContent],
   );
-  const timeLabel = new Date(message.timestamp).toLocaleTimeString('de-DE', {
+  const timeLabel = new Date(message.timestamp).toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit',
   });
@@ -58,7 +58,7 @@ export const ChatMessage = memo(function ChatMessage({ message }: ChatMessagePro
       </div>
       {isUser && (
         <Avatar className="mt-1 size-8 border">
-          <AvatarFallback className="bg-muted text-muted-foreground">DU</AvatarFallback>
+          <AvatarFallback className="bg-muted text-muted-foreground">YOU</AvatarFallback>
         </Avatar>
       )}
     </div>

@@ -3,7 +3,7 @@ import { sendChatMessage } from '@/features/tickets/api/ai';
 import type { AIResponse, ChatRequest } from '@/types';
 
 const INITIAL_MESSAGE =
-  'Hallo 😊! Ich bin Ihr ITO-Assistent. Bevor Sie ein neues Ticket erstellen, kann ich Ihnen vielleicht direkt helfen. Beschreiben Sie mir bitte Ihr Problem, und ich suche nach einer Lösung für Sie.';
+  "Hello! I'm your ITO assistant. Before creating a new ticket, I may be able to help right away. Please describe your issue, and I'll look for a solution.";
 
 interface UseAiChatOptions {
   isOpen: boolean;
@@ -88,11 +88,11 @@ export function useAiChat({ isOpen }: UseAiChatOptions): UseAiChatResult {
         const explicitFlag = responseData.shouldCreateTicket === true;
         const escalationType = aiType === 'escalation_required';
         const ticketPhrases =
-          /(ticket erstellen|create ticket|support[- ]?ticket|technicker|administrator|it[- ]?support|admin)/i;
+          /(ticket erstellen|create ticket|support[- ]?ticket|technicker|techniker|technician|administrator|it[- ]?support|admin)/i;
         const ticketRequestPhrases =
-          /((bitte|please).{0,40}ticket|ticket.{0,40}(erstellen|create)|erstellen\s+(?:sie\s+)?(?:ein\s+)?ticket|helpdesk[- ]?formular|formular ausf(ü|u)llen|1st level support|first level support|support übernimmt|helpdesk-formular|helpdeskformular)/i;
+          /((bitte|please).{0,40}ticket|ticket.{0,40}(erstellen|create)|erstellen\s+(?:sie\s+)?(?:ein\s+)?ticket|helpdesk[- ]?formular|formular ausf(ü|u)llen|1st level support|first level support|support übernimmt|helpdesk-formular|helpdeskformular|please.{0,40}(create|open).{0,20}ticket)/i;
         const escalationHints =
-          /(manuelle prüfung|berechtigung|sensible|sensitive|kundendaten|personenbezogene|personal data|privat|private|rechtliche|legal|datenschutz|data protection|client data)/i;
+          /(manuelle prüfung|berechtigung|sensible|sensitive|kundendaten|personenbezogene|personal data|privat|private|rechtliche|legal|datenschutz|data protection|client data|manual review|permission|permissions|confidential|regulated)/i;
         const aiAlreadyRequestsTicket = ticketRequestPhrases.test(aiText);
 
         if (
@@ -106,10 +106,8 @@ export function useAiChat({ isOpen }: UseAiChatOptions): UseAiChatResult {
             ...prev,
             {
               role: 'assistant',
-              message:
-                'Entschuldigung, ich kann Ihnen nicht direkt helfen. Bitte erstellen Sie ein Ticket.',
-              content:
-                'Entschuldigung, ich kann Ihnen nicht direkt helfen. Bitte erstellen Sie ein Ticket.',
+              message: 'Sorry, I cannot resolve this directly. Please create a ticket.',
+              content: 'Sorry, I cannot resolve this directly. Please create a ticket.',
               timestamp: new Date().toISOString(),
             },
           ]);
@@ -120,9 +118,9 @@ export function useAiChat({ isOpen }: UseAiChatOptions): UseAiChatResult {
           {
             role: 'assistant',
             message:
-              'Entschuldigung, es gab ein Problem bei der Verarbeitung Ihrer Anfrage. Bitte versuchen Sie es später erneut oder erstellen Sie ein Ticket.',
+              'Sorry, there was a problem processing your request. Please try again later or create a ticket.',
             content:
-              'Entschuldigung, es gab ein Problem bei der Verarbeitung Ihrer Anfrage. Bitte versuchen Sie es später erneut oder erstellen Sie ein Ticket.',
+              'Sorry, there was a problem processing your request. Please try again later or create a ticket.',
             timestamp: new Date().toISOString(),
           },
         ]);

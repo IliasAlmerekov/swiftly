@@ -23,15 +23,15 @@ export const AiOverlayFooter = memo(function AiOverlayFooter({
       <ChatInput onSendMessage={onSendMessage} isLoading={isLoading} />
       <div className="flex w-full flex-col gap-3 text-left sm:flex-row sm:items-center sm:justify-between">
         <p className="text-muted-foreground text-sm sm:max-w-[70%]">
-          Wenn der Assistent nicht weiterhilft, erstellen Sie bitte ein Ticket. So können wir uns
-          gezielt um komplexe Fälle kümmern. Vielen Dank für Ihr Verständnis! Ihr ITO-Team.
+          If the assistant cannot resolve your issue, please create a ticket. This helps us handle
+          complex cases more effectively. Thank you for your understanding. Your ITO Team.
         </p>
         <Button
           onClick={onCreateTicket}
           variant="secondary"
           className="w-full bg-blue-700 hover:bg-blue-800 sm:w-auto sm:min-w-[200px]"
         >
-          Ticket erstellen
+          Create ticket
         </Button>
       </div>
     </CardFooter>
