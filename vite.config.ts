@@ -24,6 +24,17 @@ export default defineConfig({
     },
   },
   server: {
+    watch: {
+      usePolling: process.env.CHOKIDAR_USEPOLLING === 'true',
+      interval: Number(process.env.CHOKIDAR_INTERVAL ?? 1000),
+      ignored: [
+        '**/playwright-report/**',
+        '**/test-results/**',
+        '**/coverage/**',
+        '**/dist/**',
+        '**/.git/**',
+      ],
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:4000',

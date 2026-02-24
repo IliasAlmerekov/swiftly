@@ -153,11 +153,15 @@ export interface ChatRequest {
 }
 
 export interface AIResponse {
-  response: string;
   sessionId: string;
+  response: string;
+  message: string;
   suggestions?: string[];
   confidence?: number;
-  message?: string;
+  type?: string;
+  shouldCreateTicket?: boolean;
+  relatedSolutions?: unknown[];
+  metadata?: Record<string, unknown>;
 }
 
 export interface SolutionSearchResult {

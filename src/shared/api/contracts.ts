@@ -257,13 +257,30 @@ export const userTicketStatsSchema = z
 
 export const aiResponseSchema: z.ZodType<AIResponse> = z
   .object({
-    response: z.string(),
     sessionId: z.string(),
+    response: z.string().optional(),
+    message: z.string().optional(),
     suggestions: z.array(z.string()).optional(),
     confidence: z.number().optional(),
-    message: z.string().optional(),
+    type: z.string().optional(),
+    shouldCreateTicket: z.boolean().optional(),
+    relatedSolutions: z.array(z.unknown()).optional(),
+    metadata: z.record(z.unknown()).optional(),
   })
-  .passthrough();
+  .passthrough()
+  .refine((payload) => Boolean(payload.response || payload.message), {
+    message: 'Either response or message is required',
+  })
+  .transform((payload) => {
+    const normalizedMessage = payload.message ?? payload.response ?? '';
+    const normalizedResponse = payload.response ?? payload.message ?? '';
+
+    return {
+      ...payload,
+      message: normalizedMessage,
+      response: normalizedResponse,
+    };
+  });
 
 export const solutionSearchResultSchema: z.ZodType<SolutionSearchResult> = z
   .object({

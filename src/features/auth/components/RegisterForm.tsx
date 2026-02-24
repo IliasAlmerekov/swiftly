@@ -41,7 +41,7 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
                 <Input
                   id="email"
                   type="email"
-                  placeholder="name.surname@solutions-it.com"
+                  placeholder="name.surname@swiflty.com"
                   required
                   autoComplete="email"
                   value={email}
