@@ -16,14 +16,17 @@ test.describe('Critical flows smoke', () => {
     await page.goto('/dashboard?tab=create-ticket');
     await expect(page.getByRole('heading', { name: 'Create New Ticket' })).toBeVisible();
 
-    const aiOverlayButton = page.getByRole('button', { name: 'Ticket erstellen' });
-    if (await aiOverlayButton.isVisible()) {
+    const titleInput = page.locator('#title');
+    if (!(await titleInput.isVisible())) {
+      const aiOverlayButton = page.getByRole('button', { name: /create ticket|ticket erstellen/i });
+      await expect(aiOverlayButton).toBeVisible();
       await aiOverlayButton.click();
     }
 
-    await page.getByRole('textbox', { name: 'Title *' }).fill('Cannot connect to VPN');
+    await expect(titleInput).toBeVisible();
+    await titleInput.fill('Cannot connect to VPN');
     await page
-      .getByRole('textbox', { name: 'Description *' })
+      .locator('#description')
       .fill('VPN disconnects every few minutes while working remotely.');
     await page.getByRole('button', { name: 'Create Ticket' }).click();
 
