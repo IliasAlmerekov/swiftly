@@ -1,4 +1,4 @@
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import type { FormEvent } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -91,14 +91,12 @@ describe('useLogin', () => {
 
     const event = { preventDefault: vi.fn() } as unknown as FormEvent<HTMLFormElement>;
 
-    act(() => {
-      void result.current.handleSubmit(event);
+    await act(async () => {
+      await result.current.handleSubmit(event);
     });
 
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-      expect(result.current.error).toBe('Invalid credentials');
-    });
+    expect(result.current.loading).toBe(false);
+    expect(result.current.error).toBe('Invalid credentials');
 
     expect(loginMock).not.toHaveBeenCalled();
     expect(onLoginSuccess).not.toHaveBeenCalled();

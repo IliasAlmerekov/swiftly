@@ -1,14 +1,49 @@
+x-app-base: &app-base
+  image: node:20-bookworm
+  working_dir: /app
+  volumes:
+    - .:/app
+    - node_modules:/app/node_modules
+    - playwright_cache:/root/.cache/ms-playwright
+  environment:
+    NODE_ENV: development
+
 services:
   app:
-    image: node:20-bookworm
-    working_dir: /app
-    volumes:
-      - .:/app
-      - node_modules:/app/node_modules
-      - playwright_cache:/root/.cache/ms-playwright
-    environment:
-      NODE_ENV: test
+    <<: *app-base
     command: sleep infinity
+
+  dev:
+    <<: *app-base
+    command: npm run dev -- --host 0.0.0.0
+    ports:
+      - '5173:5173'
+    profiles: ['dev']
+
+  lint:
+    <<: *app-base
+    command: npm run ci:lint
+    profiles: ['lint']
+
+  typecheck:
+    <<: *app-base
+    command: npm run ci:typecheck
+    profiles: ['typecheck']
+
+  test:
+    <<: *app-base
+    command: npm run ci:test
+    profiles: ['test']
+
+  build:
+    <<: *app-base
+    command: npm run ci:build
+    profiles: ['build']
+
+  e2e:
+    <<: *app-base
+    command: npm run ci:e2e
+    profiles: ['e2e']
 
 volumes:
   node_modules:
