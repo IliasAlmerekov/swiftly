@@ -130,3 +130,20 @@ Notes:
 
 - Measurements are from `React.Profiler` in `vitest` + `jsdom` test runtime.
 - Absolute timings are synthetic (not browser-devtools production numbers), but commit count and relative cost are useful for regression checks.
+
+## Release Budget Check (2026-02-24)
+
+Command:
+
+```bash
+npm run perf:budget
+```
+
+Result:
+
+- `PERF_BUDGET_OK`
+- `entry` chunk: `index-*.js` ~ `752.39KB` (limit: `800KB`)
+- `dashboard` route chunk: `DashboardPage-*.js` ~ `486.20KB` (limit: `550KB`)
+- `LiquidEther` chunk: `LiquidEther-*.js` ~ `472.84KB` (limit: `550KB`)
+- largest CSS chunk: `index-*.css` ~ `72.65KB` (limit: `100KB`)
+- total JS size: `1898.77KB` (limit: `2200KB`)

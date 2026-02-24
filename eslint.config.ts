@@ -56,6 +56,11 @@ export default tseslint.config(
     extends: [js.configs.recommended],
     languageOptions: { globals: globals.browser },
   }, // TypeScript config
+  {
+    files: ['scripts/**/*.mjs'],
+    languageOptions: { globals: globals.node },
+  },
+  // TypeScript config
   ...tseslint.configs.recommended, // React config
   {
     ...pluginReact.configs.flat.recommended,
