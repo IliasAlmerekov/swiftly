@@ -1,3 +1,3 @@
-npm run ci:lint
-npm run ci:typecheck
-npm run ci:test:smoke
+docker compose run --rm lint
+docker compose run --rm typecheck
+docker compose run --rm app npm run ci:test:smoke

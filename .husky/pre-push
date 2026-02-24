@@ -1,4 +1,4 @@
-npm run ci:lint
-npm run ci:typecheck
-npm run ci:test
-npm run ci:build
+docker compose run --rm lint
+docker compose run --rm typecheck
+docker compose run --rm test
+docker compose run --rm build
