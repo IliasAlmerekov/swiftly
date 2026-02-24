@@ -48,7 +48,7 @@ const architectureZones = [
 export default tseslint.config(
   // Ignore CommonJS config files and build output
   {
-    ignores: ['**/*.cjs', 'dist/**'],
+    ignores: ['**/*.cjs', 'dist/**', 'coverage/**', 'playwright-report/**'],
   },
   // Base JS config
   {

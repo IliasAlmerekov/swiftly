@@ -27,6 +27,7 @@
 - Clear naming, small functions
 - Single Responsibility per module/class
 - No circular dependencies
+- After every code change, run `npm run format:check` (or container equivalent) before merge.
 - React components and hooks must keep render phase pure (no side effects or mutations)
 - Prefer derived state and event handlers; use Effects only for external synchronization
 - Hooks linting (`rules-of-hooks`, `exhaustive-deps`) must be clean in changed code

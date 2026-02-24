@@ -24,41 +24,43 @@ If not set, the app falls back to `http://localhost:4000/api`.
 
 ## Install
 
+Container-first dependency install:
+
 ```bash
-npm install
+docker compose run --rm app npm ci
 ```
 
 ## Run
 
-Local development:
+Container-first development server:
 
 ```bash
+docker compose --profile dev up dev
+```
+
+Container-first quality commands:
+
+```bash
+docker compose run --rm lint
+docker compose run --rm typecheck
+docker compose run --rm test
+docker compose run --rm build
+docker compose run --rm app npm run format:check
+```
+
+Container-first end-to-end tests:
+
+```bash
+docker compose run --rm e2e
+```
+
+Optional local fallback (if container runtime is unavailable):
+
+```bash
+npm ci
 npm run dev
+npm run ci:lint
+npm run ci:typecheck
+npm run ci:test
+npm run ci:build
 ```
-
-Production build preview:
-
-```bash
-npm run build
-npm run preview
-```
-
-Container workflow (recommended for tooling consistency):
-
-```bash
-docker compose up -d
-docker compose exec app npm install
-docker compose exec app npm run dev
-```
-
-If the project is already running inside the `helpdesk` container, run commands there instead of creating a new container:
-
-```bash
-docker exec helpdesk npm run dev
-docker exec helpdesk npm run lint
-docker exec helpdesk npm run type-check
-docker exec helpdesk npm run test:run
-docker exec helpdesk npm run build
-```
-
-Note: in some environments the frontend container is named `helpdesk-frontend-1`; use that name with `docker exec` if `helpdesk` is not present.
