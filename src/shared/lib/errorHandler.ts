@@ -1,6 +1,7 @@
 import { toast } from 'sonner';
 
 import { ApiError, mapApiErrorToUserMessage } from '@/types';
+import { reportError } from '@/shared/lib/observability';
 
 // ============ Error Handler ============
 
@@ -16,7 +17,7 @@ export interface ErrorHandlerOptions {
 }
 
 export function handleError(error: unknown, options: ErrorHandlerOptions = {}): void {
-  const { message, showToast = true, onUnauthorized } = options;
+  const { message, showToast = true, onUnauthorized, context } = options;
 
   let errorMessage = message || 'An unexpected error occurred';
   let statusCode = 500;
@@ -32,6 +33,8 @@ export function handleError(error: unknown, options: ErrorHandlerOptions = {}): 
   } else if (error instanceof Error) {
     errorMessage = message || error.message;
   }
+
+  reportError('react-query', error, context);
 
   // Show toast notification
   if (showToast) {
@@ -63,5 +66,5 @@ export function createMutationErrorHandler(options: ErrorHandlerOptions = {}) {
  * Can be used in QueryClient defaultOptions
  */
 export function defaultQueryErrorHandler(error: unknown): void {
-  handleError(error, { showToast: false });
+  handleError(error, { showToast: false, context: 'query' });
 }

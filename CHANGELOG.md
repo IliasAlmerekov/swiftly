@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-02-24
+
+### Added
+
+- Release readiness checklist: `docs/release-checklist.md`.
+- Automated performance budget gate: `scripts/check-perf-budget.mjs` (`npm run perf:budget`).
+- Shared observability hook for runtime error reporting: `src/shared/lib/observability.ts`.
+- New tests for boundary/observability behavior:
+  - `src/shared/components/ErrorBoundary.test.tsx`
+  - `src/shared/lib/observability.test.ts`
+- Migration notes for this release: `docs/migration-notes.md`.
+
+### Changed
+
+- Error observability wired into:
+  - `src/app/provider.tsx` (`ErrorBoundary` onError path)
+  - `src/shared/lib/errorHandler.ts` (query/mutation error path)
+  - `src/shared/api/client.ts` (API request/upload failure path)
+- Updated release performance notes with measured bundle/chunk metrics:
+  - `docs/perf-notes.md`.
+- Improved test determinism under pre-push/CI load:
+  - `src/features/auth/hooks/useLogin.test.tsx`.
+
+### Fixed
+
+- Prevented host-environment dependency failures in git hooks by running checks through Docker Compose.
+- Removed disallowed GitHub Actions usages from CI workflow to satisfy repository action policy.
+- Reduced pre-push flakes in theme provider test path:
+  - `src/provider/theme-provider.test.tsx`.
+
 ## [1.0.6] - 2026-02-20
 
 ### Added

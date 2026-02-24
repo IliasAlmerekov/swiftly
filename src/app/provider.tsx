@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/provider/theme-provider';
 import { AuthProvider } from '@/shared/context/AuthContext';
 import ErrorBoundary from '@/shared/components/ErrorBoundary';
 import { defaultQueryErrorHandler } from '@/shared/lib/errorHandler';
+import { reportError } from '@/shared/lib/observability';
 
 // ============ Query Client Configuration ============
 
@@ -45,7 +46,11 @@ interface AppProviderProps {
  */
 export const AppProvider = ({ children }: AppProviderProps) => {
   return (
-    <ErrorBoundary>
+    <ErrorBoundary
+      onError={(error, errorInfo) => {
+        reportError('error-boundary', error, errorInfo.componentStack ?? undefined);
+      }}
+    >
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">

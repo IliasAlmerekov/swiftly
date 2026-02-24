@@ -1,6 +1,7 @@
 import { ApiError, getApiErrorCodeByStatus, type ApiErrorCode } from '@/types';
 import { getStoredToken, clearStoredToken } from '@/shared/utils/token';
 import { API_BASE_URL } from '@/config/env';
+import { reportError } from '@/shared/lib/observability';
 
 // ============ Configuration ============
 
@@ -199,7 +200,9 @@ export function createApiClient(config: ApiClientConfig = {}) {
       return parseSuccessResponse<T>(response);
     } catch (error) {
       clearTimeout(timeoutId);
-      throw normalizeRequestError(error, 'Failed to execute request');
+      const normalizedError = normalizeRequestError(error, 'Failed to execute request');
+      reportError('api-client', normalizedError, `${method} ${endpoint}`);
+      throw normalizedError;
     }
   }
 
@@ -283,7 +286,9 @@ export function createApiClient(config: ApiClientConfig = {}) {
         return parseSuccessResponse<T>(response);
       } catch (error) {
         clearTimeout(timeoutId);
-        throw normalizeRequestError(error, 'Failed to upload file');
+        const normalizedError = normalizeRequestError(error, 'Failed to upload file');
+        reportError('api-client', normalizedError, `UPLOAD ${endpoint}`);
+        throw normalizedError;
       }
     },
   };
