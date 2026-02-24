@@ -24,6 +24,13 @@
 
 - Use typed configuration objects
 - Avoid reading env/config directly inside business logic
+- For frontend, pass gateway/adapters into hooks/services instead of importing transport clients deep in UI code
+
+## Testability by Design
+
+- Every IO dependency must have a replaceable test seam (mock/fake/fixture).
+- Prefer explicit factory/composition roots for wiring dependencies in app startup and tests.
+- Do not construct hidden singletons inside business logic modules.
 
 ## Anti-Patterns
 

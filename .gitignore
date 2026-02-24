@@ -24,6 +24,12 @@ dist-ssr
 *.sln
 *.sw?
 
+# Local AI tool configs
+.cursor/
+.claude/
+.windsurf/
+.continue/
+
 .netlify
 coverage/
 
