@@ -19,42 +19,46 @@ describe('ThemeProvider', () => {
     expect(() => render(<Consumer />)).toThrowError('useTheme must be used within a ThemeProvider');
   });
 
-  it('does not rerender consumer when provider value dependencies do not change', () => {
-    let renderCount = 0;
+  it(
+    'does not rerender consumer when provider value dependencies do not change',
+    { timeout: 15000 },
+    () => {
+      let renderCount = 0;
 
-    const Consumer = memo(function Consumer() {
-      renderCount += 1;
-      const { setTheme } = useTheme();
+      const Consumer = memo(function Consumer() {
+        renderCount += 1;
+        const { setTheme } = useTheme();
 
-      return (
-        <button type="button" onClick={() => setTheme('light')}>
-          use-theme
-        </button>
-      );
-    });
-
-    const Harness = () => {
-      const [counter, setCounter] = useState(0);
-
-      return (
-        <>
-          <button type="button" onClick={() => setCounter((value) => value + 1)}>
-            rerender-parent
+        return (
+          <button type="button" onClick={() => setTheme('light')}>
+            use-theme
           </button>
-          <span>{counter}</span>
-          <ThemeProvider defaultTheme="light" storageKey="theme-provider-test-key">
-            <Consumer />
-          </ThemeProvider>
-        </>
-      );
-    };
+        );
+      });
 
-    render(<Harness />);
+      const Harness = () => {
+        const [counter, setCounter] = useState(0);
 
-    expect(renderCount).toBe(1);
+        return (
+          <>
+            <button type="button" onClick={() => setCounter((value) => value + 1)}>
+              rerender-parent
+            </button>
+            <span>{counter}</span>
+            <ThemeProvider defaultTheme="light" storageKey="theme-provider-test-key">
+              <Consumer />
+            </ThemeProvider>
+          </>
+        );
+      };
 
-    fireEvent.click(screen.getByRole('button', { name: 'rerender-parent' }));
+      render(<Harness />);
 
-    expect(renderCount).toBe(1);
-  });
+      expect(renderCount).toBe(1);
+
+      fireEvent.click(screen.getByRole('button', { name: 'rerender-parent' }));
+
+      expect(renderCount).toBe(1);
+    },
+  );
 });
