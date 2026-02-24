@@ -49,6 +49,8 @@ Codex MUST read and follow this file at the start of every session.
 
 - For non-trivial design decisions, add a short ADR.
 - Keep AGENTS.md small; detailed rules live in /docs.
+- For React/testing architecture changes, validate rules against current official docs via Context7 before finalizing changes.
+- If local rules intentionally diverge from official guidance, document the reason in an ADR.
 
 ## References
 

@@ -48,6 +48,18 @@ Introduce microservices ONLY if:
 - Prefer explicit over implicit behavior
 - Prefer data-in / data-out functions
 
+## React Architecture Rules
+
+- Treat components as pure functions of props/state/context; keep side effects out of render.
+- Keep state as close as possible to where it is used; avoid duplicated/derived state storage.
+- Effects are for syncing with external systems only (network, DOM APIs, subscriptions, timers).
+- Prefer feature-level public APIs and keep cross-feature coupling one-directional through shared contracts.
+
+## UI State Boundaries
+
+- Separate server state, UI state, and domain rules; do not mix transport concerns into presentation components.
+- Keep routing, auth guards, and access checks explicit at app boundaries, not hidden in low-level UI primitives.
+
 ## Anti-Patterns
 
 - God services
