@@ -19,6 +19,7 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
     name,
     error,
     success,
+    loading,
     handleSubmit,
     handleEmailChange,
     handlePasswordChange,
@@ -47,6 +48,7 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
                   value={email}
                   className="h-10"
                   onChange={handleEmailChange}
+                  disabled={loading}
                 />
               </div>
               <div className="grid gap-3">
@@ -62,6 +64,7 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
                   value={password}
                   className="h-10"
                   onChange={handlePasswordChange}
+                  disabled={loading}
                 />
               </div>
               <div className="grid gap-3">
@@ -76,6 +79,7 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
                   value={name}
                   className="h-10"
                   onChange={handleNameChange}
+                  disabled={loading}
                 />
               </div>
               {error && <p className="text-sm text-red-600">{error}</p>}
@@ -84,8 +88,8 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
                   Registration successful! Redirecting to login...
                 </p>
               )}
-              <Button type="submit" className="text-md mt-8 w-full">
-                Registration
+              <Button type="submit" className="text-md mt-8 w-full" disabled={loading}>
+                {loading ? 'Registration...' : 'Registration'}
               </Button>
               <div className="py-2 text-center text-sm">
                 Already have an account?{' '}

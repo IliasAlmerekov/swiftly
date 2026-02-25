@@ -2,8 +2,18 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { render, screen } from '@testing-library/react';
 
+import { paths } from '@/config/paths';
 import { useAuthContext } from '@/shared/context/AuthContext';
 import ProtectedRoute from './ProtectedRoute';
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
+
+  return {
+    ...actual,
+    Navigate: ({ to }: { to: string }) => <div data-testid="redirect-target">Redirect:{to}</div>,
+  };
+});
 
 vi.mock('@/shared/context/AuthContext', () => ({
   useAuthContext: vi.fn(),
@@ -28,21 +38,15 @@ describe('ProtectedRoute security', () => {
 
     render(
       <MemoryRouter initialEntries={['/dashboard']}>
-        <Routes>
-          <Route path="/login" element={<div>Login Page</div>} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute access="route.dashboard">
-                <div>Dashboard Content</div>
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+        <ProtectedRoute access="route.dashboard">
+          <div>Dashboard Content</div>
+        </ProtectedRoute>
       </MemoryRouter>,
     );
 
-    expect(screen.getByText('Login Page')).toBeInTheDocument();
+    expect(screen.getByTestId('redirect-target')).toHaveTextContent(
+      `Redirect:${paths.auth.login.getHref()}`,
+    );
     expect(screen.queryByText('Dashboard Content')).not.toBeInTheDocument();
   });
 

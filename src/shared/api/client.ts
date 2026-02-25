@@ -301,8 +301,12 @@ export function createApiClient(config: ApiClientConfig = {}) {
  */
 export const apiClient = createApiClient({
   onUnauthorized: () => {
+    if (import.meta.env.MODE === 'test') {
+      return;
+    }
+
     // Redirect to login on 401
-    window.location.href = '/login';
+    window.location.assign('/login');
   },
 });
 
