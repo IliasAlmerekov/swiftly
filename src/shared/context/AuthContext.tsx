@@ -1,13 +1,8 @@
 import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
-import type { UserRole } from '@/types';
+import type { User, UserRole } from '@/types';
 import { createStrictContext } from '@/shared/lib/createStrictContext';
-import {
-  getStoredToken,
-  setStoredToken,
-  clearStoredToken,
-  decodeToken,
-  isTokenExpired,
-} from '@/shared/utils/token';
+import { getUserProfile } from '@/shared/api/users';
+import { decodeToken, isTokenExpired } from '@/shared/utils/token';
 
 // ============ Types ============
 
@@ -42,40 +37,54 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const mapProfileToAuthUser = useCallback(
+    (profile: Pick<User, '_id' | 'email' | 'name' | 'role'>): AuthUser => ({
+      id: profile._id,
+      email: profile.email,
+      name: profile.name,
+      role: profile.role,
+    }),
+    [],
+  );
+
   // Initialize auth state on mount
   useEffect(() => {
-    const token = getStoredToken();
+    let isMounted = true;
 
-    if (!token) {
-      setIsLoading(false);
-      return;
-    }
+    const initializeAuth = async () => {
+      try {
+        const profile = await getUserProfile();
+        if (!isMounted) {
+          return;
+        }
+        setUser(mapProfileToAuthUser(profile));
+      } catch {
+        if (!isMounted) {
+          return;
+        }
+        setUser(null);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
 
-    const decoded = decodeToken(token);
+    void initializeAuth();
 
-    if (!decoded || isTokenExpired(decoded)) {
-      clearStoredToken();
-      setIsLoading(false);
-      return;
-    }
-
-    setUser({
-      id: decoded.id || '',
-      email: decoded.email || '',
-      name: decoded.name || '',
-      role: decoded.role || 'user',
-    });
-    setIsLoading(false);
-  }, []);
+    return () => {
+      isMounted = false;
+    };
+  }, [mapProfileToAuthUser]);
 
   const login = useCallback((token: string, persistent: boolean = false) => {
+    void persistent;
     const decoded = decodeToken(token);
 
     if (!decoded || isTokenExpired(decoded)) {
       throw new Error('Invalid or expired token');
     }
 
-    setStoredToken(token, persistent);
     setUser({
       id: decoded.id || '',
       email: decoded.email || '',
@@ -85,12 +94,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const logout = useCallback(() => {
-    clearStoredToken();
     setUser(null);
   }, []);
 
   const getToken = useCallback(() => {
-    return getStoredToken();
+    return null;
   }, []);
 
   const value = useMemo<AuthContextState>(

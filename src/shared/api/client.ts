@@ -1,5 +1,4 @@
 import { ApiError, getApiErrorCodeByStatus, type ApiErrorCode } from '@/types';
-import { getStoredToken, clearStoredToken } from '@/shared/utils/token';
 import { API_BASE_URL } from '@/config/env';
 import { reportError } from '@/shared/lib/observability';
 
@@ -141,17 +140,6 @@ const normalizeRequestError = (error: unknown, fallbackMessage: string): ApiErro
 export function createApiClient(config: ApiClientConfig = {}) {
   const { baseUrl = API_BASE_URL, timeout = DEFAULT_TIMEOUT, onUnauthorized } = config;
 
-  const attachAuthHeader = (headers: HeadersInit, skipAuth: boolean) => {
-    if (skipAuth) {
-      return;
-    }
-
-    const token = getStoredToken();
-    if (token) {
-      (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
-    }
-  };
-
   /**
    * Base method for making requests
    */
@@ -163,6 +151,7 @@ export function createApiClient(config: ApiClientConfig = {}) {
       headers: customHeaders,
       ...fetchOptions
     } = options;
+    void skipAuth;
     const method = (fetchOptions.method ?? 'GET').toUpperCase();
 
     // Prepare headers
@@ -170,8 +159,6 @@ export function createApiClient(config: ApiClientConfig = {}) {
       'Content-Type': 'application/json',
       ...customHeaders,
     };
-
-    attachAuthHeader(headers, skipAuth);
 
     // AbortController for timeout
     const controller = new AbortController();
@@ -181,6 +168,7 @@ export function createApiClient(config: ApiClientConfig = {}) {
       const response = await fetch(`${baseUrl}${endpoint}`, {
         ...fetchOptions,
         cache: fetchOptions.cache ?? (method === 'GET' ? 'no-store' : undefined),
+        credentials: fetchOptions.credentials ?? 'include',
         headers,
         signal: controller.signal,
         body: body ? JSON.stringify(body) : undefined,
@@ -189,7 +177,6 @@ export function createApiClient(config: ApiClientConfig = {}) {
       clearTimeout(timeoutId);
 
       if (response.status === 401) {
-        clearStoredToken();
         onUnauthorized?.();
       }
 
@@ -254,11 +241,10 @@ export function createApiClient(config: ApiClientConfig = {}) {
         headers: customHeaders,
         ...fetchOptions
       } = options || {};
+      void skipAuth;
 
       const headers: HeadersInit = { ...customHeaders };
       // Do not set Content-Type - the browser will set it with boundary
-
-      attachAuthHeader(headers, skipAuth);
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), requestTimeout);
@@ -267,6 +253,7 @@ export function createApiClient(config: ApiClientConfig = {}) {
         const response = await fetch(`${baseUrl}${endpoint}`, {
           ...fetchOptions,
           method: 'POST',
+          credentials: fetchOptions.credentials ?? 'include',
           headers,
           body: formData,
           signal: controller.signal,
@@ -275,7 +262,6 @@ export function createApiClient(config: ApiClientConfig = {}) {
         clearTimeout(timeoutId);
 
         if (response.status === 401) {
-          clearStoredToken();
           onUnauthorized?.();
         }
 

@@ -38,6 +38,51 @@ describe('getUserProfile', () => {
     expect(result.avatar).toBeUndefined();
   });
 
+  it('normalizes nullable profile fields and string manager id to undefined', async () => {
+    server.use(
+      http.get(`${API_BASE_URL}/users/profile`, () =>
+        HttpResponse.json(
+          {
+            _id: 'u-nullable-profile',
+            email: 'nullable.profile@example.com',
+            name: 'Nullable Profile',
+            role: 'user',
+            manager: 'manager-id-only',
+            company: null,
+            department: null,
+            position: null,
+            country: null,
+            city: null,
+            address: null,
+            postalCode: null,
+            lastSeen: null,
+            avatar: null,
+          },
+          { status: 200 },
+        ),
+      ),
+    );
+
+    const result = await getUserProfile();
+
+    expect(result).toMatchObject({
+      _id: 'u-nullable-profile',
+      email: 'nullable.profile@example.com',
+      name: 'Nullable Profile',
+      role: 'user',
+    });
+    expect(result.manager).toBeUndefined();
+    expect(result.company).toBeUndefined();
+    expect(result.department).toBeUndefined();
+    expect(result.position).toBeUndefined();
+    expect(result.country).toBeUndefined();
+    expect(result.city).toBeUndefined();
+    expect(result.address).toBeUndefined();
+    expect(result.postalCode).toBeUndefined();
+    expect(result.lastSeen).toBeUndefined();
+    expect(result.avatar).toBeUndefined();
+  });
+
   it('throws BAD_RESPONSE for malformed profile payload', async () => {
     server.use(
       http.get(`${API_BASE_URL}/users/profile`, () =>
