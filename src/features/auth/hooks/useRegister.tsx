@@ -1,5 +1,5 @@
 import { registerUser } from '@/features/auth/api';
-import React, { useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { paths } from '@/config/paths';
@@ -14,10 +14,28 @@ export default function useRegister() {
   const [name, setName] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const isSubmittingRef = useRef(false);
+  const redirectTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (redirectTimerRef.current !== null) {
+        window.clearTimeout(redirectTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isSubmittingRef.current) {
+      return;
+    }
+
+    isSubmittingRef.current = true;
     setError(null);
+    setSuccess(false);
+    setLoading(true);
 
     try {
       const { token } = await registerUser(email, password, name);
@@ -25,11 +43,18 @@ export default function useRegister() {
         // Use centralized login method from AuthContext
         login(token, true);
         setSuccess(true);
-        setTimeout(() => {
+        redirectTimerRef.current = window.setTimeout(() => {
           navigate(paths.auth.login.getHref());
         }, 2000);
+        return;
       }
+
+      setError('Registration failed');
+      setLoading(false);
+      isSubmittingRef.current = false;
     } catch (err) {
+      isSubmittingRef.current = false;
+      setLoading(false);
       setError(getApiErrorMessage(err, 'Registration failed'));
     }
   };
@@ -52,6 +77,7 @@ export default function useRegister() {
     name,
     error,
     success,
+    loading,
     handleSubmit,
     handleEmailChange,
     handlePasswordChange,
