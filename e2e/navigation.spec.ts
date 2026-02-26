@@ -23,7 +23,8 @@ test.describe('Navigation', () => {
     });
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await expect(page).toHaveURL(/\/login(?:\?|$)/);
+    await expect(page.locator('#email')).toBeVisible();
 
     // Filter out expected errors (like network errors in dev)
     const criticalErrors = errors.filter(

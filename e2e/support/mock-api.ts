@@ -354,9 +354,10 @@ export const setupMockApi = async (page: Page) => {
 };
 
 export const loginAs = async (page: Page, credentials: { email: string; password: string }) => {
-  await page.goto('/login');
-  await page.getByRole('textbox', { name: 'Email' }).fill(credentials.email);
-  await page.getByRole('textbox', { name: 'Password' }).fill(credentials.password);
+  await page.goto('/login', { waitUntil: 'domcontentloaded' });
+  await page.locator('#email').waitFor({ state: 'visible', timeout: 10_000 });
+  await page.locator('#email').fill(credentials.email);
+  await page.locator('#password').fill(credentials.password);
   await page.getByRole('button', { name: 'Login' }).click();
   await page.waitForURL('**/dashboard**');
 };
