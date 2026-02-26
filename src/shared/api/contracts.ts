@@ -35,15 +35,31 @@ const timestampOrDefaultSchema = z
   .union([z.string(), z.null(), z.undefined()])
   .transform((value) => value ?? DEFAULT_USER_TIMESTAMP);
 
-const avatarSchema = z
+const avatarObjectSchema = z
   .object({
     public_id: z.string(),
     url: z.string().min(1),
   })
   .passthrough();
-const nullableAvatarSchema = z
-  .union([avatarSchema, z.null(), z.undefined()])
-  .transform((value) => value ?? undefined);
+const nullableAvatarSchema = z.preprocess((value) => {
+  if (value == null) {
+    return undefined;
+  }
+
+  if (typeof value !== 'object') {
+    return value;
+  }
+
+  const avatar = value as Record<string, unknown>;
+  const publicId = typeof avatar.public_id === 'string' ? avatar.public_id.trim() : '';
+  const url = typeof avatar.url === 'string' ? avatar.url.trim() : '';
+
+  if (!publicId || !url) {
+    return undefined;
+  }
+
+  return { ...avatar, public_id: publicId, url };
+}, avatarObjectSchema.optional());
 
 const managerSchema = z
   .object({

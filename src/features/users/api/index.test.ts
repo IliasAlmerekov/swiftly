@@ -83,6 +83,45 @@ describe('getUserProfile', () => {
     expect(result.avatar).toBeUndefined();
   });
 
+  it('normalizes avatar objects with null fields to undefined', async () => {
+    server.use(
+      http.get(`${API_BASE_URL}/users/profile`, () =>
+        HttpResponse.json(
+          {
+            _id: 'u-avatar-null-fields',
+            email: 'avatar.null.fields@example.com',
+            name: 'Avatar Null Fields',
+            role: 'user',
+            avatar: {
+              public_id: null,
+              url: null,
+            },
+            manager: {
+              _id: 'manager-1',
+              name: 'Manager One',
+              email: 'manager.one@example.com',
+              avatar: {
+                public_id: null,
+                url: null,
+              },
+            },
+          },
+          { status: 200 },
+        ),
+      ),
+    );
+
+    const result = await getUserProfile();
+
+    expect(result.avatar).toBeUndefined();
+    expect(result.manager).toMatchObject({
+      _id: 'manager-1',
+      name: 'Manager One',
+      email: 'manager.one@example.com',
+    });
+    expect(result.manager?.avatar).toBeUndefined();
+  });
+
   it('throws BAD_RESPONSE for malformed profile payload', async () => {
     server.use(
       http.get(`${API_BASE_URL}/users/profile`, () =>
