@@ -59,9 +59,9 @@ test.describe('Critical flows smoke', () => {
     });
 
     await page.getByRole('button', { name: 'Admin Dashboard' }).click();
-    await expect(page.getByText('Admin Dashboard')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Admin Dashboard' })).toBeVisible();
 
     await page.getByRole('button', { name: 'Analytics' }).click();
-    await expect(page.getByText('Analytics')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Analytics' })).toBeVisible();
   });
 });
