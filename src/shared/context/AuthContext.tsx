@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react
 import type { User, UserRole } from '@/types';
 import { createStrictContext } from '@/shared/lib/createStrictContext';
 import { getUserProfile } from '@/shared/api/users';
-import { decodeToken, isTokenExpired } from '@/shared/utils/token';
+import { decodeToken, isTokenExpired } from '@/shared/utils/jwt';
 
 // ============ Types ============
 

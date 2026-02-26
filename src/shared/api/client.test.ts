@@ -2,11 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createApiClient } from './client';
 
-vi.mock('@/shared/utils/token', () => ({
-  getStoredToken: vi.fn(() => null),
-  clearStoredToken: vi.fn(),
-}));
-
 describe('createApiClient cache policy', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
