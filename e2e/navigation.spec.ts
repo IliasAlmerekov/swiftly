@@ -28,7 +28,12 @@ test.describe('Navigation', () => {
 
     // Filter out expected errors (like network errors in dev)
     const criticalErrors = errors.filter(
-      (e) => !e.includes('net::') && !e.includes('Failed to fetch'),
+      (e) =>
+        !e.includes('net::') &&
+        !e.includes('Failed to fetch') &&
+        !e.includes('status of 401') &&
+        !e.includes('context: GET /users/profile') &&
+        !e.includes('code: UNAUTHORIZED'),
     );
 
     expect(criticalErrors).toHaveLength(0);

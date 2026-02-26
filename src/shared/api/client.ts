@@ -291,6 +291,11 @@ export const apiClient = createApiClient({
       return;
     }
 
+    const currentPath = window.location.pathname;
+    if (currentPath === '/login' || currentPath === '/register') {
+      return;
+    }
+
     // Redirect to login on 401
     window.location.assign('/login');
   },
