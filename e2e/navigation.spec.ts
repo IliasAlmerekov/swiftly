@@ -1,6 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { setupMockApi } from './support/mock-api';
 
 test.describe('Navigation', () => {
+  test.beforeEach(async ({ page }) => {
+    await setupMockApi(page);
+  });
+
   test('should redirect unauthenticated users to login', async ({ page }) => {
     await page.goto('/dashboard');
 
@@ -9,8 +14,6 @@ test.describe('Navigation', () => {
   });
 
   test('should load the app without errors', async ({ page }) => {
-    await page.goto('/');
-
     // Check no console errors
     const errors: string[] = [];
     page.on('console', (msg) => {
@@ -19,6 +22,7 @@ test.describe('Navigation', () => {
       }
     });
 
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     // Filter out expected errors (like network errors in dev)

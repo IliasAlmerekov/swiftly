@@ -116,16 +116,19 @@ const createState = (): MockState => {
   return { users, tickets };
 };
 
-const getCurrentUser = (requestHeaders: { [key: string]: string }, state: MockState): MockUser => {
+const getCurrentUserFromAuthorization = (
+  requestHeaders: { [key: string]: string },
+  state: MockState,
+): MockUser | null => {
   const authHeader = requestHeaders.authorization;
   if (!authHeader?.startsWith('Bearer ')) {
-    return state.users.user;
+    return null;
   }
 
   const token = authHeader.slice('Bearer '.length);
   const [, payload] = token.split('.');
   if (!payload) {
-    return state.users.user;
+    return null;
   }
 
   try {
@@ -137,9 +140,9 @@ const getCurrentUser = (requestHeaders: { [key: string]: string }, state: MockSt
       return state.users[parsed.role];
     }
     const byId = Object.values(state.users).find((user) => user._id === parsed.id);
-    return byId ?? state.users.user;
+    return byId ?? null;
   } catch {
-    return state.users.user;
+    return null;
   }
 };
 
@@ -151,6 +154,7 @@ const toTicketList = (tickets: MockTicket[]) =>
 export const setupMockApi = async (page: Page) => {
   const state = createState();
   let ticketCounter = 1000;
+  let currentUserId: string | null = null;
 
   await page.route('**/*', async (route) => {
     const request = route.request();
@@ -163,7 +167,14 @@ export const setupMockApi = async (page: Page) => {
     }
 
     const method = request.method();
-    const currentUser = getCurrentUser(request.headers(), state);
+    const authorizationUser = getCurrentUserFromAuthorization(request.headers(), state);
+    if (authorizationUser) {
+      currentUserId = authorizationUser._id;
+    }
+    const currentUser =
+      currentUserId != null
+        ? (Object.values(state.users).find((user) => user._id === currentUserId) ?? null)
+        : null;
 
     if (pathname === '/api/auth/login' && method === 'POST') {
       const body = (await request.postDataJSON()) as { email?: string; password?: string };
@@ -172,7 +183,13 @@ export const setupMockApi = async (page: Page) => {
         return json(route, 401, { message: 'Invalid credentials' });
       }
 
+      currentUserId = matchedUser._id;
       return json(route, 200, { token: createJwt(matchedUser) });
+    }
+
+    if (pathname === '/api/auth/logout' && method === 'POST') {
+      currentUserId = null;
+      return json(route, 200, { success: true });
     }
 
     if (pathname === '/api/auth/admins' && method === 'GET') {
@@ -198,6 +215,9 @@ export const setupMockApi = async (page: Page) => {
     }
 
     if (pathname === '/api/users/profile' && method === 'GET') {
+      if (!currentUser) {
+        return json(route, 401, { message: 'Unauthorized' });
+      }
       return json(route, 200, currentUser);
     }
 
@@ -268,6 +288,9 @@ export const setupMockApi = async (page: Page) => {
     }
 
     if (pathname === '/api/tickets' && method === 'POST') {
+      if (!currentUser) {
+        return json(route, 401, { message: 'Unauthorized' });
+      }
       const body = (await request.postDataJSON()) as {
         title?: string;
         description?: string;
