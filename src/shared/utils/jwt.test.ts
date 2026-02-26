@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import { decodeToken, isTokenExpired } from './jwt';
 
-const toBase64Url = (value: string) => Buffer.from(value, 'utf8').toString('base64url');
+const toBase64Url = (value: string) =>
+  btoa(value).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
 
 const createToken = (payload: Record<string, unknown>) => {
   const header = toBase64Url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
