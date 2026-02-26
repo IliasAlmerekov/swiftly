@@ -6,7 +6,6 @@ import {
   parseEntityOrApiResponse,
   parseApiPayload,
 } from '@/shared/api/contracts';
-import { clearStoredToken, getStoredToken, setStoredToken } from '@/shared/utils/token';
 import type { AdminUsersResponse, AuthSession } from '@/types';
 
 // ============ Authentication Functions ============
@@ -48,18 +47,4 @@ export const getAdminUsers = async (): Promise<AdminUsersResponse> => {
   } catch (error) {
     throw normalizeApiModuleError(error, 'Failed to fetch admin users');
   }
-};
-
-// ============ Utility Functions ============
-
-export const isAuthenticated = (): boolean => {
-  return Boolean(getStoredToken());
-};
-
-export const clearAuthToken = (): void => {
-  clearStoredToken();
-};
-
-export const setAuthToken = (token: string, persistent = false): void => {
-  setStoredToken(token, persistent);
 };

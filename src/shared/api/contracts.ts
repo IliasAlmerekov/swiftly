@@ -16,6 +16,14 @@ import type {
 import { ApiError, toApiError } from '@/types';
 
 const stringOrNullSchema = z.string().nullable();
+const optionalNullableStringSchema = z
+  .string()
+  .nullish()
+  .transform((value) => value ?? undefined);
+const optionalNullablePostalCodeSchema = z.preprocess(
+  (value) => (value === null || value === undefined || value === '' ? undefined : value),
+  z.coerce.number().optional(),
+);
 const userRoleSchema = z.enum(['user', 'support1', 'admin']);
 const ticketPrioritySchema = z.enum(['low', 'medium', 'high']);
 const ticketStatusSchema = z.enum(['open', 'in-progress', 'resolved', 'closed']);
@@ -43,8 +51,8 @@ const managerSchema = z
     name: z.string(),
     email: z.string().email(),
     avatar: nullableAvatarSchema,
-    department: z.string().optional(),
-    position: z.string().optional(),
+    department: optionalNullableStringSchema,
+    position: optionalNullableStringSchema,
   })
   .passthrough();
 
@@ -58,18 +66,18 @@ export const userSchema: z.ZodType<User, z.ZodTypeDef, unknown> = z
     updatedAt: timestampOrDefaultSchema,
     onlineCount: z.number().optional(),
     users: z.number().optional(),
-    company: z.string().optional(),
-    department: z.string().optional(),
-    position: z.string().optional(),
+    company: optionalNullableStringSchema,
+    department: optionalNullableStringSchema,
+    position: optionalNullableStringSchema,
     manager: z
-      .union([managerSchema, z.null(), z.undefined()])
-      .transform((value) => value ?? undefined),
-    country: z.string().optional(),
-    city: z.string().optional(),
-    address: z.string().optional(),
-    postalCode: z.coerce.number().optional(),
+      .union([managerSchema, z.string(), z.null(), z.undefined()])
+      .transform((value) => (typeof value === 'string' || value == null ? undefined : value)),
+    country: optionalNullableStringSchema,
+    city: optionalNullableStringSchema,
+    address: optionalNullableStringSchema,
+    postalCode: optionalNullablePostalCodeSchema,
     isOnline: z.boolean().optional(),
-    lastSeen: z.string().optional(),
+    lastSeen: optionalNullableStringSchema,
     avatar: nullableAvatarSchema,
   })
   .passthrough();

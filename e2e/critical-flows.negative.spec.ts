@@ -24,9 +24,11 @@ test.describe('Critical flows negative', () => {
     });
 
     await page.goto('/dashboard?tab=create-ticket');
-    await expect(page.getByRole('heading', { name: 'Create New Ticket' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: /Create New (Support )?Ticket/i }),
+    ).toBeVisible();
 
-    await page.getByRole('button', { name: 'Create Ticket' }).click();
+    await page.locator('form').getByRole('button', { name: 'Create Ticket' }).click();
 
     await expect(page.getByText('Title is required')).toBeVisible();
     await expect(page.getByText('Description is required')).toBeVisible();

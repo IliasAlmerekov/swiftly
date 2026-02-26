@@ -41,10 +41,15 @@ test.describe('Critical flows smoke', () => {
 
     await page.goto('/tickets/ticket-100?tab=tickets');
     await expect(page.getByText('VPN connection keeps timing out')).toBeVisible();
+    await expect(page.getByText('Workflow')).toBeVisible();
 
-    await page.getByRole('combobox').first().click();
+    const workflowCard = page
+      .locator('div')
+      .filter({ hasText: /^Workflow/ })
+      .first();
+    await workflowCard.getByRole('combobox').first().click();
     await page.getByRole('option', { name: 'Resolved' }).click();
-    await expect(page.getByRole('combobox').first()).toContainText('Resolved');
+    await expect(workflowCard.getByRole('combobox').first()).toContainText('Resolved');
   });
 
   test('happy path: admin can open admin and analytics tabs', async ({ page }) => {
