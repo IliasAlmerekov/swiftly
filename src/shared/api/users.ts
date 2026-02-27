@@ -7,6 +7,8 @@ import {
   userSchema,
 } from './contracts';
 
+let inFlightUserProfileRequest: Promise<User> | null = null;
+
 // ============ Admin/Support Users ============
 
 /**
@@ -27,12 +29,20 @@ export const getAdminUsers = async (): Promise<AdminUsersResponse> => {
  * Fetch current user's profile
  */
 export const getUserProfile = async (): Promise<User> => {
-  try {
-    const response = await apiClient.get<unknown>('/users/profile');
-    return parseApiPayload(userSchema, response, { endpoint: '/users/profile' });
-  } catch (error) {
-    throw normalizeApiModuleError(error, 'Failed to fetch user profile');
+  if (!inFlightUserProfileRequest) {
+    inFlightUserProfileRequest = (async () => {
+      try {
+        const response = await apiClient.get<unknown>('/users/profile');
+        return parseApiPayload(userSchema, response, { endpoint: '/users/profile' });
+      } catch (error) {
+        throw normalizeApiModuleError(error, 'Failed to fetch user profile');
+      }
+    })().finally(() => {
+      inFlightUserProfileRequest = null;
+    });
   }
+
+  return inFlightUserProfileRequest;
 };
 
 // ============ User Status ============
