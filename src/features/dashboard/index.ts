@@ -2,7 +2,6 @@
 // Only exports that should be used by other parts of the app
 
 // Pages (for router)
-export { default as DashboardPage } from './pages/DashboardPage';
 export { default as Analytics } from './pages/Analytics';
 
 // Components (named exports)

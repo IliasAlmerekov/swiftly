@@ -105,9 +105,7 @@ deploy:develop:
       npm ci --cache .npm --prefer-offline --no-audit
       npm install -g netlify-cli@17.34.0
       echo "VITE_API_URL=https://swiftly-helpdesk-backend-dev.onrender.com/api" > .env.production
-      echo "=== DEBUG: Created .env.production file ==="
-      cat .env.production
-      echo "=== END DEBUG ==="
+      echo ".env.production created for develop build"
   script:
     - |
       npm run build
@@ -118,7 +116,7 @@ deploy:develop:
       echo "Site ID:" $NETLIFY_SITE_ID_DEVELOP
       test -n "$NETLIFY_SITE_ID_DEVELOP" || { echo 'Missing NETLIFY_SITE_ID_DEVELOP'; exit 1; }
       test -n "$NETLIFY_AUTH_TOKEN" || { echo 'Missing NETLIFY_AUTH_TOKEN'; exit 1; }
-    - netlify deploy --dir=dist --site=$NETLIFY_SITE_ID_DEVELOP --auth=$NETLIFY_AUTH_TOKEN --message "Develop deploy $CI_COMMIT_SHORT_SHA"
+    - netlify deploy --dir=dist --site=$NETLIFY_SITE_ID_DEVELOP --message "Develop deploy $CI_COMMIT_SHORT_SHA"
   environment:
     name: develop
     url: https://swiftly-helpdesk-develop.netlify.app/
@@ -138,9 +136,7 @@ deploy:production:
       npm ci --cache .npm --prefer-offline --no-audit
       npm install -g netlify-cli@17.34.0
       echo "VITE_API_URL=https://swiftly-helpdesk-backend.onrender.com/api" > .env.production
-      echo "=== DEBUG: Created .env.production file ==="
-      cat .env.production
-      echo "=== END DEBUG ==="
+      echo ".env.production created for production build"
   script:
     - |
       npm run build
@@ -151,7 +147,7 @@ deploy:production:
       echo "Site ID:" $NETLIFY_SITE_ID_PRODUCTION
       test -n "$NETLIFY_SITE_ID_PRODUCTION" || { echo 'Missing NETLIFY_SITE_ID_PRODUCTION'; exit 1; }
       test -n "$NETLIFY_AUTH_TOKEN" || { echo 'Missing NETLIFY_AUTH_TOKEN'; exit 1; }
-    - netlify deploy --dir=dist --site=$NETLIFY_SITE_ID_PRODUCTION --auth=$NETLIFY_AUTH_TOKEN --prod --message "Prod deploy $CI_COMMIT_SHORT_SHA"
+    - netlify deploy --dir=dist --site=$NETLIFY_SITE_ID_PRODUCTION --prod --message "Prod deploy $CI_COMMIT_SHORT_SHA"
   environment:
     name: production
     url: https://helpdesk-swiftly.netlify.app/

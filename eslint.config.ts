@@ -99,6 +99,7 @@ export default tseslint.config(
           zones: architectureZones,
         },
       ],
+      'import/no-cycle': 'error',
     },
   }, // Shared modules should not import from features or app
   {

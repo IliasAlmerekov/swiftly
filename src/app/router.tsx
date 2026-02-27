@@ -5,6 +5,7 @@ import { paths } from '@/config/paths';
 import { LoginPage, RegisterPage } from '@/features/auth';
 import { TicketDetailPage } from '@/features/tickets';
 import { UserProfile } from '@/features/users';
+import NotFoundPage from '@/app/pages/NotFoundPage';
 import AppLayout from '@/shared/components/layout/AppLayout';
 import ProtectedRoute from '@/shared/components/auth/ProtectedRoute';
 
@@ -83,6 +84,8 @@ export const AppRouter = () => {
               </ProtectedRoute>
             }
           />
+
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
     </BrowserRouter>
