@@ -10,24 +10,29 @@ We need a cross-repo contract before implementation.
 
 ## Decision
 
-Phase 0 contract is agreed as follows.
+Final contract is agreed as follows.
 
 ### 1. Transport and session model
 
 - Browser auth secrets are stored only in HttpOnly cookies.
 - Frontend never stores access/refresh token in `localStorage/sessionStorage`.
 - Frontend uses `fetch(..., { credentials: 'include' })` for authenticated API calls.
+- Browser flow is cookie session only. Token-in-body is legacy compatibility only during migration.
 
 ### 2. Auth endpoints (target contract)
 
 - `POST /api/auth/login`
-  Request: `{ email: string, password: string }`
+  Request: `{ email: string, password: string, keepLoggedIn?: boolean }`
   Response `200`: `{ user: AuthUser, authenticated: true }`
-  Side effect: sets auth cookies.
+  Side effect: sets auth cookies with backend-selected ttl profile.
 - `POST /api/auth/register`
-  Request: `{ email: string, password: string, name: string }`
+  Request: `{ email: string, password: string, name: string, keepLoggedIn?: boolean }`
   Response `201`: `{ user: AuthUser, authenticated: true }`
-  Side effect: sets auth cookies.
+  Side effect: sets auth cookies with backend-selected ttl profile.
+- `GET /api/auth/csrf`
+  Request: no body
+  Response `200`: `{ csrfToken: string }`
+  Side effect: may set/update csrf cookie for double-submit validation.
 - `GET /api/auth/me`
   Request: no body
   Response `200`: `{ user: AuthUser, authenticated: true }`
@@ -45,14 +50,18 @@ Phase 0 contract is agreed as follows.
 
 ### 3. Cookie policy
 
-- Cookies are set with `HttpOnly; Secure`.
-- Production cross-site SPA (`netlify.app` -> `onrender.com`) uses `SameSite=None`.
-- Local development may use `SameSite=Lax` where site context allows.
+- Cookies are always `HttpOnly`.
+- Secure/SameSite environment matrix is fixed:
+  - prod (`https`): `Secure` required, `SameSite=None`.
+  - local-http: `Secure` forbidden, `SameSite=Lax`.
+  - local-https: `Secure` allowed, `SameSite=Lax`.
 - Cookie names are prefixed and stable across FE/BE contracts.
+- `keepLoggedIn` is backend-supported ttl selection, not frontend ttl enforcement.
 
 ### 4. CSRF policy
 
 - Because production is cross-site and requires credentialed cookies, backend enforces CSRF protection for state-changing requests.
+- Frontend bootstraps csrf token using `GET /api/auth/csrf` before unauthenticated login/register attempts.
 - Frontend sends CSRF token in `X-CSRF-Token` header for `POST/PUT/PATCH/DELETE`.
 - Backend validates CSRF token and rejects invalid/missing tokens with `403`.
 
@@ -67,8 +76,25 @@ Phase 0 contract is agreed as follows.
 - During migration window backend may keep legacy token fields in auth responses.
 - Frontend migration target ignores token body and relies on cookie + `/api/auth/me`.
 - Final state removes token body from public auth contract.
+- Deadline for removal is fixed: `2026-06-30`.
 
-### 7. Acceptance criteria for Phase 0
+### 7. Auth error semantics
+
+- `401` is only for unauthenticated or invalid session cases: `AUTH_REQUIRED`, `AUTH_INVALID`.
+- `403` is only for authenticated but forbidden/security failures: `AUTH_FORBIDDEN`, `CSRF_INVALID`.
+- Error envelope uses `error.code` for frontend flow decisions.
+
+### 8. Frontend auth policy naming
+
+- Frontend request policy uses `authMode: 'required' | 'none'`.
+- `authMode` replaces legacy `skipAuth`.
+
+### 9. SPA fallback boundary
+
+- SPA fallback (serving `index.html`) is allowed only on frontend edge/ingress.
+- Backend API must not return `index.html` for unknown `/api/*` paths.
+
+### 10. Acceptance criteria for Phase 0
 
 - [x] Current FE/BE auth contract was inspected in code and tests.
 - [x] Target cookie-session contract is defined (endpoints, cookies, CSRF, CORS).
