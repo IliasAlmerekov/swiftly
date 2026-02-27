@@ -18,7 +18,7 @@ export const authHandlers = [
 
     return HttpResponse.json({
       user,
-      token: 'mock-jwt-token',
+      authenticated: true,
     });
   }),
 
@@ -42,7 +42,7 @@ export const authHandlers = [
 
     return HttpResponse.json({
       user: newUser,
-      token: 'mock-jwt-token',
+      authenticated: true,
     });
   }),
 
@@ -52,12 +52,21 @@ export const authHandlers = [
       return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    return HttpResponse.json(db.currentUser);
+    return HttpResponse.json({ user: db.currentUser, authenticated: true });
+  }),
+
+  // POST /api/auth/refresh
+  http.post(`${API_URL}/auth/refresh`, () => {
+    if (!db.currentUser) {
+      return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    return HttpResponse.json({ authenticated: true });
   }),
 
   // POST /api/auth/logout
   http.post(`${API_URL}/auth/logout`, () => {
     db.currentUser = null;
-    return HttpResponse.json({ message: 'Logged out' });
+    return HttpResponse.json({ success: true, message: 'Logged out' });
   }),
 ];

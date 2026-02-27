@@ -38,20 +38,24 @@ export default function useRegister() {
     setLoading(true);
 
     try {
-      const { token } = await registerUser(email, password, name);
-      if (token) {
-        // Use centralized login method from AuthContext
-        login(token, true);
-        setSuccess(true);
-        redirectTimerRef.current = window.setTimeout(() => {
-          navigate(paths.auth.login.getHref());
-        }, 2000);
+      const { user, authenticated } = await registerUser(email, password, name, true);
+      if (!authenticated) {
+        setError('Registration failed');
+        setLoading(false);
+        isSubmittingRef.current = false;
         return;
       }
 
-      setError('Registration failed');
-      setLoading(false);
-      isSubmittingRef.current = false;
+      login({
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      });
+      setSuccess(true);
+      redirectTimerRef.current = window.setTimeout(() => {
+        navigate(paths.auth.login.getHref());
+      }, 2000);
     } catch (err) {
       isSubmittingRef.current = false;
       setLoading(false);

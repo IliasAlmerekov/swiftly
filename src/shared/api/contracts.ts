@@ -3,7 +3,9 @@ import { z } from 'zod';
 import type {
   AdminUsersResponse,
   AIResponse,
-  AuthSession,
+  AuthLogoutResponse,
+  AuthRefreshResponse,
+  AuthUserResponse,
   ApiResponse,
   AuthToken,
   CursorPage,
@@ -202,9 +204,23 @@ export const authTokenSchema: z.ZodType<AuthToken, z.ZodTypeDef, unknown> = z
   })
   .passthrough();
 
-export const authSessionSchema: z.ZodType<AuthSession> = z
+export const authUserResponseSchema: z.ZodType<AuthUserResponse, z.ZodTypeDef, unknown> = z
   .object({
-    token: z.string().min(1),
+    user: userSchema,
+    authenticated: z.literal(true),
+  })
+  .passthrough();
+
+export const authRefreshResponseSchema: z.ZodType<AuthRefreshResponse> = z
+  .object({
+    authenticated: z.literal(true),
+  })
+  .passthrough();
+
+export const authLogoutResponseSchema: z.ZodType<AuthLogoutResponse> = z
+  .object({
+    success: z.literal(true),
+    message: z.string(),
   })
   .passthrough();
 

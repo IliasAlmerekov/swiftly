@@ -1,50 +1,38 @@
-import { apiClient } from '@/shared/api';
 import {
-  adminUsersFlexibleSchema,
-  authSessionSchema,
-  normalizeApiModuleError,
-  parseEntityOrApiResponse,
-  parseApiPayload,
-} from '@/shared/api/contracts';
-import type { AdminUsersResponse, AuthSession } from '@/types';
+  getCurrentSession as getCurrentSessionRequest,
+  loginWithSession,
+  logoutCurrentSession,
+  refreshCurrentSession,
+  registerWithSession,
+} from '@/shared/api';
+import { getAdminUsers as getAdminUsersRequest } from '@/shared/api/users';
+import type {
+  AdminUsersResponse,
+  AuthLogoutResponse,
+  AuthRefreshResponse,
+  AuthUserResponse,
+} from '@/types';
 
 // ============ Authentication Functions ============
 
-export const loginUser = async (email: string, password: string): Promise<AuthSession> => {
-  try {
-    const response = await apiClient.post<unknown>(
-      '/auth/login',
-      { email, password },
-      { skipAuth: true },
-    );
-    return parseEntityOrApiResponse(response, authSessionSchema, { endpoint: '/auth/login' });
-  } catch (error) {
-    throw normalizeApiModuleError(error, 'Failed to login');
-  }
-};
+export const loginUser = (
+  email: string,
+  password: string,
+  keepLoggedIn?: boolean,
+): Promise<AuthUserResponse> => loginWithSession(email, password, keepLoggedIn);
 
 export const registerUser = async (
   email: string,
   password: string,
   name: string,
-): Promise<AuthSession> => {
-  try {
-    const response = await apiClient.post<unknown>(
-      '/auth/register',
-      { email, password, name },
-      { skipAuth: true },
-    );
-    return parseEntityOrApiResponse(response, authSessionSchema, { endpoint: '/auth/register' });
-  } catch (error) {
-    throw normalizeApiModuleError(error, 'Failed to register');
-  }
-};
+  keepLoggedIn?: boolean,
+): Promise<AuthUserResponse> => registerWithSession(email, password, name, keepLoggedIn);
 
-export const getAdminUsers = async (): Promise<AdminUsersResponse> => {
-  try {
-    const response = await apiClient.get<unknown>('/auth/admins');
-    return parseApiPayload(adminUsersFlexibleSchema, response, { endpoint: '/auth/admins' });
-  } catch (error) {
-    throw normalizeApiModuleError(error, 'Failed to fetch admin users');
-  }
-};
+export const getCurrentSession = (): Promise<AuthUserResponse> => getCurrentSessionRequest();
+
+export const refreshSession = (): Promise<AuthRefreshResponse> => refreshCurrentSession();
+
+export const logoutUser = (allSessions?: boolean): Promise<AuthLogoutResponse> =>
+  logoutCurrentSession(allSessions);
+
+export const getAdminUsers = (): Promise<AdminUsersResponse> => getAdminUsersRequest();

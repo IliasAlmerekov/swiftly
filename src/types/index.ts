@@ -67,8 +67,25 @@ export interface AuthToken {
   user: User;
 }
 
-export interface AuthSession {
-  token: string;
+export interface AuthUserState {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+}
+
+export interface AuthUserResponse {
+  user: User;
+  authenticated: true;
+}
+
+export interface AuthRefreshResponse {
+  authenticated: true;
+}
+
+export interface AuthLogoutResponse {
+  success: true;
+  message: string;
 }
 
 export interface AdminUsersResponse {

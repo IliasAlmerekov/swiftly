@@ -1,4 +1,8 @@
 export type ApiErrorCode =
+  | 'AUTH_REQUIRED'
+  | 'AUTH_INVALID'
+  | 'AUTH_FORBIDDEN'
+  | 'CSRF_INVALID'
   | 'BAD_REQUEST'
   | 'UNAUTHORIZED'
   | 'FORBIDDEN'
@@ -43,6 +47,10 @@ const STATUS_TO_ERROR_CODE: Record<number, ApiErrorCode> = {
 };
 
 const API_ERROR_USER_MESSAGES: Record<ApiErrorCode, string> = {
+  AUTH_REQUIRED: 'Authentication is required. Please log in.',
+  AUTH_INVALID: 'Authentication is invalid. Please log in again.',
+  AUTH_FORBIDDEN: 'You do not have access to perform this action.',
+  CSRF_INVALID: 'Security token is invalid. Please retry your request.',
   BAD_REQUEST: 'Invalid request. Please check your input.',
   UNAUTHORIZED: 'Session expired. Please log in again.',
   FORBIDDEN: 'You do not have permission to perform this action.',

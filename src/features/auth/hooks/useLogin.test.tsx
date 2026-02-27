@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { loginUser } from '@/features/auth/api';
 import { useAuthContext } from '@/shared/context/AuthContext';
-import type { AuthSession } from '@/types';
+import type { AuthUserResponse } from '@/types';
 
 import { useLogin } from './useLogin';
 
@@ -43,12 +43,11 @@ describe('useLogin', () => {
       isLoading: false,
       login: loginMock,
       logout: vi.fn(),
-      getToken: vi.fn(),
     });
   });
 
   it('keeps loading state on successful submit until navigation', async () => {
-    const deferred = createDeferred<AuthSession>();
+    const deferred = createDeferred<AuthUserResponse>();
     const onLoginSuccess = vi.fn();
 
     mockedLoginUser.mockReturnValueOnce(deferred.promise);
@@ -69,11 +68,27 @@ describe('useLogin', () => {
     expect(result.current.loading).toBe(true);
 
     await act(async () => {
-      deferred.resolve({ token: 'jwt-token' });
+      deferred.resolve({
+        authenticated: true,
+        user: {
+          _id: 'u-1',
+          email: 'user@example.com',
+          name: 'User',
+          role: 'user',
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-01T00:00:00.000Z',
+        },
+      });
       await deferred.promise;
     });
 
-    expect(loginMock).toHaveBeenCalledWith('jwt-token', false);
+    expect(mockedLoginUser).toHaveBeenCalledWith('user@example.com', 'password123', false);
+    expect(loginMock).toHaveBeenCalledWith({
+      id: 'u-1',
+      email: 'user@example.com',
+      name: 'User',
+      role: 'user',
+    });
     expect(onLoginSuccess).toHaveBeenCalledTimes(1);
     expect(result.current.loading).toBe(true);
   });
@@ -103,7 +118,7 @@ describe('useLogin', () => {
   });
 
   it('ignores duplicate submits while request is already in flight', async () => {
-    const deferred = createDeferred<AuthSession>();
+    const deferred = createDeferred<AuthUserResponse>();
     const onLoginSuccess = vi.fn();
     mockedLoginUser.mockReturnValueOnce(deferred.promise);
 
@@ -123,6 +138,7 @@ describe('useLogin', () => {
     });
 
     expect(mockedLoginUser).toHaveBeenCalledTimes(1);
+    expect(mockedLoginUser).toHaveBeenCalledWith('user@example.com', 'password123', false);
 
     await act(async () => {
       deferred.reject(new Error('Abort pending request'));

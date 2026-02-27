@@ -62,10 +62,10 @@ export function NavUser({
       await setUserStatusOffline();
     } catch {
       // ignore status errors during logout
-    } finally {
-      logout();
-      navigate(paths.auth.login.getHref(), { replace: true });
     }
+
+    await logout();
+    navigate(paths.auth.login.getHref(), { replace: true });
   }
 
   function handleAccount() {

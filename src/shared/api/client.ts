@@ -15,7 +15,7 @@ const DEFAULT_TIMEOUT = 30000;
 
 interface RequestConfig extends Omit<RequestInit, 'body'> {
   timeout?: number;
-  skipAuth?: boolean;
+  authMode?: 'required' | 'none';
   body?: unknown;
 }
 
@@ -48,6 +48,10 @@ async function parseSuccessResponse<T>(response: Response): Promise<T> {
 }
 
 const API_ERROR_CODES: ReadonlySet<ApiErrorCode> = new Set([
+  'AUTH_REQUIRED',
+  'AUTH_INVALID',
+  'AUTH_FORBIDDEN',
+  'CSRF_INVALID',
   'BAD_REQUEST',
   'UNAUTHORIZED',
   'FORBIDDEN',
@@ -70,10 +74,16 @@ const parseErrorPayload = async (response: Response): Promise<ErrorPayload | nul
     const payload = await response.clone().json();
     if (payload && typeof payload === 'object') {
       const typedPayload = payload as Record<string, unknown>;
+      const nestedError =
+        typedPayload.error && typeof typedPayload.error === 'object'
+          ? (typedPayload.error as Record<string, unknown>)
+          : null;
+      const source = nestedError ?? typedPayload;
+
       return {
-        message: typeof typedPayload.message === 'string' ? typedPayload.message : undefined,
-        details: typedPayload.details,
-        code: isApiErrorCode(typedPayload.code) ? typedPayload.code : undefined,
+        message: typeof source.message === 'string' ? source.message : undefined,
+        details: source.details,
+        code: isApiErrorCode(source.code) ? source.code : undefined,
         userMessage:
           typeof typedPayload.userMessage === 'string' ? typedPayload.userMessage : undefined,
       };
@@ -139,6 +149,16 @@ const normalizeRequestError = (error: unknown, fallbackMessage: string): ApiErro
  */
 export function createApiClient(config: ApiClientConfig = {}) {
   const { baseUrl = API_BASE_URL, timeout = DEFAULT_TIMEOUT, onUnauthorized } = config;
+  const resolveCredentials = (
+    credentials: RequestCredentials | undefined,
+    authMode: NonNullable<RequestConfig['authMode']>,
+  ): RequestCredentials => {
+    if (credentials) {
+      return credentials;
+    }
+
+    return authMode === 'required' ? 'include' : 'omit';
+  };
 
   /**
    * Base method for making requests
@@ -146,12 +166,11 @@ export function createApiClient(config: ApiClientConfig = {}) {
   async function request<T>(endpoint: string, options: RequestConfig = {}): Promise<T> {
     const {
       timeout: requestTimeout = timeout,
-      skipAuth = false,
+      authMode = 'required',
       body,
       headers: customHeaders,
       ...fetchOptions
     } = options;
-    void skipAuth;
     const method = (fetchOptions.method ?? 'GET').toUpperCase();
 
     // Prepare headers
@@ -168,7 +187,7 @@ export function createApiClient(config: ApiClientConfig = {}) {
       const response = await fetch(`${baseUrl}${endpoint}`, {
         ...fetchOptions,
         cache: fetchOptions.cache ?? (method === 'GET' ? 'no-store' : undefined),
-        credentials: fetchOptions.credentials ?? 'include',
+        credentials: resolveCredentials(fetchOptions.credentials, authMode),
         headers,
         signal: controller.signal,
         body: body ? JSON.stringify(body) : undefined,
@@ -237,11 +256,10 @@ export function createApiClient(config: ApiClientConfig = {}) {
     ): Promise<T> => {
       const {
         timeout: requestTimeout = timeout,
-        skipAuth = false,
+        authMode = 'required',
         headers: customHeaders,
         ...fetchOptions
       } = options || {};
-      void skipAuth;
 
       const headers: HeadersInit = { ...customHeaders };
       // Do not set Content-Type - the browser will set it with boundary
@@ -253,7 +271,7 @@ export function createApiClient(config: ApiClientConfig = {}) {
         const response = await fetch(`${baseUrl}${endpoint}`, {
           ...fetchOptions,
           method: 'POST',
-          credentials: fetchOptions.credentials ?? 'include',
+          credentials: resolveCredentials(fetchOptions.credentials, authMode),
           headers,
           body: formData,
           signal: controller.signal,
@@ -292,7 +310,13 @@ export const apiClient = createApiClient({
     }
 
     const currentPath = window.location.pathname;
-    if (currentPath === '/login' || currentPath === '/register') {
+    const isProtectedPath =
+      currentPath.startsWith('/dashboard') ||
+      currentPath.startsWith('/tickets') ||
+      currentPath.startsWith('/users') ||
+      currentPath.startsWith('/user-profile');
+
+    if (!isProtectedPath) {
       return;
     }
 
