@@ -10,6 +10,7 @@ Mandatory rules:
 - Handle errors explicitly; no silent failure paths.
 - Keep public API behavior stable unless migration is documented.
 - Never add secrets to code, tests, logs, or docs.
+- Use Context7 MCP to have up-to-date stack documentation and architecture guidelines.
 
 Quality gates before completion (when feasible):
 - docker compose run --rm lint
@@ -17,7 +18,7 @@ Quality gates before completion (when feasible):
 - docker compose run --rm test
 - docker compose run --rm build
 - docker compose run --rm app npm run format:check
-
+///
 Fallback only when container runtime is unavailable:
 - npm run ci:lint
 - npm run ci:typecheck
