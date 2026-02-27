@@ -21,7 +21,7 @@ describe('Critical flow integration', () => {
 
       expect(response.ok).toBe(true);
       expect(data.user.email).toBe('test@example.com');
-      expect(data.token).toBe('mock-jwt-token');
+      expect(data.authenticated).toBe(true);
     });
 
     it('rejects invalid credentials', async () => {
@@ -184,8 +184,9 @@ describe('Critical flow integration', () => {
       const data = await response.json();
 
       expect(response.ok).toBe(true);
-      expect(data._id).toBe('u-auth-me');
-      expect(data.email).toBe('me@example.com');
+      expect(data.user._id).toBe('u-auth-me');
+      expect(data.user.email).toBe('me@example.com');
+      expect(data.authenticated).toBe(true);
     });
   });
 });

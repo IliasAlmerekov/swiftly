@@ -27,10 +27,14 @@ export function useLogin({ onLoginSuccess }: UseLoginProps) {
     setLoading(true);
 
     try {
-      const { token } = await loginUser(email, password);
+      const { user } = await loginUser(email, password, keepLoggedIn);
 
-      // Use centralized login method from AuthContext
-      login(token, keepLoggedIn);
+      login({
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      });
 
       onLoginSuccess();
     } catch (error: unknown) {

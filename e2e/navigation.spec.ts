@@ -38,4 +38,11 @@ test.describe('Navigation', () => {
 
     expect(criticalErrors).toHaveLength(0);
   });
+
+  test('shows not found page for unknown routes', async ({ page }) => {
+    await page.goto('/non-existing-route');
+
+    await expect(page.getByRole('heading', { name: 'Page not found' })).toBeVisible();
+    await expect(page).toHaveURL(/\/non-existing-route$/);
+  });
 });

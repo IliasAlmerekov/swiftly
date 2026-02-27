@@ -1,25 +1,17 @@
 import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
-import type { User, UserRole } from '@/types';
+import type { AuthUserState, User } from '@/types';
 import { createStrictContext } from '@/shared/lib/createStrictContext';
-import { getUserProfile } from '@/shared/api/users';
-import { decodeToken, isTokenExpired } from '@/shared/utils/jwt';
+import { getCurrentSession, logoutCurrentSession } from '@/shared/api/auth';
+import { reportError } from '@/shared/lib/observability';
 
 // ============ Types ============
 
-interface AuthUser {
-  id: string;
-  email: string;
-  name: string;
-  role: UserRole;
-}
-
 interface AuthContextState {
-  user: AuthUser | null;
+  user: AuthUserState | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (token: string, persistent?: boolean) => void;
-  logout: () => void;
-  getToken: () => string | null;
+  login: (user: AuthUserState) => void;
+  logout: () => Promise<void>;
 }
 
 // ============ Context ============
@@ -34,11 +26,11 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<AuthUserState | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const mapProfileToAuthUser = useCallback(
-    (profile: Pick<User, '_id' | 'email' | 'name' | 'role'>): AuthUser => ({
+    (profile: Pick<User, '_id' | 'email' | 'name' | 'role'>): AuthUserState => ({
       id: profile._id,
       email: profile.email,
       name: profile.name,
@@ -53,11 +45,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const initializeAuth = async () => {
       try {
-        const profile = await getUserProfile();
+        const session = await getCurrentSession();
         if (!isMounted) {
           return;
         }
-        setUser(mapProfileToAuthUser(profile));
+        setUser(mapProfileToAuthUser(session.user));
       } catch {
         if (!isMounted) {
           return;
@@ -77,28 +69,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
   }, [mapProfileToAuthUser]);
 
-  const login = useCallback((token: string, persistent: boolean = false) => {
-    void persistent;
-    const decoded = decodeToken(token);
+  const login = useCallback((nextUser: AuthUserState) => {
+    setUser(nextUser);
+  }, []);
 
-    if (!decoded || isTokenExpired(decoded)) {
-      throw new Error('Invalid or expired token');
+  const logout = useCallback(async () => {
+    try {
+      await logoutCurrentSession();
+    } catch (error) {
+      reportError('app', error, 'auth/logout');
+    } finally {
+      setUser(null);
     }
-
-    setUser({
-      id: decoded.id || '',
-      email: decoded.email || '',
-      name: decoded.name || '',
-      role: decoded.role || 'user',
-    });
-  }, []);
-
-  const logout = useCallback(() => {
-    setUser(null);
-  }, []);
-
-  const getToken = useCallback(() => {
-    return null;
   }, []);
 
   const value = useMemo<AuthContextState>(
@@ -108,9 +90,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       isLoading,
       login,
       logout,
-      getToken,
     }),
-    [user, isLoading, login, logout, getToken],
+    [user, isLoading, login, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

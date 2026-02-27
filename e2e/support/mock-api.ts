@@ -51,22 +51,6 @@ const json = (route: Route, status: number, body: unknown) =>
     body: JSON.stringify(body),
   });
 
-const toBase64Url = (value: string): string => Buffer.from(value, 'utf8').toString('base64url');
-
-const createJwt = (user: MockUser): string => {
-  const header = toBase64Url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-  const payload = toBase64Url(
-    JSON.stringify({
-      id: user._id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      exp: Math.floor(Date.now() / 1000) + 60 * 60,
-    }),
-  );
-  return `${header}.${payload}.signature`;
-};
-
 const createState = (): MockState => {
   const users: Record<Role, MockUser> = {
     user: {
@@ -116,36 +100,6 @@ const createState = (): MockState => {
   return { users, tickets };
 };
 
-const getCurrentUserFromAuthorization = (
-  requestHeaders: { [key: string]: string },
-  state: MockState,
-): MockUser | null => {
-  const authHeader = requestHeaders.authorization;
-  if (!authHeader?.startsWith('Bearer ')) {
-    return null;
-  }
-
-  const token = authHeader.slice('Bearer '.length);
-  const [, payload] = token.split('.');
-  if (!payload) {
-    return null;
-  }
-
-  try {
-    const parsed = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as {
-      role?: Role;
-      id?: string;
-    };
-    if (parsed.role && state.users[parsed.role]) {
-      return state.users[parsed.role];
-    }
-    const byId = Object.values(state.users).find((user) => user._id === parsed.id);
-    return byId ?? null;
-  } catch {
-    return null;
-  }
-};
-
 const toTicketList = (tickets: MockTicket[]) =>
   tickets.map((ticket) => ({
     ...ticket,
@@ -167,10 +121,6 @@ export const setupMockApi = async (page: Page) => {
     }
 
     const method = request.method();
-    const authorizationUser = getCurrentUserFromAuthorization(request.headers(), state);
-    if (authorizationUser) {
-      currentUserId = authorizationUser._id;
-    }
     const currentUser =
       currentUserId != null
         ? (Object.values(state.users).find((user) => user._id === currentUserId) ?? null)
@@ -184,12 +134,59 @@ export const setupMockApi = async (page: Page) => {
       }
 
       currentUserId = matchedUser._id;
-      return json(route, 200, { token: createJwt(matchedUser) });
+      return json(route, 200, { user: matchedUser, authenticated: true });
+    }
+
+    if (pathname === '/api/auth/csrf' && method === 'GET') {
+      return json(route, 200, { csrfToken: 'csrf-token-e2e' });
+    }
+
+    if (pathname === '/api/auth/register' && method === 'POST') {
+      const body = (await request.postDataJSON()) as {
+        email?: string;
+        password?: string;
+        name?: string;
+      };
+      if (!body.email || !body.password || !body.name) {
+        return json(route, 400, { message: 'Validation failed' });
+      }
+      const existingUser = Object.values(state.users).find((user) => user.email === body.email);
+      if (existingUser) {
+        return json(route, 409, { message: 'User already exists' });
+      }
+
+      const registeredUser: MockUser = {
+        _id: `user-${++ticketCounter}`,
+        email: body.email,
+        name: body.name,
+        role: 'user',
+        createdAt: NOW,
+        updatedAt: NOW,
+      };
+      state.users.user = registeredUser;
+      currentUserId = registeredUser._id;
+      return json(route, 201, { user: registeredUser, authenticated: true });
+    }
+
+    if (pathname === '/api/auth/me' && method === 'GET') {
+      if (!currentUser) {
+        return json(route, 401, { message: 'Unauthorized' });
+      }
+
+      return json(route, 200, { user: currentUser, authenticated: true });
+    }
+
+    if (pathname === '/api/auth/refresh' && method === 'POST') {
+      if (!currentUser) {
+        return json(route, 401, { message: 'Unauthorized' });
+      }
+
+      return json(route, 200, { authenticated: true });
     }
 
     if (pathname === '/api/auth/logout' && method === 'POST') {
       currentUserId = null;
-      return json(route, 200, { success: true });
+      return json(route, 200, { success: true, message: 'Logged out' });
     }
 
     if (pathname === '/api/auth/admins' && method === 'GET') {

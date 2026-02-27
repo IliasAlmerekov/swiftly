@@ -13,4 +13,5 @@ export { useLogin } from './hooks/useLogin';
 export { default as useRegister } from './hooks/useRegister';
 
 // React Query Hooks
-export { authKeys, useAdminUsers, useLoginMutation, useRegisterMutation } from './hooks/useAuth';
+export { authKeys, useLoginMutation, useRegisterMutation } from './hooks/useAuth';
+export { useAdminUsers } from '@/shared/hooks/useAdminUsers';

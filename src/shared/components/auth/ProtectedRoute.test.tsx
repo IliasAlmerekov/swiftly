@@ -33,7 +33,6 @@ describe('ProtectedRoute security', () => {
       isLoading: false,
       login: vi.fn(),
       logout: vi.fn(),
-      getToken: vi.fn(),
     });
 
     render(
@@ -62,7 +61,6 @@ describe('ProtectedRoute security', () => {
       isLoading: false,
       login: vi.fn(),
       logout: vi.fn(),
-      getToken: vi.fn(),
     });
 
     render(
@@ -96,7 +94,6 @@ describe('ProtectedRoute security', () => {
       isLoading: false,
       login: vi.fn(),
       logout: vi.fn(),
-      getToken: vi.fn(),
     });
 
     render(

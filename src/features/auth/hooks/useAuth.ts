@@ -1,25 +1,15 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { UserRole } from '@/types';
 
-import { getAdminUsers, loginUser, registerUser } from '../api';
+import { loginUser, registerUser } from '../api';
 
 // ============ Query Keys ============
 
 export const authKeys = {
   all: ['auth'] as const,
   user: () => [...authKeys.all, 'user'] as const,
-  admins: () => [...authKeys.all, 'admins'] as const,
 };
-
-// ============ Query Hooks ============
-
-export function useAdminUsers() {
-  return useQuery({
-    queryKey: authKeys.admins(),
-    queryFn: getAdminUsers,
-  });
-}
 
 // ============ Mutation Hooks ============
 

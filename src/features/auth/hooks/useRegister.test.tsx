@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { registerUser } from '@/features/auth/api';
 import { useAuthContext } from '@/shared/context/AuthContext';
-import type { AuthSession } from '@/types';
+import type { AuthUserResponse } from '@/types';
 
 import useRegister from './useRegister';
 
@@ -51,7 +51,6 @@ describe('useRegister', () => {
       isLoading: false,
       login: loginMock,
       logout: vi.fn(),
-      getToken: vi.fn(),
     });
   });
 
@@ -84,7 +83,7 @@ describe('useRegister', () => {
   });
 
   it('ignores duplicate submits while request is already in flight', async () => {
-    const deferred = createDeferred<AuthSession>();
+    const deferred = createDeferred<AuthUserResponse>();
     mockedRegisterUser.mockReturnValueOnce(deferred.promise);
 
     const { result } = renderHook(() => useRegister());
@@ -111,16 +110,34 @@ describe('useRegister', () => {
 
     expect(result.current.loading).toBe(true);
     expect(mockedRegisterUser).toHaveBeenCalledTimes(1);
+    expect(mockedRegisterUser).toHaveBeenCalledWith(
+      'user@example.com',
+      'password123',
+      'User Name',
+      true,
+    );
 
     await act(async () => {
-      deferred.reject(new Error('Abort pending request'));
-      try {
-        await deferred.promise;
-      } catch {
-        // expected rejection for cleanup
-      }
+      deferred.resolve({
+        authenticated: true,
+        user: {
+          _id: 'u-1',
+          email: 'user@example.com',
+          name: 'User Name',
+          role: 'user',
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-01T00:00:00.000Z',
+        },
+      });
+      await deferred.promise;
     });
 
-    expect(result.current.loading).toBe(false);
+    expect(loginMock).toHaveBeenCalledWith({
+      id: 'u-1',
+      email: 'user@example.com',
+      name: 'User Name',
+      role: 'user',
+    });
+    expect(result.current.loading).toBe(true);
   });
 });

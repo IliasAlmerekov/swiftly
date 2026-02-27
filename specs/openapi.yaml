@@ -1,0 +1,403 @@
+openapi: 3.0.3
+info:
+  title: Swiflty Helpdesk Auth API Contract
+  version: 1.0.0
+  description: >-
+    Phase 1 contract-first auth specification. Security notes: credentialed
+    CORS is allowed only for allowlisted frontend origins; wildcard origin (*)
+    is forbidden with cookies.
+servers:
+  - url: /
+tags:
+  - name: auth
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: auth_session
+      description: Browser cookie session auth for protected endpoints.
+  parameters:
+    CsrfHeader:
+      name: X-CSRF-Token
+      in: header
+      required: true
+      schema:
+        type: string
+      description: Required for state-changing endpoints.
+  schemas:
+    AuthUser:
+      type: object
+      additionalProperties: false
+      required:
+        - _id
+        - email
+        - name
+        - role
+      properties:
+        _id:
+          type: string
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        role:
+          type: string
+          enum: [user, support1, admin]
+    Error:
+      type: object
+      additionalProperties: false
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Machine-readable error code.
+          example: AUTH_REQUIRED
+          enum:
+            - AUTH_REQUIRED
+            - AUTH_INVALID
+            - AUTH_FORBIDDEN
+            - CSRF_INVALID
+            - VALIDATION_ERROR
+            - RATE_LIMITED
+            - INTERNAL_ERROR
+        message:
+          type: string
+          example: Authentication is required.
+        details:
+          nullable: true
+          description: Optional structured details.
+    AuthenticatedResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - user
+        - authenticated
+      properties:
+        user:
+          $ref: '#/components/schemas/AuthUser'
+        authenticated:
+          type: boolean
+          enum: [true]
+    AuthenticatedResponseLegacy:
+      type: object
+      additionalProperties: false
+      required:
+        - user
+        - authenticated
+        - accessToken
+        - refreshToken
+      properties:
+        user:
+          $ref: '#/components/schemas/AuthUser'
+        authenticated:
+          type: boolean
+          enum: [true]
+        accessToken:
+          type: string
+          deprecated: true
+          description: Legacy migration field. Ignore on frontend.
+        refreshToken:
+          type: string
+          deprecated: true
+          description: Legacy migration field. Ignore on frontend.
+    AuthSuccessResponse:
+      oneOf:
+        - $ref: '#/components/schemas/AuthenticatedResponse'
+        - $ref: '#/components/schemas/AuthenticatedResponseLegacy'
+      description: >-
+        Temporary migration window allows legacy token fields. Legacy
+        token-body fields are removed after 2026-06-30.
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        keepLoggedIn:
+          type: boolean
+    RegisterRequest:
+      type: object
+      additionalProperties: false
+      required: [email, password, name]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        name:
+          type: string
+        keepLoggedIn:
+          type: boolean
+    LogoutRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        allSessions:
+          type: boolean
+    LogoutResponse:
+      type: object
+      additionalProperties: false
+      required: [success, message]
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+        message:
+          type: string
+    RefreshResponse:
+      type: object
+      additionalProperties: false
+      required: [authenticated]
+      properties:
+        authenticated:
+          type: boolean
+          enum: [true]
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+    CsrfBootstrapResponse:
+      type: object
+      additionalProperties: false
+      required: [csrfToken]
+      properties:
+        csrfToken:
+          type: string
+          description: Value to be sent in X-CSRF-Token header.
+paths:
+  /api/auth/csrf:
+    get:
+      tags: [auth]
+      summary: Bootstrap csrf token for unauthenticated flows.
+      responses:
+        '200':
+          description: Csrf token issued.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CsrfBootstrapResponse'
+  /api/auth/login:
+    post:
+      tags: [auth]
+      summary: Login and start cookie session.
+      parameters:
+        - $ref: '#/components/parameters/CsrfHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authenticated and cookie set.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSuccessResponse'
+        '400':
+          description: Validation failed.
+          content:
+            application/json:
+              examples:
+                validationError:
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Request validation failed.
+                      details:
+                        fields:
+                          - email
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Invalid credentials or invalid authentication state.
+          content:
+            application/json:
+              examples:
+                authInvalid:
+                  value:
+                    error:
+                      code: AUTH_INVALID
+                      message: Invalid authentication state.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden or csrf validation failure.
+          content:
+            application/json:
+              examples:
+                csrfInvalid:
+                  value:
+                    error:
+                      code: CSRF_INVALID
+                      message: CSRF token is missing or invalid.
+                forbidden:
+                  value:
+                    error:
+                      code: AUTH_FORBIDDEN
+                      message: Access is forbidden.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/auth/register:
+    post:
+      tags: [auth]
+      summary: Register and start cookie session.
+      description: Requires credentialed CORS with allowlisted frontend origin.
+      parameters:
+        - $ref: '#/components/parameters/CsrfHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User created and authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSuccessResponse'
+        '400':
+          description: Validation failed.
+          content:
+            application/json:
+              examples:
+                validationError:
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Request validation failed.
+                      details:
+                        fields:
+                          - password
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication error.
+          content:
+            application/json:
+              examples:
+                authInvalid:
+                  value:
+                    error:
+                      code: AUTH_INVALID
+                      message: Invalid authentication state.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden or csrf validation failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/auth/me:
+    get:
+      tags: [auth]
+      summary: Return current authenticated user.
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Current session user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticatedResponse'
+        '401':
+          description: Not authenticated.
+          content:
+            application/json:
+              examples:
+                authRequired:
+                  value:
+                    error:
+                      code: AUTH_REQUIRED
+                      message: Authentication is required.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden.
+          content:
+            application/json:
+              examples:
+                forbidden:
+                  value:
+                    error:
+                      code: AUTH_FORBIDDEN
+                      message: Access is forbidden.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/auth/refresh:
+    post:
+      tags: [auth]
+      summary: Rotate cookie session.
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfHeader'
+      responses:
+        '200':
+          description: Session refreshed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshResponse'
+        '401':
+          description: Not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden or csrf validation failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/auth/logout:
+    post:
+      tags: [auth]
+      summary: Logout from current session or all sessions.
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CsrfHeader'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+      responses:
+        '200':
+          description: Logout successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutResponse'
+        '401':
+          description: Not authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden or csrf validation failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
