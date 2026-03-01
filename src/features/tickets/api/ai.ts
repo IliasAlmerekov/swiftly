@@ -1,4 +1,9 @@
-import type { ApiResponse, AIResponse, ChatRequest, SolutionSearchResult } from '@/types';
+import {
+  type ApiResponse,
+  type AIResponse,
+  type ChatRequest,
+  type SolutionSearchResult,
+} from '@/types';
 import { apiClient } from '@/shared/api';
 import {
   aiResponseSchema,
@@ -8,13 +13,14 @@ import {
   parseApiPayload,
   solutionSearchResultSchema,
 } from '@/shared/api/contracts';
+import { postWithCsrf } from '@/shared/api/csrf';
 import { z } from 'zod';
 
 // ============ Chat ============
 
 export const sendChatMessage = async (data: ChatRequest): Promise<ApiResponse<AIResponse>> => {
   try {
-    const response = await apiClient.post<unknown>('/ai/chat', data);
+    const response = await postWithCsrf('/ai/chat', data);
     return parseApiPayload(apiResponseSchema(aiResponseSchema), response, { endpoint: '/ai/chat' });
   } catch (error) {
     throw normalizeApiModuleError(error, 'Failed to send chat message');
@@ -50,7 +56,7 @@ export const getTicketSuggestions = async (ticketId: string): Promise<ApiRespons
 export const generateSolution = async (ticketId: string): Promise<ApiResponse<AIResponse>> => {
   const endpoint = `/ai/tickets/${ticketId}/solution`;
   try {
-    const response = await apiClient.post<unknown>(endpoint);
+    const response = await postWithCsrf(endpoint);
     return parseApiPayload(apiResponseSchema(aiResponseSchema), response, { endpoint });
   } catch (error) {
     throw normalizeApiModuleError(error, 'Failed to generate AI solution');
@@ -65,7 +71,7 @@ export const submitAIFeedback = async (
   feedback?: string,
 ): Promise<ApiResponse<{ message: string }>> => {
   try {
-    const response = await apiClient.post<unknown>('/ai/feedback', {
+    const response = await postWithCsrf('/ai/feedback', {
       sessionId,
       isHelpful,
       feedback,
