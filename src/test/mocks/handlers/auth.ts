@@ -4,6 +4,11 @@ import { db, createMockUser } from '../db';
 const API_URL = '/api';
 
 export const authHandlers = [
+  // GET /api/auth/csrf
+  http.get(`${API_URL}/auth/csrf`, () => {
+    return HttpResponse.json({ csrfToken: 'test-csrf-token' });
+  }),
+
   // POST /api/auth/login
   http.post(`${API_URL}/auth/login`, async ({ request }) => {
     const body = (await request.json()) as { email: string; password: string };

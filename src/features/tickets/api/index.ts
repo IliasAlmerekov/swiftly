@@ -6,6 +6,7 @@ import type {
   UpdateTicketFormData,
 } from '@/types';
 import { apiClient } from '@/shared/api';
+import { postWithCsrf } from '@/shared/api/csrf';
 import {
   normalizeApiModuleError,
   normalizeCursorPageContract,
@@ -191,9 +192,7 @@ export const updateTicket = async (
 export const addComment = async (ticketId: string, content: string): Promise<Ticket> => {
   try {
     const endpoint = `/tickets/${ticketId}/comments`;
-    const response = await apiClient.post<unknown>(endpoint, {
-      content,
-    });
+    const response = await postWithCsrf(endpoint, { content });
     return parseEntityOrApiResponse(response, ticketSchema, { endpoint });
   } catch (error) {
     throw normalizeApiModuleError(error, 'Failed to add comment');
