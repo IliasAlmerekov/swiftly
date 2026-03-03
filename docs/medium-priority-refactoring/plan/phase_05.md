@@ -17,24 +17,28 @@ Replace the inline staff role check on line 76 of `ticketColumns.tsx` with `STAF
 ### `src/features/tickets/config/ticketColumns.tsx`
 
 **Current state (verified lines 1–85):**
+
 - Line 1: `import { Badge } from '@/shared/components/ui/badge';`
 - Line 3: `import { UserCell } from '../components/UserCell';`
-- Line 38: `const isClickable = role === 'admin' && !!ownerId;`  ← **admin-only, DO NOT TOUCH**
-- Line 76: `const isClickable = (role === 'admin' || role === 'support1') && !!assigneeId;`  ← **target**
+- Line 38: `const isClickable = role === 'admin' && !!ownerId;` ← **admin-only, DO NOT TOUCH**
+- Line 76: `const isClickable = (role === 'admin' || role === 'support1') && !!assigneeId;` ← **target**
 
 **Changes:**
 
 1. **ADD import** at the top of the file:
+
    ```ts
    import { STAFF_ROLES } from '@/shared/security/access-matrix';
    ```
 
    **Verify first:** confirm `STAFF_ROLES` is exported from `access-matrix.ts`. The research doc confirms it is defined there as `const STAFF_ROLES: UserRole[] = ['support1', 'admin']`. Check whether it has an explicit `export` keyword — if not, it may need to be exported first. Run:
+
    ```
    grep -n "STAFF_ROLES" src/shared/security/access-matrix.ts
    ```
 
 2. **REPLACE** line 76 only:
+
    ```ts
    // Before:
    const isClickable = (role === 'admin' || role === 'support1') && !!assigneeId;
@@ -44,6 +48,7 @@ Replace the inline staff role check on line 76 of `ticketColumns.tsx` with `STAF
    ```
 
 **DO NOT CHANGE:**
+
 - Line 38: `const isClickable = role === 'admin' && !!ownerId;` — this is an **admin-only** check, not a staff check. `STAFF_ROLES.includes` would incorrectly include `support1` for the owner cell. Leave as-is.
 - All other column definitions
 - The `role` parameter in render functions — unchanged
@@ -54,12 +59,12 @@ Replace the inline staff role check on line 76 of `ticketColumns.tsx` with `STAF
 
 No new test file needed for this single-line change. Verify:
 
-| Verification | Command | Expected |
-|---|---|---|
-| Line 76 no longer contains inline check | `grep -n "role === 'support1'" src/features/tickets/config/ticketColumns.tsx` | Zero results |
-| Line 38 still has admin-only check | `grep -n "role === 'admin'" src/features/tickets/config/ticketColumns.tsx` | Exactly 1 result (line 38) |
-| STAFF_ROLES import resolves | `npm run type-check` | Zero TypeScript errors |
-| Tickets page still renders | `npm run test:run` | No regressions |
+| Verification                            | Command                                                                       | Expected                   |
+| --------------------------------------- | ----------------------------------------------------------------------------- | -------------------------- |
+| Line 76 no longer contains inline check | `grep -n "role === 'support1'" src/features/tickets/config/ticketColumns.tsx` | Zero results               |
+| Line 38 still has admin-only check      | `grep -n "role === 'admin'" src/features/tickets/config/ticketColumns.tsx`    | Exactly 1 result (line 38) |
+| STAFF_ROLES import resolves             | `npm run type-check`                                                          | Zero TypeScript errors     |
+| Tickets page still renders              | `npm run test:run`                                                            | No regressions             |
 
 ---
 

@@ -27,6 +27,7 @@ Backend API (/api/auth/profile)
 ```
 
 **ticketColumns.tsx — special path (render function, no hook):**
+
 ```
 ticketColumns render fn receives: role (parameter)
   └─▶ line 38: role === 'admin' && !!ownerId          (admin-only check — UNCHANGED)
@@ -35,6 +36,7 @@ ticketColumns render fn receives: role (parameter)
 ```
 
 **TicketDetailPage — special source:**
+
 ```
 TicketDetailPage uses useAuthContext() (not useAuth())
   └─▶ currentUser = useAuthContext().user
@@ -61,6 +63,7 @@ TanStack Query hook (e.g. useTicket, useUser)
 ```
 
 **Shared component props (resolved API):**
+
 ```
 LoadingState:
   message?: string   ← optional; component uses its own default when absent
@@ -71,6 +74,7 @@ ErrorState:
 ```
 
 **Migration:**
+
 - `UserProfile.tsx`: `onClose` passed → close button visible (behavior preserved)
 - `TicketDetailPage.tsx`: `onClose` not passed → no close button (matches current inline behavior)
 
@@ -79,6 +83,7 @@ ErrorState:
 ## 3. useDashboardData Flow (unchanged except import path)
 
 **Before:**
+
 ```
 dashboard-page-contract.tsx
   import { useDashboardData } from '@/app/hooks/useDashboardData'
@@ -87,6 +92,7 @@ dashboard-page-contract.tsx
 ```
 
 **After:**
+
 ```
 dashboard-page-contract.tsx
   import { useDashboardData } from '@/features/dashboard'   ← updated
@@ -95,6 +101,7 @@ dashboard-page-contract.tsx
 ```
 
 **Internal data flow of useDashboardData (unchanged):**
+
 ```
 useDashboardData()
   ├─▶ useQuery(['dashboard', 'user-tickets'])      → getTickets({ scope: 'mine' })
@@ -116,9 +123,9 @@ All `@/features/tickets` and `@/features/users` imports must use feature index f
 
 ## Error Paths
 
-| Scenario | Current behavior | After refactoring |
-|---|---|---|
-| `role` is `undefined` during auth loading | inline checks may return false | `useIsStaff()` returns `isRoleReady: false`, `isStaff: false` — same result |
-| API error on dashboard queries | TanStack Query sets `isError: true` | unchanged — `useDashboardData` behavior identical |
-| LoadingState rendered without `message` | N/A (tickets inline had static text) | shared `LoadingState` renders its own default message |
-| ErrorState rendered without `onClose` | N/A (tickets inline had no close button) | shared `ErrorState` renders no close button when `onClose` absent |
+| Scenario                                  | Current behavior                         | After refactoring                                                           |
+| ----------------------------------------- | ---------------------------------------- | --------------------------------------------------------------------------- |
+| `role` is `undefined` during auth loading | inline checks may return false           | `useIsStaff()` returns `isRoleReady: false`, `isStaff: false` — same result |
+| API error on dashboard queries            | TanStack Query sets `isError: true`      | unchanged — `useDashboardData` behavior identical                           |
+| LoadingState rendered without `message`   | N/A (tickets inline had static text)     | shared `LoadingState` renders its own default message                       |
+| ErrorState rendered without `onClose`     | N/A (tickets inline had no close button) | shared `ErrorState` renders no close button when `onClose` absent           |

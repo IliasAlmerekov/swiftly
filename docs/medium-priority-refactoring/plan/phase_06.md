@@ -24,14 +24,15 @@ All imports within the hook body must use feature index paths (CLAUDE.md rule 7:
 
 Verify each import in the current `src/app/hooks/useDashboardData.ts`:
 
-| Current import | Required path after move | Check |
-|---|---|---|
-| `@/features/tickets` functions (`getAIStats`, `getAllTickets`, etc.) | Must come from `@/features/tickets` (index) — verify these are exported in `src/features/tickets/index.ts` |
-| `@/features/users` functions (`activityInterval`, `getSupportUsers`, `setUserStatusOnline`) | Must come from `@/features/users` (index) — verify these are exported in `src/features/users/index.ts` |
-| `@/features/dashboard/types/dashboard` types | Change to relative `../types/dashboard` since the file is now inside the same feature |
-| `@/types` (Ticket type) | Unchanged — shared types |
+| Current import                                                                              | Required path after move                                                                                   | Check |
+| ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ----- |
+| `@/features/tickets` functions (`getAIStats`, `getAllTickets`, etc.)                        | Must come from `@/features/tickets` (index) — verify these are exported in `src/features/tickets/index.ts` |
+| `@/features/users` functions (`activityInterval`, `getSupportUsers`, `setUserStatusOnline`) | Must come from `@/features/users` (index) — verify these are exported in `src/features/users/index.ts`     |
+| `@/features/dashboard/types/dashboard` types                                                | Change to relative `../types/dashboard` since the file is now inside the same feature                      |
+| `@/types` (Ticket type)                                                                     | Unchanged — shared types                                                                                   |
 
 **Pre-check (run before creating the file):**
+
 ```bash
 grep -n "^export" src/features/tickets/index.ts | grep -E "getAIStats|getAllTickets|getTicketStatsOfMonth|getTickets|getUserTicketStats"
 grep -n "^export" src/features/users/index.ts | grep -E "activityInterval|getSupportUsers|setUserStatusOnline"
@@ -46,18 +47,21 @@ If any of these are NOT exported through the feature index, they must be added t
 ### `src/features/dashboard/index.ts`
 
 **Current state (verified):**
+
 ```ts
 // Hooks
 export { useGreeting } from './hooks/useGreeting';
 ```
 
 **Changes:**
+
 1. **ADD** after the `useGreeting` export line:
    ```ts
    export { useDashboardData } from './hooks/useDashboardData';
    ```
 
 **DO NOT CHANGE:**
+
 - All existing exports (Analytics, components, useGreeting, types)
 
 ---
@@ -65,12 +69,15 @@ export { useGreeting } from './hooks/useGreeting';
 ### `src/app/pages/dashboard-page-contract.tsx`
 
 **Current state (verified line 8):**
+
 ```ts
 import { useDashboardData } from '@/app/hooks/useDashboardData';
 ```
 
 **Changes:**
+
 1. **REPLACE** line 8:
+
    ```ts
    // Before:
    import { useDashboardData } from '@/app/hooks/useDashboardData';
@@ -80,6 +87,7 @@ import { useDashboardData } from '@/app/hooks/useDashboardData';
    ```
 
 **DO NOT CHANGE:**
+
 - The `DashboardPageContract` interface
 - The `defaultDashboardPageContract` object
 - The `DashboardPageContractProvider` component
@@ -90,6 +98,7 @@ import { useDashboardData } from '@/app/hooks/useDashboardData';
 ### `src/app/pages/DashboardPage.test.tsx`
 
 **Current state (verified lines 6 and 13–15):**
+
 ```ts
 import { useDashboardData } from '@/app/hooks/useDashboardData';
 
@@ -101,6 +110,7 @@ vi.mock('@/app/hooks/useDashboardData', () => ({
 **Changes:**
 
 1. **REPLACE** the import on line 6:
+
    ```ts
    // Before:
    import { useDashboardData } from '@/app/hooks/useDashboardData';
@@ -110,6 +120,7 @@ vi.mock('@/app/hooks/useDashboardData', () => ({
    ```
 
 2. **REPLACE** the `vi.mock` call on lines 13–15:
+
    ```ts
    // Before:
    vi.mock('@/app/hooks/useDashboardData', () => ({
@@ -118,7 +129,8 @@ vi.mock('@/app/hooks/useDashboardData', () => ({
 
    // After:
    vi.mock('@/features/dashboard', async () => {
-     const actual = await vi.importActual<typeof import('@/features/dashboard')>('@/features/dashboard');
+     const actual =
+       await vi.importActual<typeof import('@/features/dashboard')>('@/features/dashboard');
      return {
        ...actual,
        useDashboardData: vi.fn(),
@@ -131,6 +143,7 @@ vi.mock('@/app/hooks/useDashboardData', () => ({
    **Merge strategy:** Find the existing `vi.mock('@/features/dashboard', async () => { ... })` block in the test file and add `useDashboardData: vi.fn()` to its returned object alongside the existing mock entries.
 
 **DO NOT CHANGE:**
+
 - Any test case logic, `beforeEach`, `describe`, `it` blocks
 - Mock return values for `useDashboardData` set in `beforeEach`
 
@@ -141,6 +154,7 @@ vi.mock('@/app/hooks/useDashboardData', () => ({
 ### `src/app/hooks/useDashboardData.ts`
 
 **Action:** Delete after confirming:
+
 1. `src/features/dashboard/hooks/useDashboardData.ts` exists and TypeScript compiles without errors
 2. `dashboard-page-contract.tsx` import updated
 3. `DashboardPage.test.tsx` mock updated
@@ -152,14 +166,14 @@ vi.mock('@/app/hooks/useDashboardData', () => ({
 
 No new test files. All coverage comes from the existing `DashboardPage.test.tsx`:
 
-| Verification | Command | Expected |
-|---|---|---|
-| Hook resolves from new path | `npm run type-check` | Zero errors |
-| Dashboard contract resolves import | `npm run type-check` | Zero errors |
-| Test mock resolves | `npx vitest run src/app/pages/DashboardPage.test.tsx` | All tests pass |
-| No import of old path remains | `grep -rn "app/hooks/useDashboardData" src/` | Zero results |
-| Full suite passes | `npm run test:run` | No regressions |
-| Build passes | `npm run build` | No errors |
+| Verification                       | Command                                               | Expected       |
+| ---------------------------------- | ----------------------------------------------------- | -------------- |
+| Hook resolves from new path        | `npm run type-check`                                  | Zero errors    |
+| Dashboard contract resolves import | `npm run type-check`                                  | Zero errors    |
+| Test mock resolves                 | `npx vitest run src/app/pages/DashboardPage.test.tsx` | All tests pass |
+| No import of old path remains      | `grep -rn "app/hooks/useDashboardData" src/`          | Zero results   |
+| Full suite passes                  | `npm run test:run`                                    | No regressions |
+| Build passes                       | `npm run build`                                       | No errors      |
 
 ---
 

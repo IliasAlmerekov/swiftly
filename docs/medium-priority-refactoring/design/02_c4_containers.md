@@ -44,9 +44,9 @@
 
 ## Container Inventory
 
-| Container | Status | Change |
-|---|---|---|
+| Container                 | Status   | Change                                              |
+| ------------------------- | -------- | --------------------------------------------------- |
 | React SPA (Vite/React 19) | Existing | Internal files modified — no container-level change |
-| Helpdesk Backend | Existing | **Not touched** |
-| MSW (test env) | Existing | No new handlers needed (no new API calls) |
-| Redis / BullMQ / S3 | N/A | Not involved |
+| Helpdesk Backend          | Existing | **Not touched**                                     |
+| MSW (test env)            | Existing | No new handlers needed (no new API calls)           |
+| Redis / BullMQ / S3       | N/A      | Not involved                                        |

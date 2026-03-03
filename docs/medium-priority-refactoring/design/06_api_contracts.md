@@ -18,6 +18,7 @@ This refactoring is **purely internal to the React SPA**.
 All existing API contracts in `src/shared/api/contracts.ts` remain untouched.
 
 All TanStack Query keys used by `useDashboardData` remain unchanged:
+
 - `['dashboard', 'user-tickets']`
 - `['dashboard', 'all-tickets']`
 - `['dashboard', 'tickets-today']`

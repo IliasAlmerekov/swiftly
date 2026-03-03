@@ -18,6 +18,7 @@ Perform all changes to `TicketDetailPage.tsx` in a single pass: remove the two i
 
 **Confirmed at:** research doc, lines 1–70 read in full
 **Current state (verified):**
+
 - Lines 23–28: inline `LoadingState` component defined (no props, static text)
 - Lines 30–35: inline `ErrorState` component defined (`{ message: string }`, no onClose)
 - Line 4: `import { useAuthContext } from '@/shared/context/AuthContext'`
@@ -27,28 +28,33 @@ Perform all changes to `TicketDetailPage.tsx` in a single pass: remove the two i
 **Changes:**
 
 1. **REMOVE** the inline `LoadingState` component (lines 23–28):
+
    ```
    // ============ Loading Component ============
    const LoadingState = () => (...)
    ```
 
 2. **REMOVE** the inline `ErrorState` component (lines 30–35):
+
    ```
    // ============ Error Component ============
    const ErrorState = ({ message }: { message: string }) => (...)
    ```
 
 3. **ADD import** at the top of the file:
+
    ```
    import { LoadingState, ErrorState } from '@/shared/components';
    ```
 
 4. **REMOVE** line 55:
+
    ```
    const isStaff = currentUser?.role === 'admin' || currentUser?.role === 'support1';
    ```
 
 5. **ADD** after the `useAuthContext()` block (before the queries section):
+
    ```
    const { isStaff } = useIsStaff();
    ```
@@ -59,6 +65,7 @@ Perform all changes to `TicketDetailPage.tsx` in a single pass: remove the two i
    ```
 
 **DO NOT CHANGE:**
+
 - `import { useAuthContext } from '@/shared/context/AuthContext'` — still needed for `currentUser` object (used for form defaults, admin users query, etc.)
 - `const currentUser = user ? { _id, email, role, name } : null` — still needed
 - All usages of `isStaff` as a variable after line 55 (they remain valid, value now comes from hook)
@@ -71,14 +78,14 @@ Perform all changes to `TicketDetailPage.tsx` in a single pass: remove the two i
 
 No new test file needed. Verify via type-check and existing tests that:
 
-| Verification | Method | Expected |
-|---|---|---|
-| TypeScript resolves `LoadingState` from shared | `npm run type-check` | No error on import |
-| TypeScript resolves `ErrorState` from shared | `npm run type-check` | No error on import |
-| `useIsStaff` import resolves | `npm run type-check` | No error on import |
-| `isStaff` usage sites after removal still valid | `npm run type-check` | No type errors |
-| No stale inline component defs remain | Manual grep: `grep -n "const LoadingState" TicketDetailPage.tsx` | Zero results |
-| Full test suite passes | `npm run test:run` | No regressions |
+| Verification                                    | Method                                                           | Expected           |
+| ----------------------------------------------- | ---------------------------------------------------------------- | ------------------ |
+| TypeScript resolves `LoadingState` from shared  | `npm run type-check`                                             | No error on import |
+| TypeScript resolves `ErrorState` from shared    | `npm run type-check`                                             | No error on import |
+| `useIsStaff` import resolves                    | `npm run type-check`                                             | No error on import |
+| `isStaff` usage sites after removal still valid | `npm run type-check`                                             | No type errors     |
+| No stale inline component defs remain           | Manual grep: `grep -n "const LoadingState" TicketDetailPage.tsx` | Zero results       |
+| Full test suite passes                          | `npm run test:run`                                               | No regressions     |
 
 ---
 

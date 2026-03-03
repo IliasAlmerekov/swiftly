@@ -14,14 +14,14 @@ This plan consolidates three groups of duplicated code in the React SPA: (1) fiv
 
 ## Phase Overview
 
-| # | Phase Name | Layer | New Files | Modified Files | Deleted Files | Complexity |
-|---|---|---|---|---|---|---|
-| 1 | Shared LoadingState & ErrorState | Presentation | 3 | 0 | 0 | Low |
-| 2 | TicketDetailPage full migration | Presentation | 0 | 1 | 0 | Low |
-| 3 | isStaff consolidation — remaining pages | Presentation | 0 | 4 | 0 | Low |
-| 4 | users/components cleanup | Presentation + Wiring | 0 | 2 | 2 | Low |
-| 5 | ticketColumns STAFF_ROLES | Presentation | 0 | 1 | 0 | Low |
-| 6 | Move useDashboardData | Application + Wiring | 1 | 3 | 1 | Low |
+| #   | Phase Name                              | Layer                 | New Files | Modified Files | Deleted Files | Complexity |
+| --- | --------------------------------------- | --------------------- | --------- | -------------- | ------------- | ---------- |
+| 1   | Shared LoadingState & ErrorState        | Presentation          | 3         | 0              | 0             | Low        |
+| 2   | TicketDetailPage full migration         | Presentation          | 0         | 1              | 0             | Low        |
+| 3   | isStaff consolidation — remaining pages | Presentation          | 0         | 4              | 0             | Low        |
+| 4   | users/components cleanup                | Presentation + Wiring | 0         | 2              | 2             | Low        |
+| 5   | ticketColumns STAFF_ROLES               | Presentation          | 0         | 1              | 0             | Low        |
+| 6   | Move useDashboardData                   | Application + Wiring  | 1         | 3              | 1             | Low        |
 
 ---
 

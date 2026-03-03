@@ -18,11 +18,11 @@ This refactoring introduces two new shared components and moves one hook. All ex
 **Render wrapper:** `render()` from `@/test/test-utils`
 **MSW handlers:** None needed
 
-| Scenario | Input | Expected |
-|---|---|---|
-| Renders with explicit message | `<LoadingState message="Loading tickets..." />` | text "Loading tickets..." visible |
-| Renders with default message | `<LoadingState />` (no props) | default message text visible (not empty) |
-| Renders loading spinner/indicator | `<LoadingState />` | spinner element present in DOM |
+| Scenario                          | Input                                           | Expected                                 |
+| --------------------------------- | ----------------------------------------------- | ---------------------------------------- |
+| Renders with explicit message     | `<LoadingState message="Loading tickets..." />` | text "Loading tickets..." visible        |
+| Renders with default message      | `<LoadingState />` (no props)                   | default message text visible (not empty) |
+| Renders loading spinner/indicator | `<LoadingState />`                              | spinner element present in DOM           |
 
 ### `src/shared/components/ErrorState.tsx`
 
@@ -30,12 +30,12 @@ This refactoring introduces two new shared components and moves one hook. All ex
 **Render wrapper:** `render()` from `@/test/test-utils`
 **MSW handlers:** None needed
 
-| Scenario | Input | Expected |
-|---|---|---|
-| Renders error message | `<ErrorState message="Something went wrong" />` | text "Something went wrong" visible |
-| Renders close button when onClose provided | `<ErrorState message="err" onClose={fn} />` | close button visible in DOM |
-| Close button calls onClose | `<ErrorState message="err" onClose={mockFn} />` + user clicks close | `mockFn` called once |
-| No close button when onClose absent | `<ErrorState message="err" />` | no close button in DOM |
+| Scenario                                   | Input                                                               | Expected                            |
+| ------------------------------------------ | ------------------------------------------------------------------- | ----------------------------------- |
+| Renders error message                      | `<ErrorState message="Something went wrong" />`                     | text "Something went wrong" visible |
+| Renders close button when onClose provided | `<ErrorState message="err" onClose={fn} />`                         | close button visible in DOM         |
+| Close button calls onClose                 | `<ErrorState message="err" onClose={mockFn} />` + user clicks close | `mockFn` called once                |
+| No close button when onClose absent        | `<ErrorState message="err" />`                                      | no close button in DOM              |
 
 ---
 
@@ -45,13 +45,13 @@ All existing page tests that cover staff/non-staff rendering must continue to pa
 
 **Strategy:** Mock `useAuth()` (or `useAuthContext()`) to return specific role values. `useIsStaff()` is not mocked — it is exercised through the real hook.
 
-| Test file | Scenario | Mock | Expected |
-|---|---|---|---|
-| `DashboardPage.test.tsx` | staff user sees admin tab | `useAuth().role = 'admin'` | admin dashboard tab rendered |
-| `DashboardPage.test.tsx` | non-staff user sees user tab only | `useAuth().role = 'customer'` | no admin-specific content |
-| `CreateTicket.test.tsx` (if exists) | staff sees assignee field | `useAuth().role = 'support1'` | assignee field visible |
-| `Tickets.test.tsx` (if exists) | staff sees all-tickets filter | `useAuth().role = 'admin'` | all-tickets tab visible |
-| `TicketDetailPage.test.tsx` (if exists) | staff sees workflow card | `useAuthContext().user.role = 'admin'` | workflow card rendered |
+| Test file                               | Scenario                          | Mock                                   | Expected                     |
+| --------------------------------------- | --------------------------------- | -------------------------------------- | ---------------------------- |
+| `DashboardPage.test.tsx`                | staff user sees admin tab         | `useAuth().role = 'admin'`             | admin dashboard tab rendered |
+| `DashboardPage.test.tsx`                | non-staff user sees user tab only | `useAuth().role = 'customer'`          | no admin-specific content    |
+| `CreateTicket.test.tsx` (if exists)     | staff sees assignee field         | `useAuth().role = 'support1'`          | assignee field visible       |
+| `Tickets.test.tsx` (if exists)          | staff sees all-tickets filter     | `useAuth().role = 'admin'`             | all-tickets tab visible      |
+| `TicketDetailPage.test.tsx` (if exists) | staff sees workflow card          | `useAuthContext().user.role = 'admin'` | workflow card rendered       |
 
 ---
 
@@ -59,8 +59,8 @@ All existing page tests that cover staff/non-staff rendering must continue to pa
 
 Existing `DashboardPage.test.tsx` mocks `useDashboardData`. After the move, only the mock path changes.
 
-| File | Change | Expected behavior |
-|---|---|---|
+| File                     | Change                                                                                  | Expected behavior                          |
+| ------------------------ | --------------------------------------------------------------------------------------- | ------------------------------------------ |
 | `DashboardPage.test.tsx` | `vi.mock('@/app/hooks/useDashboardData', ...)` → `vi.mock('@/features/dashboard', ...)` | All existing test scenarios pass unchanged |
 
 **No new test logic** is required for `useDashboardData` — its behavior is identical post-move.
@@ -69,12 +69,12 @@ Existing `DashboardPage.test.tsx` mocks `useDashboardData`. After the move, only
 
 ## 4. Regression Tests — LoadingState/ErrorState Migration
 
-| Test file | Scenario | Expected |
-|---|---|---|
-| `UserProfile.test.tsx` (if exists) | loading state shown | shared `LoadingState` renders (import updated) |
-| `UserProfile.test.tsx` (if exists) | error state with close | shared `ErrorState` with close button renders |
-| `TicketDetailPage.test.tsx` (if exists) | loading state shown | shared `LoadingState` renders (was inline) |
-| `TicketDetailPage.test.tsx` (if exists) | error state (no close) | shared `ErrorState` without close button |
+| Test file                               | Scenario               | Expected                                       |
+| --------------------------------------- | ---------------------- | ---------------------------------------------- |
+| `UserProfile.test.tsx` (if exists)      | loading state shown    | shared `LoadingState` renders (import updated) |
+| `UserProfile.test.tsx` (if exists)      | error state with close | shared `ErrorState` with close button renders  |
+| `TicketDetailPage.test.tsx` (if exists) | loading state shown    | shared `LoadingState` renders (was inline)     |
+| `TicketDetailPage.test.tsx` (if exists) | error state (no close) | shared `ErrorState` without close button       |
 
 ---
 

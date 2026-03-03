@@ -2,6 +2,7 @@
 
 **Date:** 2026-03-03
 **Ticket:**
+
 > - Duplication of `isStaff` checks in `DashboardPage.tsx`, `CreateTicket.tsx`, `Tickets.tsx`, `ticketColumns.tsx` — fix: use `useIsStaff()` everywhere
 > - Duplication of `LoadingState`/`ErrorState` in `TicketDetailPage.tsx` and `users/hooks/components/` — fix: extract into `shared/components/`
 > - `useDashboardData` lives in `app/hooks/` instead of `features/dashboard/` — fix: move it
@@ -21,15 +22,17 @@ All three problems exist simultaneously: `useIsStaff()` is defined but unused (5
 **File:** `src/shared/hooks/useIsStaff.ts`
 **Exported function:** `useIsStaff()`
 **Return type:**
+
 ```ts
 {
-  isStaff: boolean;      // role === 'admin' || role === 'support1'
-  isAdmin: boolean;      // role === 'admin'
-  isSupport: boolean;    // role === 'support1'
-  isRoleReady: boolean;  // role !== undefined && role !== null
+  isStaff: boolean; // role === 'admin' || role === 'support1'
+  isAdmin: boolean; // role === 'admin'
+  isSupport: boolean; // role === 'support1'
+  isRoleReady: boolean; // role !== undefined && role !== null
   role: UserRole;
 }
 ```
+
 **Dependencies:** `useAuth()` → reads `role` field
 **Current consumers:** ZERO — hook is defined but not imported anywhere
 
@@ -43,11 +46,13 @@ All three problems exist simultaneously: `useIsStaff()` is defined but unused (5
 
 **File:** `src/features/users/components/LoadingState.tsx`
 **Props:**
+
 ```ts
 interface LoadingStateProps {
-  message?: string;  // defaults to 'Loading profile...'
+  message?: string; // defaults to 'Loading profile...'
 }
 ```
+
 **JSX structure:** Full-screen flex container (`min-h-screen`), animated spinning border circle (`border-primary`), message text
 **Exported via:** `src/features/users/components/index.ts` line 3
 
@@ -62,12 +67,14 @@ interface LoadingStateProps {
 
 **File:** `src/features/users/components/ErrorState.tsx`
 **Props:**
+
 ```ts
 interface ErrorStateProps {
   message: string;
-  onClose: () => void;  // required callback
+  onClose: () => void; // required callback
 }
 ```
+
 **JSX structure:** `bg-destructive` banner, `text-destructive-foreground`, underlined close button with `onClick`
 **Exported via:** `src/features/users/components/index.ts` line 4
 
@@ -83,6 +90,7 @@ interface ErrorStateProps {
 **File:** `src/app/hooks/useDashboardData.ts`
 **Exported function:** `useDashboardData()`
 **Return value (18 fields):**
+
 ```ts
 {
   adminSummary: DashboardTicketSummary;
@@ -105,6 +113,7 @@ interface ErrorStateProps {
   isUserMetricsError: boolean;
 }
 ```
+
 **Imports from `@/features/tickets`:** `getAIStats`, `getAllTickets`, `getTicketStatsOfMonth`, `getTickets`, `getUserTicketStats`
 **Imports from `@/features/users`:** `activityInterval`, `getSupportUsers`, `setUserStatusOnline`
 **Imports from `@/features/dashboard/types/dashboard`:** `DashboardAiRequestStat`, `DashboardMonthlyStat`, `DashboardSupportStatus`, `DashboardTicketSummary`
@@ -196,6 +205,7 @@ src/
 ### Contract / DI pattern for DashboardPage
 
 **File:** `src/app/pages/dashboard-page-contract.tsx`
+
 - Defines `DashboardPageContract` interface with `useDashboardData` field
 - `DashboardPageContractProvider` context provides real implementation
 - `DashboardPage` reads from contract via `useDashboardPageContract()`
@@ -207,13 +217,13 @@ src/
 
 ### isStaff inline computations (5 pages/components)
 
-| File | Line | Pattern |
-|---|---|---|
-| `src/app/pages/DashboardPage.tsx` | 31 | `const isStaff = role === 'admin' \|\| role === 'support1';` |
-| `src/features/tickets/pages/CreateTicket.tsx` | 20–22 | Same + `isRoleReady` |
-| `src/features/tickets/pages/Tickets.tsx` | 120 | `const isStaff = role === 'admin' \|\| role === 'support1';` |
-| `src/features/tickets/pages/TicketDetailPage.tsx` | 55 | `currentUser?.role === 'admin' \|\| currentUser?.role === 'support1'` |
-| `src/features/users/components/PersonalInformationSection.tsx` | 56 | `currentUser?.role === 'admin' \|\| currentUser?.role === 'support1'` |
+| File                                                           | Line  | Pattern                                                               |
+| -------------------------------------------------------------- | ----- | --------------------------------------------------------------------- |
+| `src/app/pages/DashboardPage.tsx`                              | 31    | `const isStaff = role === 'admin' \|\| role === 'support1';`          |
+| `src/features/tickets/pages/CreateTicket.tsx`                  | 20–22 | Same + `isRoleReady`                                                  |
+| `src/features/tickets/pages/Tickets.tsx`                       | 120   | `const isStaff = role === 'admin' \|\| role === 'support1';`          |
+| `src/features/tickets/pages/TicketDetailPage.tsx`              | 55    | `currentUser?.role === 'admin' \|\| currentUser?.role === 'support1'` |
+| `src/features/users/components/PersonalInformationSection.tsx` | 56    | `currentUser?.role === 'admin' \|\| currentUser?.role === 'support1'` |
 
 ### TicketDetailPage.tsx — isStaff source
 
@@ -223,17 +233,18 @@ src/
 ### ticketColumns.tsx — inline role checks (not isStaff pattern)
 
 **File:** `src/features/tickets/config/ticketColumns.tsx`
+
 - Line 38: `const isClickable = role === 'admin' && !!ownerId;` (owner cell — admin only)
 - Line 76: `const isClickable = (role === 'admin' || role === 'support1') && !!assigneeId;` (assignee cell — full staff)
 - `role` arrives as a render function parameter, not via hook
 
 ### useDashboardData consumers
 
-| File | Consumption method |
-|---|---|
+| File                                        | Consumption method                                                               |
+| ------------------------------------------- | -------------------------------------------------------------------------------- |
 | `src/app/pages/dashboard-page-contract.tsx` | Direct import: `import { useDashboardData } from '@/app/hooks/useDashboardData'` |
-| `src/app/pages/DashboardPage.tsx` | Via contract: `useDashboardPageContract().useDashboardData()` |
-| `src/app/pages/DashboardPage.test.tsx` | Mocked: `vi.mock('@/app/hooks/useDashboardData', ...)` |
+| `src/app/pages/DashboardPage.tsx`           | Via contract: `useDashboardPageContract().useDashboardData()`                    |
+| `src/app/pages/DashboardPage.test.tsx`      | Mocked: `vi.mock('@/app/hooks/useDashboardData', ...)`                           |
 
 ---
 
@@ -252,15 +263,18 @@ Not applicable — all three problems are internal to the frontend React compone
 ## Missing — Required for This Ticket
 
 ### isStaff consolidation
+
 - `useIsStaff()` hook: EXISTS at `src/shared/hooks/useIsStaff.ts` — not missing, but zero consumers
 - `isStaff` removal from 5 inline files: currently inline-duplicated in each
 
 ### LoadingState/ErrorState shared components
+
 - `src/shared/components/LoadingState`: NOT FOUND — does not exist
 - `src/shared/components/ErrorState`: NOT FOUND — does not exist
 - A shared props interface reconciling users (message + onClose) and tickets (message only) variants: NOT FOUND
 
 ### useDashboardData location
+
 - `src/features/dashboard/hooks/useDashboardData.ts`: NOT FOUND
 - `useDashboardData` in `src/features/dashboard/index.ts` exports: NOT FOUND
 
@@ -297,6 +311,7 @@ Not applicable — all three problems are internal to the frontend React compone
 - `src/features/dashboard/types/dashboard.ts` — dashboard type definitions
 
 **NOT FOUND (confirmed absent):**
+
 - `src/shared/components/LoadingState` — no file
 - `src/shared/components/ErrorState` — no file
 - `src/features/dashboard/hooks/useDashboardData.ts` — no file

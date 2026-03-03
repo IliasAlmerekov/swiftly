@@ -19,10 +19,12 @@ Delete the feature-scoped `LoadingState.tsx` and `ErrorState.tsx` from `src/feat
 **Confirmed at:** research doc; `src/features/users/components/LoadingState.tsx`
 **Action:** Delete the file entirely.
 **Pre-condition:** Verify there are no remaining imports of this file in the codebase beyond `UserProfile.tsx` and `users/components/index.ts`. Run:
+
 ```
 grep -rn "from.*users/components/LoadingState" src/
 grep -rn "from.*users/components.*LoadingState" src/
 ```
+
 Both must return zero results beyond the files being modified in this phase.
 
 ---
@@ -32,6 +34,7 @@ Both must return zero results beyond the files being modified in this phase.
 **Confirmed at:** research doc; `src/features/users/components/ErrorState.tsx`
 **Action:** Delete the file entirely.
 **Pre-condition:** Verify no remaining consumers outside this phase's scope:
+
 ```
 grep -rn "from.*users/components/ErrorState" src/
 grep -rn "from.*users/components.*ErrorState" src/
@@ -44,6 +47,7 @@ grep -rn "from.*users/components.*ErrorState" src/
 ### `src/features/users/components/index.ts`
 
 **Current state (verified):**
+
 ```ts
 export { default as UserCard } from './UserCard';
 export { default as PersonalInformationSection } from './PersonalInformationSection';
@@ -55,10 +59,12 @@ export { default as VirtualizedManagerSelect } from './VirtualizedManagerSelect'
 ```
 
 **Changes:**
+
 1. **REMOVE** line 3: `export { default as LoadingState } from './LoadingState';`
 2. **REMOVE** line 4: `export { default as ErrorState } from './ErrorState';`
 
 **DO NOT CHANGE:**
+
 - All other exports in the file
 
 ---
@@ -66,11 +72,13 @@ export { default as VirtualizedManagerSelect } from './VirtualizedManagerSelect'
 ### `src/features/users/pages/UserProfile.tsx`
 
 **Current state (verified line 5):**
+
 ```ts
 import { UserCard, PersonalInformationSection, LoadingState, ErrorState } from '../components';
 ```
 
 **Changes:**
+
 1. **SPLIT** the import: remove `LoadingState` and `ErrorState` from the `../components` import
 2. **ADD** new import for the shared versions:
    ```ts
@@ -78,12 +86,14 @@ import { UserCard, PersonalInformationSection, LoadingState, ErrorState } from '
    ```
 
 After the change, line 5 should read (keeping only what remains from `../components`):
+
 ```ts
 import { UserCard, PersonalInformationSection } from '../components';
 import { LoadingState, ErrorState } from '@/shared/components';
 ```
 
 **DO NOT CHANGE:**
+
 - All usages of `LoadingState` and `ErrorState` as JSX (component names unchanged)
 - All usages of `UserCard` and `PersonalInformationSection`
 - All other imports and state in `UserProfile.tsx`
@@ -94,13 +104,13 @@ import { LoadingState, ErrorState } from '@/shared/components';
 
 No new test files. Verify:
 
-| Verification | Command | Expected |
-|---|---|---|
-| LoadingState.tsx deleted | Check file does not exist | File absent |
-| ErrorState.tsx deleted | Check file does not exist | File absent |
-| No stale import of deleted files | `npm run type-check` | Zero TypeScript errors |
-| UserProfile still renders | `npm run test:run` | No regressions |
-| users barrel no longer exports deleted items | `grep "LoadingState" src/features/users/components/index.ts` | Zero results |
+| Verification                                 | Command                                                      | Expected               |
+| -------------------------------------------- | ------------------------------------------------------------ | ---------------------- |
+| LoadingState.tsx deleted                     | Check file does not exist                                    | File absent            |
+| ErrorState.tsx deleted                       | Check file does not exist                                    | File absent            |
+| No stale import of deleted files             | `npm run type-check`                                         | Zero TypeScript errors |
+| UserProfile still renders                    | `npm run test:run`                                           | No regressions         |
+| users barrel no longer exports deleted items | `grep "LoadingState" src/features/users/components/index.ts` | Zero results           |
 
 ---
 

@@ -13,10 +13,10 @@
 ```ts
 // Existing — do NOT modify
 interface UseIsStaffResult {
-  isStaff: boolean;       // role === 'admin' || role === 'support1'
-  isAdmin: boolean;       // role === 'admin'
-  isSupport: boolean;     // role === 'support1'
-  isRoleReady: boolean;   // role !== undefined && role !== null
+  isStaff: boolean; // role === 'admin' || role === 'support1'
+  isAdmin: boolean; // role === 'admin'
+  isSupport: boolean; // role === 'support1'
+  isRoleReady: boolean; // role !== undefined && role !== null
   role: UserRole;
 }
 ```
@@ -35,6 +35,7 @@ interface LoadingStateProps {
 ```
 
 **Design decision:** `message` is optional. The component renders a sensible default (e.g. `"Loading..."`) when omitted. This accommodates:
+
 - `TicketDetailPage` inline variant — had no props (static text)
 - `UserProfile` usage — passes `message="Loading profile..."`
 
@@ -53,10 +54,12 @@ interface ErrorStateProps {
 ```
 
 **Design decision:** `onClose` becomes optional. See ADR-002.
+
 - When `onClose` is provided → close button is rendered
 - When `onClose` is absent → no close button rendered
 
 This accommodates:
+
 - `UserProfile` — passes `onClose` → close button shown (behavior preserved)
 - `TicketDetailPage` inline variant — had no `onClose` → no close button (behavior preserved)
 
@@ -104,6 +107,7 @@ const STAFF_ROLES: UserRole[] = ['support1', 'admin'];
 ```
 
 `ticketColumns.tsx` line 76 replacement:
+
 ```ts
 // Before:
 const isClickable = (role === 'admin' || role === 'support1') && !!assigneeId;
@@ -116,10 +120,10 @@ const isClickable = STAFF_ROLES.includes(role) && !!assigneeId;
 
 ## Summary of Type Changes
 
-| Type | File | Change |
-|---|---|---|
-| `LoadingStateProps` | `src/shared/components/LoadingState.tsx` | **NEW** |
-| `ErrorStateProps` | `src/shared/components/ErrorState.tsx` | **NEW** |
-| `UseIsStaffResult` | `src/shared/hooks/useIsStaff.ts` | Unchanged |
-| `UseDashboardDataResult` | `src/features/dashboard/hooks/useDashboardData.ts` | Unchanged (moved) |
-| Dashboard types (`DashboardTicketSummary`, etc.) | `src/features/dashboard/types/dashboard.ts` | Unchanged |
+| Type                                             | File                                               | Change            |
+| ------------------------------------------------ | -------------------------------------------------- | ----------------- |
+| `LoadingStateProps`                              | `src/shared/components/LoadingState.tsx`           | **NEW**           |
+| `ErrorStateProps`                                | `src/shared/components/ErrorState.tsx`             | **NEW**           |
+| `UseIsStaffResult`                               | `src/shared/hooks/useIsStaff.ts`                   | Unchanged         |
+| `UseDashboardDataResult`                         | `src/features/dashboard/hooks/useDashboardData.ts` | Unchanged (moved) |
+| Dashboard types (`DashboardTicketSummary`, etc.) | `src/features/dashboard/types/dashboard.ts`        | Unchanged         |
