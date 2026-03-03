@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ErrorState, LoadingState } from '@/shared/components';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import { useAuthContext } from '@/shared/context/AuthContext';
 import { useTicket, useUpdateTicket, useAddComment } from '@/features/tickets/hooks/useTickets';
 import { useAdminUsers } from '@/shared/hooks/useAdminUsers';
+import { useIsStaff } from '@/shared/hooks/useIsStaff';
 import { normalizeCategoryValue } from '@/features/tickets/utils/ticketUtils';
 import type { Ticket, UpdateTicketFormData } from '@/types';
 
@@ -20,25 +22,12 @@ import {
   TicketRequesterCard,
 } from '../components/ticket-detail';
 
-// ============ Loading Component ============
-const LoadingState = () => (
-  <div className="flex flex-1 items-center justify-center">
-    <div className="py-8 text-center">Loading...</div>
-  </div>
-);
-
-// ============ Error Component ============
-const ErrorState = ({ message }: { message: string }) => (
-  <div className="flex flex-1 items-center justify-center">
-    <div className="py-8 text-center text-red-500">{message}</div>
-  </div>
-);
-
 // ============ Main Component ============
 const TicketDetailPage = () => {
   const { ticketId } = useParams<{ ticketId: string }>();
   const navigate = useNavigate();
   const { user } = useAuthContext();
+  const { isStaff } = useIsStaff();
 
   // UI State
   const [isEditing, setIsEditing] = useState(false);
@@ -51,8 +40,6 @@ const TicketDetailPage = () => {
         name: user.name,
       }
     : null;
-
-  const isStaff = currentUser?.role === 'admin' || currentUser?.role === 'support1';
 
   // ============ Queries ============
   const { data: ticket, isLoading, error } = useTicket(ticketId ?? '');

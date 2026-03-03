@@ -1,4 +1,5 @@
 import { Badge } from '@/shared/components/ui/badge';
+import { STAFF_ROLES } from '@/shared/security/access-matrix';
 import { getPriorityColor, getStatusColor } from '@/features/tickets/utils/ticketUtils';
 import { UserCell } from '../components/UserCell';
 import type { TicketTableColumn } from '../constants/ticketTable';
@@ -73,7 +74,7 @@ export const TICKET_COLUMNS: TicketTableColumn[] = [
       const assigneeName = ticket.assignedTo?.name ?? 'Unassigned';
       const assigneeId = ticket.assignedTo?._id;
       const assigneeAvatarUrl = ticket.assignedTo?.avatar?.url;
-      const isClickable = (role === 'admin' || role === 'support1') && !!assigneeId;
+      const isClickable = !!role && STAFF_ROLES.includes(role) && !!assigneeId;
 
       return (
         <UserCell

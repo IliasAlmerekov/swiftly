@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { http, HttpResponse } from 'msw';
 
-import { canAccess } from '@/shared/security/access-matrix';
+import { STAFF_ROLES, canAccess } from '@/shared/security/access-matrix';
 import { server } from '@/test/mocks/server';
 import { createMockTicket, createMockUser, db, seedDb } from '@/test/mocks/db';
 
@@ -79,6 +79,11 @@ describe('Critical flow integration', () => {
   });
 
   describe('role access flow', () => {
+    it('keeps staff role allowlist limited to support and admin', () => {
+      expect(STAFF_ROLES).toEqual(['support1', 'admin']);
+      expect(STAFF_ROLES.includes('user')).toBe(false);
+    });
+
     it('allows user to access only own profile route', () => {
       expect(
         canAccess('route.userById', 'user', {

@@ -12,6 +12,7 @@ import {
   DashboardPageContractProvider,
   useDashboardPageContract,
 } from '@/app/pages/dashboard-page-contract';
+import { useIsStaff } from '@/shared/hooks/useIsStaff';
 
 const DashboardPageContent: React.FC = () => {
   const {
@@ -24,11 +25,11 @@ const DashboardPageContent: React.FC = () => {
   const [searchParams] = useSearchParamsHook();
   const navigate = useNavigateHook();
   const { role, userName } = useAuthHook();
+  const { isStaff } = useIsStaff();
   const { greeting } = useGreetingHook();
   const dashboardData = useDashboardDataHook();
 
   const currentTab: TabType = (searchParams.get('tab') as TabType) || 'dashboard';
-  const isStaff = role === 'admin' || role === 'support1';
 
   const handleTicketClick = useCallback(
     (ticketId: string) => {

@@ -16,6 +16,7 @@ export { default as ViewSupportStatus } from './components/ViewSupportStatus';
 
 // Hooks
 export { useGreeting } from './hooks/useGreeting';
+export { useDashboardData } from './hooks/useDashboardData';
 
 // Types
 export type { DashboardTabComponents } from './types/dashboard';
