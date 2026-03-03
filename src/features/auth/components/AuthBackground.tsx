@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 
-const LiquidEther = lazy(() => import('@/components/LiquidEther'));
+const LiquidEther = lazy(() => import('./LiquidEther'));
 
 const canUseDOM = typeof window !== 'undefined';
 
