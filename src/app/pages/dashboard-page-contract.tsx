@@ -2,10 +2,9 @@
 import { useMemo, type ReactNode } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
-import { useGreeting } from '@/features/dashboard';
+import { useDashboardData, useGreeting } from '@/features/dashboard';
 import { useAuth } from '@/shared/hooks/useAuth';
 import { createStrictContext } from '@/shared/lib/createStrictContext';
-import { useDashboardData } from '@/app/hooks/useDashboardData';
 
 export interface DashboardPageContract {
   useSearchParams: typeof useSearchParams;

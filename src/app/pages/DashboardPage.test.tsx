@@ -3,15 +3,11 @@ import { Profiler } from 'react';
 import type { Ticket, User } from '@/types';
 import { render, screen } from '@/test/test-utils';
 import { useAuth } from '@/shared/hooks/useAuth';
-import { useDashboardData } from '@/app/hooks/useDashboardData';
+import { useDashboardData } from '@/features/dashboard';
 import DashboardPage from './DashboardPage';
 
 vi.mock('@/shared/hooks/useAuth', () => ({
   useAuth: vi.fn(),
-}));
-
-vi.mock('@/app/hooks/useDashboardData', () => ({
-  useDashboardData: vi.fn(),
 }));
 
 vi.mock('@/features/tickets', () => ({
@@ -44,6 +40,7 @@ vi.mock('@/features/dashboard', async () => {
     DashboardContent: () => <div>Dashboard overview content</div>,
     Analytics: () => <div>Analytics content</div>,
     useGreeting: () => ({ greeting: 'Hello' }),
+    useDashboardData: vi.fn(),
   };
 });
 

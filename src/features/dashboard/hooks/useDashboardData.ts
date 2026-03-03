@@ -14,7 +14,7 @@ import type {
   DashboardMonthlyStat,
   DashboardSupportStatus,
   DashboardTicketSummary,
-} from '@/features/dashboard/types/dashboard';
+} from '../types/dashboard';
 
 const EMPTY_TICKET_SUMMARY: DashboardTicketSummary = {
   totalTickets: 0,

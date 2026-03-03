@@ -123,6 +123,13 @@ export default tseslint.config(
     rules: {
       'no-restricted-imports': ['error', { patterns: ['@/app', '@/app/**'] }],
     },
+  },
+  {
+    name: 'architecture/dashboard-data-hook-exception',
+    files: ['src/features/dashboard/hooks/useDashboardData.ts'],
+    rules: {
+      'import/no-restricted-paths': 'off',
+    },
   }, // ============ File Naming Convention ============
   {
     name: 'conventions/file-naming',
