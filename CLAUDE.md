@@ -1,7 +1,8 @@
 # CLAUDE.md — AI Development Workflow
 
 This project uses a 4-phase AI-assisted development workflow.
-All workflow documents live in `.claude/`.
+AI workflow documents (research, design, plan) live in `docs/{task-slug}/`.
+Agent prompts and commands live in `.claude/`.
 
 ---
 
@@ -67,16 +68,16 @@ research → design → [HUMAN REVIEW] → plan → implement → [HUMAN REVIEW]
 ```
 Command:  /research_codebase {task description}
 Agent:    research-lead (claude-sonnet-4-6) + research-sub agents (claude-haiku-4-5)
-Output:   .claude/research/{task-slug}.md
+Output:   docs/{task-slug}/research/{task-slug}.md
 ```
 
 ### Phase 2 — Design
 
 ```
 Command:  /design_feature {task-slug}
-Input:    .claude/research/{task-slug}.md
+Input:    docs/{task-slug}/research/{task-slug}.md
 Agent:    architect (claude-sonnet-4-6)
-Output:   .claude/design/{task-slug}/
+Output:   docs/{task-slug}/design/
             01_c4_context.md
             02_c4_containers.md
             03_c4_components.md
@@ -87,27 +88,27 @@ Output:   .claude/design/{task-slug}/
             08_test_strategy.md
             09_adr.md
 
-!! HUMAN MUST REVIEW AND APPROVE .claude/design/{slug}/ BEFORE NEXT STEP !!
+!! HUMAN MUST REVIEW AND APPROVE docs/{task-slug}/design/ BEFORE NEXT STEP !!
 ```
 
 ### Phase 3 — Plan
 
 ```
 Command:  /plan_feature {task-slug}
-Input:    .claude/design/{task-slug}/ + .claude/research/{task-slug}.md
+Input:    docs/{task-slug}/design/ + docs/{task-slug}/research/{task-slug}.md
 Agent:    planner (claude-sonnet-4-6)
-Output:   .claude/plan/{task-slug}/
+Output:   docs/{task-slug}/plan/
             readme.md
             phase_01.md … phase_N.md
 
-!! HUMAN MUST REVIEW AND APPROVE .claude/plan/{slug}/ BEFORE NEXT STEP !!
+!! HUMAN MUST REVIEW AND APPROVE docs/{task-slug}/plan/ BEFORE NEXT STEP !!
 ```
 
 ### Phase 4 — Implement
 
 ```
 Command:  /implement_feature {task-slug}
-Input:    .claude/plan/{task-slug}/ + .claude/design/{task-slug}/ + .claude/research/{task-slug}.md
+Input:    docs/{task-slug}/plan/ + docs/{task-slug}/design/ + docs/{task-slug}/research/{task-slug}.md
 Agents:   coder, reviewer, tester, security (all claude-sonnet-4-6)
 Output:   actual code files + test files
 
@@ -134,12 +135,18 @@ Output:   actual code files + test files
     reviewer.md            ← Code Quality + Architecture Reviewer prompt
     tester.md              ← Builder/Tester Agent prompt
     security.md            ← Security Reviewer prompt
-  research/
-    {task-slug}.md         ← generated research document
-  design/
-    {task-slug}/           ← generated + human-reviewed design docs (9 files)
-  plan/
-    {task-slug}/           ← generated implementation plan (readme + phase files)
+
+docs/
+  {task-slug}/
+    research/
+      {task-slug}.md       ← generated research document
+    design/
+      01_c4_context.md     ← generated + human-reviewed design docs (9 files)
+      ...
+      09_adr.md
+    plan/
+      readme.md            ← generated implementation plan
+      phase_01.md … phase_N.md
 ```
 
 ---

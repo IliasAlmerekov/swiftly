@@ -22,19 +22,19 @@ max_threads = 4
 max_depth = 1
 
 [agents.explorer]
-description = "Read-only codebase exploration for swiftly-helpdesk. Map architecture, dependencies, and edit points with exact file/symbol references."
+description = "Phase 1 Research lead: read-only codebase scan with parallel sub-agents and facts-only output."
 config_file = "agents/explorer.toml"
 
 [agents.worker]
-description = "Implement minimal production-safe changes for React/TypeScript/Vite stack with tests and container-first verification."
+description = "Phase 4 Implementor: executes approved plan phase-by-phase with minimal production-safe patches and quality gates."
 config_file = "agents/worker.toml"
 
 [agents.reviewer]
-description = "Read-only reviewer focused on security, correctness, regressions, architecture boundaries, and test sufficiency."
+description = "Phase 2 Design and Phase 4 review: architecture artifacts, ADRs, and compliance review with evidence."
 config_file = "agents/reviewer.toml"
 
 [agents.tester]
-description = "Testing specialist for deterministic Vitest/RTL/Playwright tests and CI-safe test workflows."
+description = "Phase 3 Planning and test strategy specialist: phase breakdown, test plan, deterministic test updates, and gate execution."
 config_file = "agents/tester.toml"
 
 [profiles.project]

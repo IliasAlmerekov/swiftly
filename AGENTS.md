@@ -16,6 +16,7 @@ Codex MUST read and follow this file at the start of every session.
 - Preserve existing style, conventions, and architecture.
 - Prefer small, reviewable diffs over full rewrites.
 - Update docs when behavior or usage changes.
+- Git commits created by Codex MUST NOT include `Co-authored-by` or any AI attribution lines.
 
 ## Quality bar (mandatory)
 
