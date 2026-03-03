@@ -16,12 +16,12 @@ export interface AccessContext {
 
 interface AccessRule {
   description: string;
-  allowedRoles: UserRole[];
+  allowedRoles: readonly UserRole[];
   condition?: (context: AccessContext, role: UserRole) => boolean;
 }
 
-const ALL_ROLES: UserRole[] = ['user', 'support1', 'admin'];
-const STAFF_ROLES: UserRole[] = ['support1', 'admin'];
+const ALL_ROLES: readonly UserRole[] = ['user', 'support1', 'admin'];
+export const STAFF_ROLES: readonly UserRole[] = ['support1', 'admin'];
 
 export const ACCESS_MATRIX: Record<AccessKey, AccessRule> = {
   'route.dashboard': {
