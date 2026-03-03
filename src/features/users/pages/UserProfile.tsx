@@ -2,12 +2,7 @@ import { useState, useEffect } from 'react';
 import { getAllUsers, getUserProfile, getUserProfileById } from '@/features/users/api';
 import type { User } from '@/types';
 import { useParams } from 'react-router-dom';
-import {
-  UserCard,
-  PersonalInformationSection,
-  LoadingState,
-  ErrorState,
-} from '../hooks/components';
+import { UserCard, PersonalInformationSection, LoadingState, ErrorState } from '../components';
 import { useAvatarHandlers, useProfileEditor } from '../hooks';
 import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 import { canAccess } from '@/shared/security/access-matrix';
