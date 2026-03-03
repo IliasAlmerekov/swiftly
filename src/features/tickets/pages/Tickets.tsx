@@ -14,7 +14,7 @@ import {
   USER_STATUS_SELECT_OPTIONS,
 } from '@/features/tickets/hooks/useTicketFilters';
 import { useTicketFilter } from '@/shared/hooks/useTicketFilter';
-import { useAuth } from '@/shared/hooks/useAuth';
+import { useIsStaff } from '@/shared/hooks/useIsStaff';
 import { usePagination } from '@/shared/hooks/usePagination';
 import FilterSelect from '@/shared/components/filters/FilterSelect';
 import { Skeleton } from '@/shared/components/ui/skeleton';
@@ -116,8 +116,7 @@ const PaginationFooter = memo(function PaginationFooter({
  */
 export function Tickets() {
   const navigate = useNavigate();
-  const { role } = useAuth();
-  const isStaff = role === 'admin' || role === 'support1';
+  const { isStaff } = useIsStaff();
 
   // Search state - debounced value from TicketSearchBar
   const [searchQuery, setSearchQuery] = useState('');

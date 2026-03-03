@@ -12,6 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { paths } from '@/config/paths';
 import AccessGuard from '@/shared/components/auth/AccessGuard';
+import { useIsStaff } from '@/shared/hooks/useIsStaff';
 
 /**
  * Schema for profile form validation
@@ -52,8 +53,8 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
   const navigate = useNavigate();
   const [editMode, setEditMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-
-  const isStaff = currentUser?.role === 'admin' || currentUser?.role === 'support1';
+  const { isStaff } = useIsStaff();
+  const canViewManagerProfile = isStaff && currentUser !== null;
 
   const {
     register,
@@ -254,7 +255,7 @@ const PersonalInformationSection = memo(function PersonalInformationSection({
                     />
                   </Avatar>
                 )}
-                {isStaff ? (
+                {canViewManagerProfile ? (
                   <Button variant="secondary" className="cursor-pointer" onClick={handleOwnerClick}>
                     <p className="mt-1 text-white">{user.manager?.name || 'N/A'}</p>
                   </Button>

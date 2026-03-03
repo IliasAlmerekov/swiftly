@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { useAuth } from '@/shared/hooks/useAuth';
+import { useIsStaff } from '@/shared/hooks/useIsStaff';
 import { useCreateTicketForm } from '@/features/tickets/hooks/useCreateTicketForm';
 import { AiOverlay } from '@/features/tickets/components/ai-overlay';
 import ConfirmOverlay from '@/features/tickets/components/ConfirmOverlay';
@@ -17,9 +17,7 @@ import { CreateTicketHelpSection } from '@/features/tickets/components/CreateTic
  * - Clean separation between staff and user flows
  */
 export const CreateTicket = memo(function CreateTicket() {
-  const { role } = useAuth();
-  const isStaff = role === 'admin' || role === 'support1';
-  const isRoleReady = role !== undefined && role !== null;
+  const { isStaff, isRoleReady } = useIsStaff();
 
   const {
     isSubmitting,
