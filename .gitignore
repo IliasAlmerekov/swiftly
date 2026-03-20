@@ -26,7 +26,13 @@ dist-ssr
 
 # Local AI tool configs
 .cursor/
-.claude/
+.claude/*
+!.claude/agents/
+!.claude/commands/
+.claude/agents/*
+.claude/commands/*
+!.claude/agents/*.md
+!.claude/commands/*.md
 .windsurf/
 .continue/
 
